@@ -20,3 +20,16 @@ This document describes how the modules of the `airborne-cot-relay` crate fit to
 
 3. `Targeter::project_pixel` performs the single-pixel projection without tracking. It returns a `GroundIntersection` with CE90 and LE90 estimates.
 
+## CoT output
+
+1. `TrackSummary::from_track` converts a `sightline-cot` track into geodetic coordinates, speed, course, and an error radius. Its LE90 value is fixed at 10 m.
+
+2. `classification_to_cot_type` maps a classification string to a CoT type code. Unknown classes map to `a-u-G`.
+
+3. `CotStreamer::build_cot_xml` renders a `<event>` element with the UID `TRACK-<id>`. The stale time is the event time plus the stale timeout that was passed to `CotStreamer::new`.
+
+4. `CotStreamer::send_track` sends the XML as one UDP datagram to the target address.
+
+## Current status
+
+The modules above are implemented and unit tested. The `airborne-cot-relay` binary does not call `TelemetryIngest`, `Targeter` or `CotStreamer` yet. It prints placeholder messages only.
