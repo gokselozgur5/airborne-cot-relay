@@ -90,6 +90,9 @@ impl<C: Clock> TrackFilter<C> {
             if now.saturating_sub(prev.last_ms) < self.config.min_interval_ms {
                 return false;
             }
+            if distance_m(prev.lat, prev.lon, lat, lon) < self.config.min_move_m {
+                return false;
+            }
         }
         self.tracks.insert(
             uid.to_string(),
@@ -101,4 +104,12 @@ impl<C: Clock> TrackFilter<C> {
         );
         true
     }
+}
+
+/// Approximate ground distance in metres using an equirectangular projection.
+fn distance_m(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
+    const M_PER_DEG: f64 = 111_320.0;
+    let dy = (lat2 - lat1) * M_PER_DEG;
+    let dx = (lon2 - lon1) * M_PER_DEG * ((lat1 + lat2) / 2.0).to_radians().cos();
+    dx.hypot(dy)
 }
