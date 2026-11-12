@@ -41,3 +41,9 @@ fn run_mission(mode: MissionMode) -> ExitCode {
         }
     }
 }
+
+fn main() -> ExitCode {
+    print_banner();
+    let mode = MissionMode::parse_args(env::args());
+    run_mission(mode)
+}
