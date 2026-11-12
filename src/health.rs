@@ -111,3 +111,19 @@ pub struct Heartbeat<'a> {
     pub time: &'a str,
     pub stale: &'a str,
 }
+
+impl Heartbeat<'_> {
+    /// Render the heartbeat as a CoT XML string.
+    pub fn to_xml(&self) -> String {
+        format!(
+            "<event version=\"2.0\" uid=\"{uid}\" type=\"b-t-f\" how=\"m-g\" \
+time=\"{t}\" start=\"{t}\" stale=\"{s}\">\
+<point lat=\"0\" lon=\"0\" hae=\"0\" ce=\"9999999\" le=\"9999999\"/>\
+<detail><status relay=\"{st}\"/></detail></event>",
+            uid = xml_escape(self.uid),
+            t = xml_escape(self.time),
+            s = xml_escape(self.stale),
+            st = xml_escape(self.status),
+        )
+    }
+}
