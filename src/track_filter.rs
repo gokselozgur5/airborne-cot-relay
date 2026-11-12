@@ -21,3 +21,9 @@ impl ManualClock {
         self.0.set(self.0.get() + delta_ms);
     }
 }
+
+impl Clock for ManualClock {
+    fn now_ms(&self) -> u64 {
+        self.0.get()
+    }
+}
