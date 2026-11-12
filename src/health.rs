@@ -127,3 +127,29 @@ time=\"{t}\" start=\"{t}\" stale=\"{s}\">\
         )
     }
 }
+
+// Hysteresis for health values.
+
+/// Commits a new value only after it is seen for `required` consecutive samples.
+#[derive(Debug, Clone)]
+pub struct Hysteresis<T: Copy + PartialEq> {
+    committed: T,
+    candidate: T,
+    streak: u32,
+    required: u32,
+}
+
+impl<T: Copy + PartialEq> Hysteresis<T> {
+    pub fn new(initial: T, required: u32) -> Self {
+        Self {
+            committed: initial,
+            candidate: initial,
+            streak: 0,
+            required,
+        }
+    }
+
+    pub fn committed(&self) -> T {
+        self.committed
+    }
+}
