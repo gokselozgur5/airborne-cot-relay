@@ -21,3 +21,11 @@ fn older_frame_does_not_replace_latest_pose() {
     ingest.process_bytes(&frame(1000, 99.0));
     assert_eq!(ingest.latest_pose().unwrap().timestamp_ms, 2000);
 }
+
+#[test]
+fn duplicate_timestamp_keeps_first_pose() {
+    let mut ingest = TelemetryIngest::new(35.0, 139.0, 200.0, 5000);
+    let first = ingest.process_bytes(&frame(3000, 10.0))[0];
+    ingest.process_bytes(&frame(3000, 50.0));
+    assert_eq!(ingest.latest_pose(), Some(first));
+}
