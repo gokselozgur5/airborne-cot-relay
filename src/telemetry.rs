@@ -133,3 +133,16 @@ impl TelemetryIngest {
         self.rx_buf.clear();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_platform_pose_staleness() {
+        let pose = PlatformPose::new(1000, 37.77, -122.41, 500.0, 0.0, 0.0, 1.57);
+        assert!(!pose.is_stale(1500, 1000));
+        assert!(pose.is_stale(2500, 1000));
+        assert_eq!(pose.timestamp_ms, 1000);
+    }
+}
