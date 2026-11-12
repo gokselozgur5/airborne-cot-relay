@@ -21,3 +21,14 @@ fn mon() -> (HealthMonitor<Clock>, Rc<Cell<u64>>) {
 fn starting_until_telemetry() {
     assert_eq!(mon().0.status(), HealthStatus::Starting);
 }
+
+#[test]
+fn degrades_then_offline_by_telemetry_age() {
+    let (mut m, t) = mon();
+    m.record_telemetry();
+    assert_eq!(m.status(), HealthStatus::Healthy);
+    t.set(103);
+    assert_eq!(m.status(), HealthStatus::Degraded);
+    t.set(110);
+    assert_eq!(m.status(), HealthStatus::Offline);
+}
