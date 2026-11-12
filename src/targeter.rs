@@ -232,9 +232,11 @@ impl Targeter {
             }
         }
         self.anchor_detections(pose, &mut tracker_dets);
+        self.predict_track_boxes();
         self.tracker
             .step(dt_s, &tracker_dets)
             .map_err(|e| RelayError::TargetingError(format!("tracker step error: {e}")))?;
+        self.record_box_motion();
         self.extract_tracked_objects(pose, detections)
     }
 }
