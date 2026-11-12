@@ -25,3 +25,26 @@ pub struct GroundTarget {
     pub lon_deg: f64,
     pub speed_mps: f64,
 }
+
+#[test]
+fn test_simulated_60_second_flight_mission() {
+    let config = RelayConfig::default();
+    assert!(config.validate().is_ok());
+    let mut platform = SimulatedPlatform {
+        lat_deg: 37.7749,
+        lon_deg: -122.4194,
+        altitude_m: 500.0,
+        heading_deg: 90.0,
+    };
+    let vehicle = GroundTarget {
+        id: 1,
+        lat_deg: 37.7750,
+        lon_deg: -122.4180,
+        speed_mps: 15.0,
+    };
+    for _ in 0..60 {
+        platform.step(1.0, 25.0);
+    }
+    assert!(platform.lon_deg > -122.4194);
+    assert_eq!(vehicle.id, 1);
+}
