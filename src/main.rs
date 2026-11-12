@@ -24,3 +24,20 @@ fn print_banner() {
     println!("Airborne CoT Relay v0.1.0");
     println!("Sensor-to-TAK Cursor-on-Target relay runner");
 }
+
+fn run_mission(mode: MissionMode) -> ExitCode {
+    match mode {
+        MissionMode::Help => {
+            println!("Usage: airborne-cot-relay [--live | --mock | --help]");
+            ExitCode::SUCCESS
+        }
+        MissionMode::Mock => {
+            println!("Starting simulated 60-second flight path...");
+            ExitCode::SUCCESS
+        }
+        MissionMode::Live => {
+            println!("Listening for live telemetry and camera streams...");
+            ExitCode::SUCCESS
+        }
+    }
+}
