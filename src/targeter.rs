@@ -43,3 +43,12 @@ pub struct TrackedObject {
     pub hits: usize,
     pub is_confirmed: bool,
 }
+
+/// Multi-target geospatial projection and tracking engine.
+pub struct Targeter {
+    camera: Intrinsics,
+    ground_elevation_m: f64,
+    tracker: MultiTargetTracker,
+    last_timestamp_ms: Option<u64>,
+    class_map: std::collections::HashMap<u64, String>,
+}
