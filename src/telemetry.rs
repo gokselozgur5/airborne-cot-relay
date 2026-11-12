@@ -111,3 +111,19 @@ impl TelemetryIngest {
         pose
     }
 }
+
+impl TelemetryIngest {
+    pub fn process_bytes(&mut self, incoming: &[u8]) -> Vec<PlatformPose> {
+        self.rx_buf.extend_from_slice(incoming);
+        let mut poses = Vec::new();
+        while let Some(pos) = self.rx_buf.iter().position(|&b| b == 0x00) {
+            let frame: Vec<u8> = self.rx_buf.drain(..=pos).collect();
+            if frame.len() > 1 {
+                if let Ok(telem) = NavTelemetry::unpack_uart(&frame) {
+                    poses.push(self.update_from_nav(&telem));
+                }
+            }
+        }
+        poses
+    }
+}
