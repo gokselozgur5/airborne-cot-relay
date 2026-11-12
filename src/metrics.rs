@@ -65,3 +65,27 @@ impl Metrics {
     }
 }
 
+/// Point-in-time copy of all metrics.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Snapshot {
+    pub packets_in: u64,
+    pub dropped: u64,
+    pub sent: u64,
+    pub reconnects: u64,
+    pub queue_depth: u64,
+    pub last_send_age_ms: Option<u64>,
+}
+
+impl Metrics {
+    pub fn snapshot(&self, now_ms: u64) -> Snapshot {
+        Snapshot {
+            packets_in: self.packets_in.load(Ordering::Relaxed),
+            dropped: self.dropped.load(Ordering::Relaxed),
+            sent: self.sent.load(Ordering::Relaxed),
+            reconnects: self.reconnects.load(Ordering::Relaxed),
+            queue_depth: self.queue_depth.load(Ordering::Relaxed),
+            last_send_age_ms: self.last_send_age_ms(now_ms),
+        }
+    }
+}
+
