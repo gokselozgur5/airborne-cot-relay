@@ -22,3 +22,24 @@ fn rejects_zero_stale_timeout() {
     assert!(msg(&cfg).contains("stale timeout"));
 }
 
+#[test]
+fn rejects_zero_image_size() {
+    let mut cfg = RelayConfig::default();
+    cfg.camera.image_width = 0;
+    assert!(msg(&cfg).contains("image size"));
+}
+
+#[test]
+fn rejects_principal_point_outside_image() {
+    let mut cfg = RelayConfig::default();
+    cfg.camera.principal_u = 2000.0;
+    assert!(msg(&cfg).contains("principal point"));
+}
+
+#[test]
+fn rejects_infinite_ground_elevation() {
+    let mut cfg = RelayConfig::default();
+    cfg.ground_elevation_m = f64::INFINITY;
+    assert!(msg(&cfg).contains("ground elevation"));
+}
+
