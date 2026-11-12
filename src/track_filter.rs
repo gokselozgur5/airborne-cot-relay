@@ -17,6 +17,10 @@ impl ManualClock {
         Self(Cell::new(start_ms))
     }
 
+    pub fn set(&self, now_ms: u64) {
+        self.0.set(now_ms);
+    }
+
     pub fn advance(&self, delta_ms: u64) {
         self.0.set(self.0.get() + delta_ms);
     }
