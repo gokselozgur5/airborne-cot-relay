@@ -184,3 +184,25 @@ mod test_stream {
         assert!(!ingest.is_stale(6000));
     }
 }
+
+#[cfg(test)]
+mod test_crc {
+    use super::*;
+
+    #[test]
+    fn test_crc_error_rejection() {
+        let mut ingest = TelemetryIngest::new(35.0, 139.0, 200.0, 1000);
+        let telem = NavTelemetry {
+            timestamp_ms: 1000,
+            pos_ned_m: [0.0, 0.0, 0.0],
+            vel_ned_mps: [0.0, 0.0, 0.0],
+            euler_rad: [0.0, 0.0, 0.0],
+            status: 0,
+        };
+        let mut buf = [0u8; 64];
+        let len = telem.pack_uart(&mut buf).unwrap();
+        let mut bad = buf[..len].to_vec();
+        bad[5] ^= 0xFF;
+        assert!(ingest.process_bytes(&bad).is_empty());
+    }
+}
