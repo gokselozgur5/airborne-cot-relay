@@ -27,3 +27,23 @@ fn garbage_between_frames_is_skipped() {
     let ts: Vec<u64> = poses.iter().map(|p| p.timestamp_ms).collect();
     assert_eq!(ts, vec![1000, 2000]);
 }
+
+#[test]
+fn dropped_frame_does_not_block_later_frames() {
+    let mut ing = ingest();
+    ing.process_bytes(&frame(1000));
+    let poses = ing.process_bytes(&frame(3000));
+    assert_eq!(poses.len(), 1);
+    assert_eq!(ing.latest_pose().unwrap().timestamp_ms, 3000);
+}
+
+#[test]
+fn truncated_frame_then_valid_frame_recovers() {
+    let mut ing = ingest();
+    let full = frame(2000);
+    let mut stream = full[..full.len() / 2].to_vec();
+    stream.push(0x00);
+    stream.extend_from_slice(&frame(4000));
+    let poses = ing.process_bytes(&stream);
+    assert_eq!(poses.last().unwrap().timestamp_ms, 4000);
+}
