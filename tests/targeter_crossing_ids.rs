@@ -29,3 +29,20 @@ fn ids_per_step(frames: &[Vec<TargetDetection>]) -> Vec<Vec<u64>> {
     }
     out
 }
+
+#[test]
+fn crossing_targets_keep_two_stable_ids() {
+    let frames: Vec<_> = (0..10)
+        .map(|k| {
+            vec![
+                det(400.0 + 30.0 * k as f64, 260.0, None),
+                det(880.0 - 30.0 * k as f64, 300.0, None),
+            ]
+        })
+        .collect();
+    let steps = ids_per_step(&frames);
+    assert!(
+        steps.iter().all(|ids| ids == &steps[0]),
+        "ids per step: {steps:?}"
+    );
+}
