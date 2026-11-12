@@ -39,6 +39,30 @@ impl PlatformPose {
     }
 }
 
+fn lerp(a: f64, b: f64, f: f64) -> f64 {
+    a + (b - a) * f
+}
+
+/// Interpolates between two samples, clamping outside their time range.
+pub fn interpolate_pose(a: &PlatformPose, b: &PlatformPose, t_ms: u64) -> PlatformPose {
+    if t_ms <= a.timestamp_ms || b.timestamp_ms <= a.timestamp_ms {
+        return *a;
+    }
+    if t_ms >= b.timestamp_ms {
+        return *b;
+    }
+    let f = (t_ms - a.timestamp_ms) as f64 / (b.timestamp_ms - a.timestamp_ms) as f64;
+    PlatformPose::new(
+        t_ms,
+        lerp(a.lat_deg, b.lat_deg, f),
+        lerp(a.lon_deg, b.lon_deg, f),
+        lerp(a.hae_m, b.hae_m, f),
+        lerp(a.roll_rad, b.roll_rad, f),
+        lerp(a.pitch_rad, b.pitch_rad, f),
+        lerp(a.yaw_rad, b.yaw_rad, f),
+    )
+}
+
 pub struct TelemetryIngest {
     rx_buf: Vec<u8>,
     origin_lat_deg: f64,
