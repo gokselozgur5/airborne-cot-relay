@@ -20,3 +20,13 @@ fn concurrent_increments_are_not_lost() {
     let s = m.snapshot(0);
     assert_eq!((s.packets_in, s.dropped), (8000, 16000));
 }
+
+#[test]
+fn gauge_reflects_last_write() {
+    let m = Arc::new(Metrics::new());
+    let m2 = Arc::clone(&m);
+    thread::spawn(move || m2.set_queue_depth(42)).join().unwrap();
+    assert_eq!(m.snapshot(0).queue_depth, 42);
+    m.set_queue_depth(1);
+    assert_eq!(m.snapshot(0).queue_depth, 1);
+}
