@@ -49,3 +49,5 @@ The binary reads only its first argument:
 | `--live`, `-l` | Print the live listening notice |
 | `--help`, `-h` | Print usage and exit with status 0 |
 
+See [docs/architecture.md](docs/architecture.md) for module responsibilities and [docs/operations.md](docs/operations.md) for configuration, failure modes and exit codes.
+
