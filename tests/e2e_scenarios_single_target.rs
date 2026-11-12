@@ -78,3 +78,28 @@ fn emitted_cot_carries_uid_and_type() {
     assert!(xml.contains("uid=\"TRACK-0001\""));
     assert!(xml.contains("type=\"a-f-G-E-V-C\""));
 }
+
+fn attr(xml: &str, name: &str) -> String {
+    let key = format!(" {name}=\"");
+    let start = xml.find(&key).unwrap() + key.len();
+    let len = xml[start..].find('"').unwrap();
+    xml[start..start + len].to_string()
+}
+
+#[test]
+fn cot_point_is_under_nadir_platform() {
+    let (mut targeter, rx, s) = rig();
+    for i in 0..2u64 {
+        let objs = targeter
+            .update(&pose(1000 + i * 100), &[det(640.0, 360.0)])
+            .unwrap();
+        if objs[0].is_confirmed {
+            emit(&s, &objs[0], T0_MS);
+        }
+    }
+    let xml = recv(&rx);
+    let lat: f64 = attr(&xml, "lat").parse().unwrap();
+    let lon: f64 = attr(&xml, "lon").parse().unwrap();
+    assert!((lat - 37.7749).abs() < 1e-4);
+    assert!((lon + 122.4194).abs() < 1e-4);
+}
