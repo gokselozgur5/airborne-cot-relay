@@ -62,3 +62,22 @@ impl Default for RelayConfig {
         }
     }
 }
+
+impl RelayConfig {
+    pub fn validate(&self) -> Result<(), RelayError> {
+        if self.telemetry_listen_addr.is_empty() {
+            return Err(RelayError::InvalidConfig(
+                "empty telemetry listen addr".into(),
+            ));
+        }
+        if self.cot_broadcast_addr.is_empty() {
+            return Err(RelayError::InvalidConfig("empty cot broadcast addr".into()));
+        }
+        if self.camera.focal_length_px <= 0.0 {
+            return Err(RelayError::InvalidConfig(
+                "focal length must be positive".into(),
+            ));
+        }
+        Ok(())
+    }
+}
