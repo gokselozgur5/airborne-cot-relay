@@ -142,6 +142,26 @@ impl<T> BoundedQueue<T> {
             }
         }
     }
+
+    /// Removes and returns the oldest queued item.
+    pub fn pop(&mut self) -> Option<T> {
+        self.items.pop_front()
+    }
+
+    /// Number of queued items.
+    pub fn len(&self) -> usize {
+        self.items.len()
+    }
+
+    /// True when nothing is queued.
+    pub fn is_empty(&self) -> bool {
+        self.items.is_empty()
+    }
+
+    /// Total items dropped since creation.
+    pub fn dropped(&self) -> u64 {
+        self.dropped
+    }
 }
 
 pub struct CotStreamer {
