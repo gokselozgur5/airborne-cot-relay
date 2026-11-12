@@ -267,6 +267,11 @@ impl CotStreamer {
         )
     }
 
+    /// Builds a CoT event stamped from the injected clock.
+    pub fn build_cot_xml_now<C: Clock>(&self, track: &TrackSummary, clock: &C) -> String {
+        self.build_cot_xml(track, clock.now_ms())
+    }
+
     pub fn send_track(&self, track: &TrackSummary, now_ms: i64) -> Result<usize, RelayError> {
         let xml = self.build_cot_xml(track, now_ms);
         self.send_xml(&xml)
