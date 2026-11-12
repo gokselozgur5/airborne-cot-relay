@@ -146,3 +146,17 @@ mod tests {
         assert_eq!(pose.timestamp_ms, 1000);
     }
 }
+
+#[cfg(test)]
+mod test_geodetic {
+    use super::*;
+
+    #[test]
+    fn test_ned_to_geodetic_conversion() {
+        let ingest = TelemetryIngest::new(0.0, 0.0, 100.0, 5000);
+        let (lat, lon, hae) = ingest.ned_to_geodetic([111_132.92, 0.0, -50.0]);
+        assert!((lat - 1.0).abs() < 1e-4);
+        assert!((lon - 0.0).abs() < 1e-4);
+        assert!((hae - 150.0).abs() < 1e-4);
+    }
+}
