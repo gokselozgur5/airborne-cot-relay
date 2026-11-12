@@ -22,6 +22,21 @@ impl MissionMode {
     }
 }
 
+const KNOWN_FLAGS: [&str; 8] = [
+    "--live",
+    "-l",
+    "--mock",
+    "-m",
+    "--help",
+    "-h",
+    "--version",
+    "-V",
+];
+
+fn find_unknown_arg(args: &[String]) -> Option<&String> {
+    args.iter().skip(1).find(|a| !KNOWN_FLAGS.contains(&a.as_str()))
+}
+
 fn print_banner() {
     println!("Airborne CoT Relay v0.1.0");
     println!("Sensor-to-TAK Cursor-on-Target relay runner");
@@ -52,6 +67,11 @@ fn main() -> ExitCode {
     let mut args: Vec<String> = env::args().collect();
     let dry_run = args.iter().any(|a| a == "--dry-run");
     args.retain(|a| a != "--dry-run");
+    if let Some(bad) = find_unknown_arg(&args) {
+        eprintln!("error: unrecognized argument '{bad}'");
+        eprintln!("Usage: airborne-cot-relay [--live | --mock | --help]");
+        return ExitCode::from(2);
+    }
     let mode = MissionMode::parse_args(args.into_iter());
     if mode != MissionMode::Version {
         print_banner();
