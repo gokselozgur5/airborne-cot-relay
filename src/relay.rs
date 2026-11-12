@@ -3,6 +3,24 @@ use sightline_cot::cot::{escape_xml_attr, format_iso8601_utc};
 use sightline_cot::tracker::Track;
 use std::net::{SocketAddr, ToSocketAddrs, UdpSocket};
 
+/// Source of wall-clock time in milliseconds since the Unix epoch.
+pub trait Clock {
+    fn now_ms(&self) -> i64;
+}
+
+/// Clock backed by the operating system time.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct SystemClock;
+
+impl Clock for SystemClock {
+    fn now_ms(&self) -> i64 {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_millis() as i64)
+            .unwrap_or(0)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct TrackSummary {
     pub id: u64,
