@@ -70,3 +70,25 @@ impl<T: TimeSource> HealthMonitor<T> {
         }
     }
 }
+
+impl<T: TimeSource> HealthMonitor<T> {
+    /// Classify current health from ages and failure count.
+    pub fn status(&self) -> HealthStatus {
+        let t = &self.thresholds;
+        let now = self.clock.now();
+        let Some(tel) = self.last_telemetry else {
+            return HealthStatus::Starting;
+        };
+        let tel_age = now.saturating_sub(tel);
+        if tel_age >= t.offline_telemetry_age || self.failures >= t.offline_failures {
+            return HealthStatus::Offline;
+        }
+        let send_stale = self
+            .last_send
+            .is_some_and(|s| now.saturating_sub(s) >= t.degraded_send_age);
+        if tel_age >= t.degraded_telemetry_age || send_stale || self.failures > 0 {
+            return HealthStatus::Degraded;
+        }
+        HealthStatus::Healthy
+    }
+}
