@@ -101,6 +101,26 @@ impl RelayConfig {
         Ok(())
     }
 
+    /// Applies environment overrides on top of the current values.
+    /// Precedence: defaults, then environment, then explicit field writes.
+    pub fn with_env_overrides<F>(mut self, lookup: F) -> Result<Self, RelayError>
+    where
+        F: Fn(&str) -> Option<String>,
+    {
+        if let Some(v) = lookup("RELAY_TELEMETRY_ADDR") {
+            self.telemetry_listen_addr = v;
+        }
+        if let Some(v) = lookup("RELAY_COT_ADDR") {
+            self.cot_broadcast_addr = v;
+        }
+        if let Some(v) = lookup("RELAY_STALE_TIMEOUT_MS") {
+            self.target_stale_timeout_ms = v.parse().map_err(|_| {
+                RelayError::InvalidConfig(format!("RELAY_STALE_TIMEOUT_MS not a number: {v}"))
+            })?;
+        }
+        Ok(self)
+    }
+
     pub fn validate(&self) -> Result<(), RelayError> {
         if self.telemetry_listen_addr.is_empty() {
             return Err(RelayError::InvalidConfig(

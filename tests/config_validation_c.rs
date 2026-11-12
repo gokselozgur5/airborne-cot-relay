@@ -42,4 +42,3 @@ fn explicit_value_beats_env_when_applied_after() {
     cfg.target_stale_timeout_ms = 900;
     assert_eq!(cfg.target_stale_timeout_ms, 900);
 }
-
