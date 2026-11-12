@@ -291,7 +291,8 @@ impl Targeter {
             if self.class_map.contains_key(&trk.id) {
                 continue;
             }
-            if let Some(det) = detections.first() {
+            let bbox = (trk.bbox.x1, trk.bbox.y1, trk.bbox.x2, trk.bbox.y2);
+            if let Some(det) = detections.iter().find(|d| d.bbox == bbox) {
                 self.class_map.insert(trk.id, det.classification.clone());
             }
         }
