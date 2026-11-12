@@ -75,7 +75,32 @@ fn check_socket_addr(name: &str, value: &str) -> Result<(), RelayError> {
     Ok(())
 }
 
+fn invalid(msg: &str) -> Result<(), RelayError> {
+    Err(RelayError::InvalidConfig(msg.into()))
+}
+
 impl RelayConfig {
+    fn validate_numeric(&self) -> Result<(), RelayError> {
+        let c = &self.camera;
+        if !c.focal_length_px.is_finite() {
+            return invalid("focal length must be finite");
+        }
+        if !self.ground_elevation_m.is_finite() {
+            return invalid("ground elevation must be finite");
+        }
+        if self.target_stale_timeout_ms == 0 {
+            return invalid("stale timeout must be positive");
+        }
+        if c.image_width == 0 || c.image_height == 0 {
+            return invalid("image size must be non-zero");
+        }
+        let (w, h) = (f64::from(c.image_width), f64::from(c.image_height));
+        if !(0.0..=w).contains(&c.principal_u) || !(0.0..=h).contains(&c.principal_v) {
+            return invalid("principal point must lie inside the image");
+        }
+        Ok(())
+    }
+
     pub fn validate(&self) -> Result<(), RelayError> {
         if self.telemetry_listen_addr.is_empty() {
             return Err(RelayError::InvalidConfig(
@@ -92,7 +117,7 @@ impl RelayConfig {
                 "focal length must be positive".into(),
             ));
         }
-        Ok(())
+        self.validate_numeric()
     }
 }
 
