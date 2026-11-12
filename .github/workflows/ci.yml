@@ -5,3 +5,18 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+
+jobs:
+  check:
+    name: Check, Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: gokselozgur5/stm32-navcore
+          path: stm32-navcore
+      - uses: actions/checkout@v4
+        with:
+          repository: gokselozgur5/sightline-cot
+          path: sightline-cot
