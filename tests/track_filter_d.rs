@@ -17,3 +17,17 @@ fn uids_are_independent() {
     assert!(!f.accept("a", 2.0, 2.0));
     assert_eq!(f.tracked_count(), 2);
 }
+
+#[test]
+fn frozen_clock_drops_repeats() {
+    let mut f = filter(1);
+    assert!(f.accept("a", 1.0, 1.0));
+    assert!(!f.accept("a", 2.0, 2.0));
+}
+
+#[test]
+fn zero_interval_accepts_every_event() {
+    let mut f = filter(0);
+    assert!(f.accept("a", 1.0, 1.0));
+    assert!(f.accept("a", 1.0, 1.0));
+}
