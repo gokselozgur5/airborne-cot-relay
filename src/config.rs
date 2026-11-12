@@ -63,6 +63,18 @@ impl Default for RelayConfig {
     }
 }
 
+fn check_socket_addr(name: &str, value: &str) -> Result<(), RelayError> {
+    let addr: std::net::SocketAddr = value
+        .parse()
+        .map_err(|_| RelayError::InvalidConfig(format!("invalid {name}: {value}")))?;
+    if addr.port() == 0 {
+        return Err(RelayError::InvalidConfig(format!(
+            "{name} port must be non-zero"
+        )));
+    }
+    Ok(())
+}
+
 impl RelayConfig {
     pub fn validate(&self) -> Result<(), RelayError> {
         if self.telemetry_listen_addr.is_empty() {
@@ -73,6 +85,8 @@ impl RelayConfig {
         if self.cot_broadcast_addr.is_empty() {
             return Err(RelayError::InvalidConfig("empty cot broadcast addr".into()));
         }
+        check_socket_addr("telemetry listen addr", &self.telemetry_listen_addr)?;
+        check_socket_addr("cot broadcast addr", &self.cot_broadcast_addr)?;
         if self.camera.focal_length_px <= 0.0 {
             return Err(RelayError::InvalidConfig(
                 "focal length must be positive".into(),

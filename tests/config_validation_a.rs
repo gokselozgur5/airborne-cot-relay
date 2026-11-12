@@ -35,4 +35,3 @@ fn accepts_ipv6_socket_addr() {
     cfg.cot_broadcast_addr = "[ff02::1]:6969".into();
     assert!(cfg.validate().is_ok());
 }
-
