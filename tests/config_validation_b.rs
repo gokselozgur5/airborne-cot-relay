@@ -42,4 +42,3 @@ fn rejects_infinite_ground_elevation() {
     cfg.ground_elevation_m = f64::INFINITY;
     assert!(msg(&cfg).contains("ground elevation"));
 }
-
