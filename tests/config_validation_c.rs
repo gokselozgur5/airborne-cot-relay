@@ -36,3 +36,10 @@ fn bad_timeout_names_key() {
     }
 }
 
+#[test]
+fn explicit_value_beats_env_when_applied_after() {
+    let mut cfg = build(&[("RELAY_STALE_TIMEOUT_MS", "250")]).unwrap();
+    cfg.target_stale_timeout_ms = 900;
+    assert_eq!(cfg.target_stale_timeout_ms, 900);
+}
+
