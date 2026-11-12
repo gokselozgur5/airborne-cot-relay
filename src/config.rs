@@ -81,3 +81,15 @@ impl RelayConfig {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_config_validity() {
+        let config = RelayConfig::default();
+        assert!(config.validate().is_ok());
+        assert_eq!(config.ground_elevation_m, 0.0);
+        assert_eq!(config.target_stale_timeout_ms, 5000);
+    }
