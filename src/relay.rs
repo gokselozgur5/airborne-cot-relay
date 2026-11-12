@@ -15,3 +15,23 @@ pub struct TrackSummary {
     pub course_deg: f64,
     pub speed_mps: f64,
 }
+
+impl TrackSummary {
+    pub fn from_track(
+        track: &Track,
+        classification: &str,
+        origin_lat: f64,
+        origin_lon: f64,
+        origin_hae: f64,
+    ) -> Self {
+        let (lat_deg, lon_deg, hae_m) = sightline_cot::camera::enu_to_geodetic(
+            [track.x[0], track.x[1], 0.0],
+            origin_lat,
+            origin_lon,
+            origin_hae,
+        );
+        let speed_mps = (track.x[2] * track.x[2] + track.x[3] * track.x[3]).sqrt();
+        let course_rad = track.x[0].atan2(track.x[1]);
+        let course_deg = (course_rad.to_degrees() + 360.0) % 360.0;
+        let ce90_m = 2.146 * track.p[0][0].max(track.p[1][1]).sqrt();
+        let le90_m = 10.0;
