@@ -146,11 +146,18 @@ impl TelemetryIngest {
 
 impl TelemetryIngest {
     pub fn update_from_nav(&mut self, telem: &NavTelemetry) -> PlatformPose {
+        self.accept_nav(telem)
+            .or(self.latest_pose)
+            .expect("a pose exists after a nav update")
+    }
+
+    /// Returns the new pose, or `None` when the frame was ignored.
+    fn accept_nav(&mut self, telem: &NavTelemetry) -> Option<PlatformPose> {
         if let Some(current) = self.latest_pose {
             let ts = telem.timestamp_ms as u64;
             let is_reset = current.timestamp_ms.saturating_sub(ts) > self.reset_threshold_ms;
             if ts <= current.timestamp_ms && !is_reset {
-                return current;
+                return None;
             }
         }
         let (lat, lon, hae) = self.ned_to_geodetic(telem.pos_ned_m);
@@ -164,7 +171,7 @@ impl TelemetryIngest {
             telem.euler_rad[2] as f64,
         );
         self.latest_pose = Some(pose);
-        pose
+        Some(pose)
     }
 }
 
@@ -176,7 +183,7 @@ impl TelemetryIngest {
             let frame: Vec<u8> = self.rx_buf.drain(..=pos).collect();
             if frame.len() > 1 {
                 match NavTelemetry::unpack_uart(&frame) {
-                    Ok(telem) => poses.push(self.update_from_nav(&telem)),
+                    Ok(telem) => poses.extend(self.accept_nav(&telem)),
                     Err(e) => self.record_decode_error(format!("{e:?}")),
                 }
             }
