@@ -63,3 +63,17 @@ pub struct CotStreamer {
     target_addr: SocketAddr,
     stale_timeout_ms: u64,
 }
+
+impl CotStreamer {
+    pub fn new(
+        bind_addr: &str,
+        target_addr_str: &str,
+        stale_timeout_ms: u64,
+    ) -> Result<Self, RelayError> {
+        let socket = UdpSocket::bind(bind_addr).map_err(|e| {
+            RelayError::IoError(format!("failed to bind UDP socket {bind_addr}: {e}"))
+        })?;
+        socket
+            .set_nonblocking(true)
+            .map_err(|e| RelayError::IoError(format!("failed to set non-blocking: {e}")))?;
+        let _ = socket.set_broadcast(true);
