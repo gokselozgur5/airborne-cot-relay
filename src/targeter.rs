@@ -61,6 +61,8 @@ pub struct Targeter {
     class_map: std::collections::HashMap<u64, String>,
     anchor_deg: Option<(f64, f64)>,
     frame_offset_m: [f64; 2],
+    box_motion: std::collections::HashMap<u64, BoxMotion>,
+    frame: u64,
 }
 
 impl Targeter {
@@ -80,6 +82,8 @@ impl Targeter {
             class_map: std::collections::HashMap::new(),
             anchor_deg: None,
             frame_offset_m: [0.0, 0.0],
+            box_motion: std::collections::HashMap::new(),
+            frame: 0,
         }
     }
 }
