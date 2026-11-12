@@ -48,3 +48,12 @@ impl TrackSummary {
         }
     }
 }
+
+pub fn classification_to_cot_type(classification: &str) -> &'static str {
+    match classification.to_ascii_lowercase().as_str() {
+        "vehicle" | "car" | "truck" => "a-f-G-E-V-C",
+        "person" | "pedestrian" | "human" => "a-f-G-E-S",
+        "aircraft" | "drone" | "uav" => "a-f-A-M-F",
+        _ => "a-u-G",
+    }
+}
