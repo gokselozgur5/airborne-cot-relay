@@ -89,3 +89,16 @@ impl Metrics {
     }
 }
 
+impl Snapshot {
+    /// Renders stable `key value` lines, one per metric.
+    pub fn render(&self) -> String {
+        let age = self
+            .last_send_age_ms
+            .map_or_else(|| "never".to_string(), |a| a.to_string());
+        format!(
+            "packets_in {}\ndropped {}\nsent {}\nreconnects {}\nqueue_depth {}\nlast_send_age_ms {}\n",
+            self.packets_in, self.dropped, self.sent, self.reconnects, self.queue_depth, age
+        )
+    }
+}
+
