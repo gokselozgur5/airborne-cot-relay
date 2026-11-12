@@ -375,3 +375,29 @@ mod test_helpers {
         }
     }
 }
+
+#[cfg(test)]
+mod tests_tracker {
+    use super::test_helpers::sample_detection;
+    use super::tests::*;
+    use super::*;
+
+    #[test]
+    fn test_multi_target_tracking_step() {
+        let mut targeter = Targeter::with_params(&sample_intrinsics(), 0.0, 2, 5, 1.0);
+        let mut pose = nadir_pose(100.0);
+        let det = sample_detection();
+        let t1 = targeter
+            .update(&pose, std::slice::from_ref(&det))
+            .expect("update 1 failed");
+        assert_eq!(t1.len(), 1);
+        assert!(!t1[0].is_confirmed);
+        pose.timestamp_ms += 100;
+        let t2 = targeter
+            .update(&pose, std::slice::from_ref(&det))
+            .expect("update 2 failed");
+        assert_eq!(t2.len(), 1);
+        assert!(t2[0].is_confirmed);
+        assert_eq!(t2[0].classification, "vehicle");
+    }
+}
