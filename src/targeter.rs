@@ -255,7 +255,9 @@ impl Targeter {
         trk: &sightline_cot::tracker::Track,
         pose: &PlatformPose,
     ) -> (f64, f64, f64) {
-        let enu = [trk.x[0], trk.x[1], self.ground_elevation_m - pose.hae_m];
+        let [off_e, off_n] = self.frame_offset_m;
+        let up = self.ground_elevation_m - pose.hae_m;
+        let enu = [trk.x[0] - off_e, trk.x[1] - off_n, up];
         enu_to_geodetic(enu, pose.lat_deg, pose.lon_deg, pose.hae_m)
     }
 }
