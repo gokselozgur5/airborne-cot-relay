@@ -28,3 +28,12 @@ This guide covers configuration, validation, errors and exit status for the `air
 
 The check does not inspect the principal point, the image size, or the ground elevation. A focal length of `NaN` also passes, because `NaN <= 0.0` is false.
 
+## Error variants
+
+| Variant | Display prefix | Produced by |
+| --- | --- | --- |
+| `InvalidConfig` | `Invalid config:` | `RelayConfig::validate` |
+| `IoError` | `IO error:` | `CotStreamer::new` (bind, non-blocking mode, address resolution) and `CotStreamer::send_xml` |
+| `TargetingError` | `Targeting error:` | `Targeter::project_pixel` and `Targeter::update` |
+| `DecodeError` | `Decode error:` | Not produced by the crate yet |
+
