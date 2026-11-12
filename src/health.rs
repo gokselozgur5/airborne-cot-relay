@@ -29,3 +29,17 @@ impl Default for HealthThresholds {
         }
     }
 }
+
+/// Injectable monotonic time source.
+pub trait TimeSource {
+    fn now(&self) -> Duration;
+}
+
+/// Tracks telemetry and send activity.
+pub struct HealthMonitor<T: TimeSource> {
+    clock: T,
+    thresholds: HealthThresholds,
+    last_telemetry: Option<Duration>,
+    last_send: Option<Duration>,
+    failures: u32,
+}
