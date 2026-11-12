@@ -255,6 +255,30 @@ impl Targeter {
 }
 
 impl Targeter {
+    /// Record the image-space motion of tracks updated in the current frame.
+    fn record_box_motion(&mut self) {
+        self.frame += 1;
+        let (frame, tracks) = (self.frame, &self.tracker.tracks);
+        self.box_motion
+            .retain(|id, _| tracks.iter().any(|t| t.id == *id));
+        for trk in tracks.iter().filter(|t| t.time_since_update == 0) {
+            let b = &trk.bbox;
+            let center = ((b.x1 + b.x2) / 2.0, (b.y1 + b.y2) / 2.0);
+            let shift = self.box_motion.get(&trk.id).map_or((0.0, 0.0), |m| {
+                let gap = (frame - m.frame) as f64;
+                ((center.0 - m.center.0) / gap, (center.1 - m.center.1) / gap)
+            });
+            let motion = BoxMotion {
+                center,
+                frame,
+                shift,
+            };
+            self.box_motion.insert(trk.id, motion);
+        }
+    }
+}
+
+impl Targeter {
     /// Shift platform-relative detections into the frame anchored at the first pose.
     fn anchor_detections(&mut self, pose: &PlatformPose, dets: &mut [Detection]) {
         const EARTH_RADIUS_M: f64 = 6378137.0;
