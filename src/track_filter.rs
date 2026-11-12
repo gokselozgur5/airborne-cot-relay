@@ -63,6 +63,7 @@ pub struct TrackFilter<C: Clock> {
     config: FilterConfig,
     clock: C,
     tracks: HashMap<String, Entry>,
+    keepalive_ms: Option<u64>,
 }
 
 impl<C: Clock> TrackFilter<C> {
@@ -71,7 +72,14 @@ impl<C: Clock> TrackFilter<C> {
             config,
             clock,
             tracks: HashMap::new(),
+            keepalive_ms: None,
         }
+    }
+
+    /// Re-emits an unchanged target once this many ms passed since its last send.
+    pub fn with_keepalive_ms(mut self, ms: u64) -> Self {
+        self.keepalive_ms = Some(ms);
+        self
     }
 
     pub fn clock(&self) -> &C {
