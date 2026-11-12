@@ -100,7 +100,9 @@ impl<C: Clock> TrackFilter<C> {
             if now.saturating_sub(prev.last_ms) < self.config.min_interval_ms {
                 return false;
             }
-            if distance_m(prev.lat, prev.lon, lat, lon) < self.config.min_move_m {
+            let idle = now.saturating_sub(prev.last_ms);
+            let keepalive_due = self.keepalive_ms.is_some_and(|k| idle >= k);
+            if !keepalive_due && distance_m(prev.lat, prev.lon, lat, lon) < self.config.min_move_m {
                 return false;
             }
         }
