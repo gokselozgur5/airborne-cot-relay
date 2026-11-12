@@ -37,13 +37,13 @@ impl Metrics {
     pub fn add_dropped(&self, n: u64) {
         bump(&self.dropped, n);
     }
-}
 
-impl Metrics {
     pub fn add_reconnect(&self) {
         bump(&self.reconnects, 1);
     }
+}
 
+impl Metrics {
     /// Counts one sent packet and records when it happened.
     pub fn record_sent(&self, now_ms: u64) {
         bump(&self.sent, 1);
@@ -102,3 +102,23 @@ impl Snapshot {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn counts_and_renders() {
+        let m = Metrics::new();
+        m.add_packets_in(3);
+        m.add_dropped(1);
+        m.record_sent(100);
+        let s = m.snapshot(150);
+        assert_eq!(s.last_send_age_ms, Some(50));
+        assert!(s.render().starts_with("packets_in 3\ndropped 1\nsent 1\n"));
+    }
+
+    #[test]
+    fn fresh_has_no_send_age() {
+        assert_eq!(Metrics::new().last_send_age_ms(10), None);
+    }
+}
