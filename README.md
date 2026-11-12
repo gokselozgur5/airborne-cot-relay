@@ -1,6 +1,12 @@
 # Airborne CoT Relay
 
-Zero-allocation airborne sensor-to-TAK Cursor-on-Target relay pipeline.
+Airborne sensor-to-TAK Cursor-on-Target relay pipeline.
+
+## Status
+
+The library modules are implemented and covered by unit tests.
+
+The `airborne-cot-relay` binary is still a placeholder. It prints fixed messages for each mode and does not open sockets or read telemetry yet.
 
 ## System Architecture
 
