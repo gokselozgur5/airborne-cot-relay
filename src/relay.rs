@@ -42,6 +42,12 @@ impl ManualClock {
     }
 }
 
+impl Clock for ManualClock {
+    fn now_ms(&self) -> i64 {
+        self.now_ms.get()
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct TrackSummary {
     pub id: u64,
