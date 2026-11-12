@@ -5,3 +5,4 @@ pub mod telemetry;
 pub use config::{CameraIntrinsics, RelayConfig, RelayError};
 pub use relay::{classification_to_cot_type, CotStreamer, TrackSummary};
 pub use telemetry::{PlatformPose, TelemetryIngest};
+pub mod targeter;
