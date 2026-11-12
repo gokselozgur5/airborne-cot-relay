@@ -171,3 +171,19 @@ impl Targeter {
         }
     }
 }
+
+impl Targeter {
+    fn compute_dt_s(&mut self, timestamp_ms: u64) -> f64 {
+        match self.last_timestamp_ms {
+            None => {
+                self.last_timestamp_ms = Some(timestamp_ms);
+                0.1
+            }
+            Some(prev) => {
+                self.last_timestamp_ms = Some(timestamp_ms);
+                let diff = timestamp_ms.saturating_sub(prev);
+                (diff as f64 / 1000.0).clamp(0.001, 5.0)
+            }
+        }
+    }
+}
