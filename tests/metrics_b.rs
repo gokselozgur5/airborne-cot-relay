@@ -20,3 +20,11 @@ fn populated_snapshot_format_is_pinned() {
 queue_depth 4\nlast_send_age_ms 25\n";
     assert_eq!(m.snapshot(125).render(), want);
 }
+
+#[test]
+fn render_has_six_lines_and_trailing_newline() {
+    let out = Metrics::new().snapshot(0).render();
+    assert!(out.ends_with('\n'));
+    assert_eq!(out.lines().count(), 6);
+    assert!(out.lines().all(|l| l.split(' ').count() == 2));
+}
