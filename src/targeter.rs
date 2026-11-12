@@ -359,3 +359,19 @@ mod tests_horizon {
         assert!(res.is_err());
     }
 }
+
+#[cfg(test)]
+mod test_helpers {
+    use super::*;
+
+    pub fn sample_detection() -> TargetDetection {
+        TargetDetection {
+            pixel_u: 500.0,
+            pixel_v: 500.0,
+            bbox: (490.0, 490.0, 510.0, 510.0),
+            classification: "vehicle".into(),
+            confidence: 0.95,
+            embedding: None,
+        }
+    }
+}
