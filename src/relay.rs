@@ -314,6 +314,18 @@ mod tests {
     }
 
     #[test]
+    fn test_bounded_queue_drop_newest_and_clamp() {
+        let mut queue = BoundedQueue::new(0, DropPolicy::DropNewest);
+        assert_eq!(queue.push("a"), None);
+        assert_eq!(queue.push("b"), Some("b"));
+        assert_eq!(queue.push("c"), Some("c"));
+        assert_eq!(queue.len(), 1);
+        assert_eq!(queue.dropped(), 2);
+        assert_eq!(queue.pop(), Some("a"));
+        assert_eq!(queue.pop(), None);
+    }
+
+    #[test]
     fn test_udp_socket_dispatch_loopback() {
         let rx_sock = UdpSocket::bind("127.0.0.1:0").unwrap();
         rx_sock
