@@ -112,3 +112,16 @@ fn burst_event_times_never_decrease() {
         prev = time;
     }
 }
+
+#[test]
+fn each_frame_emits_four_distinct_uids() {
+    let (mut t, rx, s) = rig();
+    for i in 0..10u64 {
+        let objs = t.update(&pose(1000 + i * 100), &burst_dets()).unwrap();
+        let confirmed: Vec<_> = objs.iter().filter(|o| o.is_confirmed).collect();
+        confirmed.iter().for_each(|o| emit(&s, o, T0_MS));
+        let uids: std::collections::BTreeSet<_> =
+            confirmed.iter().map(|_| attr(&recv(&rx), "uid")).collect();
+        assert_eq!(uids.len(), confirmed.len());
+    }
+}
