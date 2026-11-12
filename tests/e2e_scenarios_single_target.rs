@@ -103,3 +103,25 @@ fn cot_point_is_under_nadir_platform() {
     assert!((lat - 37.7749).abs() < 1e-4);
     assert!((lon + 122.4194).abs() < 1e-4);
 }
+
+#[test]
+fn stale_follows_event_time_and_count_matches_confirmed_frames() {
+    let (mut targeter, rx, s) = rig();
+    let mut sent = 0;
+    for i in 0..5u64 {
+        let objs = targeter
+            .update(&pose(1000 + i * 100), &[det(640.0, 360.0)])
+            .unwrap();
+        if objs[0].is_confirmed {
+            emit(&s, &objs[0], T0_MS + (i as i64) * 100);
+            sent += 1;
+        }
+    }
+    assert_eq!(sent, 4);
+    let xml = recv(&rx);
+    assert_eq!(attr(&xml, "time"), "2023-11-14T22:13:20.100Z");
+    assert_eq!(attr(&xml, "stale"), "2023-11-14T22:13:25.100Z");
+    for _ in 1..sent {
+        assert!(recv(&rx).contains("TRACK-0001"));
+    }
+}
