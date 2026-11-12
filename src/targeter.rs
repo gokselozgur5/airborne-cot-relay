@@ -113,3 +113,18 @@ impl Targeter {
             .map_err(|e| RelayError::TargetingError(format!("ground intersection error: {e}")))
     }
 }
+
+impl Targeter {
+    fn estimate_cov_ce_le(&self, cam_pose: &CameraPose, pixel_u: f64, pixel_v: f64) -> (f64, f64) {
+        estimate_covariance_ce_le(
+            &self.camera,
+            cam_pose,
+            pixel_u,
+            pixel_v,
+            self.ground_elevation_m,
+            1.0,
+            0.01,
+        )
+        .unwrap_or((5.0, 5.0))
+    }
+}
