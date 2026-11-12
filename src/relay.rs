@@ -35,3 +35,16 @@ impl TrackSummary {
         let course_deg = (course_rad.to_degrees() + 360.0) % 360.0;
         let ce90_m = 2.146 * track.p[0][0].max(track.p[1][1]).sqrt();
         let le90_m = 10.0;
+        Self {
+            id: track.id,
+            classification: classification.to_string(),
+            lat_deg,
+            lon_deg,
+            hae_m,
+            ce90_m,
+            le90_m,
+            course_deg,
+            speed_mps,
+        }
+    }
+}
