@@ -187,6 +187,14 @@ mod tests {
     }
 
     #[test]
+    fn test_backoff_doubles_then_caps() {
+        let mut backoff = Backoff::new(100, 1000);
+        let delays: Vec<u64> = (0..6).map(|_| backoff.next_delay_ms()).collect();
+        assert_eq!(delays, vec![100, 200, 400, 800, 1000, 1000]);
+        assert_eq!(backoff.attempt(), 6);
+    }
+
+    #[test]
     fn test_cot_xml_generation_and_validation() {
         let streamer = CotStreamer::new("127.0.0.1:0", "127.0.0.1:6969", 5000).unwrap();
         let track = TrackSummary {
