@@ -17,3 +17,21 @@ fn fresh_track_is_retained() {
     assert_eq!(f.evict_stale(), 0);
     assert_eq!(f.tracked_count(), 1);
 }
+
+#[test]
+fn stale_track_is_evicted() {
+    let mut f = filter();
+    f.accept("t1", 1.0, 1.0);
+    f.clock().advance(5_001);
+    assert_eq!(f.evict_stale(), 1);
+    assert_eq!(f.tracked_count(), 0);
+}
+
+#[test]
+fn evicted_uid_is_accepted_again() {
+    let mut f = filter();
+    assert!(f.accept("t1", 1.0, 1.0));
+    f.clock().advance(6_000);
+    f.evict_stale();
+    assert!(f.accept("t1", 1.0, 1.0));
+}
