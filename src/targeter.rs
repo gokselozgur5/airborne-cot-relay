@@ -269,3 +269,18 @@ impl Targeter {
         }
     }
 }
+
+impl Targeter {
+    fn extract_tracked_objects(
+        &mut self,
+        pose: &PlatformPose,
+        detections: &[TargetDetection],
+    ) -> Result<Vec<TrackedObject>, RelayError> {
+        self.update_classification_map(detections);
+        let mut results = Vec::with_capacity(self.tracker.tracks.len());
+        for trk in &self.tracker.tracks {
+            results.push(self.convert_single_track(trk, pose));
+        }
+        Ok(results)
+    }
+}
