@@ -23,3 +23,8 @@ jobs:
         with:
           repository: gokselozgur5/sightline-cot
           path: sightline-cot
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Verify formatting
+        run: cargo fmt --all -- --check
