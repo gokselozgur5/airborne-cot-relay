@@ -81,3 +81,24 @@ impl<C: Clock> TrackFilter<C> {
         self.tracks.len()
     }
 }
+
+impl<C: Clock> TrackFilter<C> {
+    /// Returns true when an event for `uid` at the given position should be sent.
+    pub fn accept(&mut self, uid: &str, lat: f64, lon: f64) -> bool {
+        let now = self.clock.now_ms();
+        if let Some(prev) = self.tracks.get(uid) {
+            if now.saturating_sub(prev.last_ms) < self.config.min_interval_ms {
+                return false;
+            }
+        }
+        self.tracks.insert(
+            uid.to_string(),
+            Entry {
+                last_ms: now,
+                lat,
+                lon,
+            },
+        );
+        true
+    }
+}
