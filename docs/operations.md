@@ -26,7 +26,7 @@ This guide covers configuration, validation, errors and exit status for the `air
 2. `cot_broadcast_addr` must not be empty.
 3. `camera.focal_length_px` must be greater than zero.
 
-The check does not inspect the principal point, the image size, or the ground elevation. A focal length of `NaN` also passes, because `NaN <= 0.0` is false.
+The check does not inspect the principal point, the image size, or the ground elevation. A focal length of `NaN` is rejected, because validation requires the value to be finite.
 
 ## Error variants
 
