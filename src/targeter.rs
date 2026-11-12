@@ -51,6 +51,8 @@ pub struct Targeter {
     tracker: MultiTargetTracker,
     last_timestamp_ms: Option<u64>,
     class_map: std::collections::HashMap<u64, String>,
+    anchor_deg: Option<(f64, f64)>,
+    frame_offset_m: [f64; 2],
 }
 
 impl Targeter {
@@ -68,6 +70,8 @@ impl Targeter {
             tracker: MultiTargetTracker::default(),
             last_timestamp_ms: None,
             class_map: std::collections::HashMap::new(),
+            anchor_deg: None,
+            frame_offset_m: [0.0, 0.0],
         }
     }
 }
