@@ -49,3 +49,18 @@ fn stationary_target_keeps_one_track_while_platform_moves() {
     let err_m = ground_error_m(tracks[0].lat_deg, tracks[0].lon_deg);
     assert!(err_m < 1.0, "track is {err_m} m from the target");
 }
+
+#[test]
+fn stationary_target_converges_over_a_long_pass() {
+    let mut t = targeter();
+    let mut tracks = Vec::new();
+    for k in 0..6u32 {
+        let pose = pose_east_of_origin(10.0 * f64::from(k), 1000 + 100 * u64::from(k));
+        let det = detection(500.0 - 100.0 * f64::from(k));
+        tracks = t.update(&pose, &[det]).expect("update failed");
+    }
+    assert_eq!(tracks.len(), 1);
+    assert!(tracks[0].is_confirmed);
+    assert!(tracks[0].speed_mps < 1.0, "speed {}", tracks[0].speed_mps);
+    assert!(ground_error_m(tracks[0].lat_deg, tracks[0].lon_deg) < 1.0);
+}
