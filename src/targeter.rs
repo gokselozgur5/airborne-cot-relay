@@ -97,3 +97,19 @@ impl Targeter {
         }
     }
 }
+
+impl Targeter {
+    fn project_ray_to_enu(
+        &self,
+        pixel_u: f64,
+        pixel_v: f64,
+        cam_pose: &CameraPose,
+    ) -> Result<[f64; 3], RelayError> {
+        let ray = self
+            .camera
+            .pixel_to_ray(pixel_u, pixel_v)
+            .map_err(|e| RelayError::TargetingError(format!("ray error: {e}")))?;
+        intersect_ground(ray, cam_pose, self.ground_elevation_m)
+            .map_err(|e| RelayError::TargetingError(format!("ground intersection error: {e}")))
+    }
+}
