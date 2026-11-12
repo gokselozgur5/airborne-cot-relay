@@ -297,3 +297,30 @@ impl Targeter {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    pub fn sample_intrinsics() -> CameraIntrinsics {
+        CameraIntrinsics {
+            focal_length_px: 1000.0,
+            principal_u: 500.0,
+            principal_v: 500.0,
+            image_width: 1000,
+            image_height: 1000,
+        }
+    }
+
+    pub fn nadir_pose(hae_m: f64) -> PlatformPose {
+        PlatformPose {
+            timestamp_ms: 1000,
+            lat_deg: 37.7749,
+            lon_deg: -122.4194,
+            hae_m,
+            roll_rad: 0.0,
+            pitch_rad: 0.0,
+            yaw_rad: 0.0,
+        }
+    }
+}
