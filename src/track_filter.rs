@@ -52,6 +52,7 @@ impl Default for FilterConfig {
 #[derive(Debug, Clone, Copy)]
 struct Entry {
     last_ms: u64,
+    seen_ms: u64,
     lat: f64,
     lon: f64,
 }
@@ -86,7 +87,8 @@ impl<C: Clock> TrackFilter<C> {
     /// Returns true when an event for `uid` at the given position should be sent.
     pub fn accept(&mut self, uid: &str, lat: f64, lon: f64) -> bool {
         let now = self.clock.now_ms();
-        if let Some(prev) = self.tracks.get(uid) {
+        if let Some(prev) = self.tracks.get_mut(uid) {
+            prev.seen_ms = now;
             if now.saturating_sub(prev.last_ms) < self.config.min_interval_ms {
                 return false;
             }
@@ -98,6 +100,7 @@ impl<C: Clock> TrackFilter<C> {
             uid.to_string(),
             Entry {
                 last_ms: now,
+                seen_ms: now,
                 lat,
                 lon,
             },
@@ -115,13 +118,13 @@ fn distance_m(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
 }
 
 impl<C: Clock> TrackFilter<C> {
-    /// Removes uids not accepted within the stale age and returns how many were removed.
+    /// Removes uids not seen within the stale age and returns how many were removed.
     pub fn evict_stale(&mut self) -> usize {
         let now = self.clock.now_ms();
         let max_age = self.config.stale_after_ms;
         let before = self.tracks.len();
         self.tracks
-            .retain(|_, e| now.saturating_sub(e.last_ms) <= max_age);
+            .retain(|_, e| now.saturating_sub(e.seen_ms) <= max_age);
         before - self.tracks.len()
     }
 }
