@@ -63,3 +63,21 @@ pub struct TrackFilter<C: Clock> {
     clock: C,
     tracks: HashMap<String, Entry>,
 }
+
+impl<C: Clock> TrackFilter<C> {
+    pub fn new(config: FilterConfig, clock: C) -> Self {
+        Self {
+            config,
+            clock,
+            tracks: HashMap::new(),
+        }
+    }
+
+    pub fn clock(&self) -> &C {
+        &self.clock
+    }
+
+    pub fn tracked_count(&self) -> usize {
+        self.tracks.len()
+    }
+}
