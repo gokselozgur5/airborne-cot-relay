@@ -17,3 +17,10 @@ fn renders_event_with_status() {
     assert!(x.contains("stale=\"2026-01-01T00:00:30Z\""));
     assert!(x.ends_with("</event>"));
 }
+
+#[test]
+fn escapes_attribute_values() {
+    let x = hb("a\"<b>&", "x'y").to_xml();
+    assert!(x.contains("uid=\"a&quot;&lt;b&gt;&amp;\""));
+    assert!(x.contains("relay=\"x&apos;y\""));
+}
