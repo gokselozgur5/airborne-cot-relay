@@ -153,3 +153,23 @@ impl<T: Copy + PartialEq> Hysteresis<T> {
         self.committed
     }
 }
+
+impl<T: Copy + PartialEq> Hysteresis<T> {
+    /// Feed a sample and return the committed value.
+    pub fn observe(&mut self, v: T) -> T {
+        if v == self.committed {
+            self.candidate = v;
+            self.streak = 0;
+        } else if v == self.candidate {
+            self.streak += 1;
+        } else {
+            self.candidate = v;
+            self.streak = 1;
+        }
+        if self.streak >= self.required {
+            self.committed = v;
+            self.streak = 0;
+        }
+        self.committed
+    }
+}
