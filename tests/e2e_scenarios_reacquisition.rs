@@ -49,3 +49,16 @@ fn track_is_dropped_after_long_gap() {
     }
     assert!(frame(&mut t, 11, false).is_empty());
 }
+
+#[test]
+fn short_gap_keeps_track_id() {
+    let (mut t, _rx, _s) = rig();
+    let id = frame(&mut t, 0, true)[0].id;
+    frame(&mut t, 1, true);
+    frame(&mut t, 2, false);
+    frame(&mut t, 3, false);
+    let objs = frame(&mut t, 4, true);
+    assert_eq!(objs.len(), 1);
+    assert_eq!(objs[0].id, id);
+    assert!(objs[0].is_confirmed);
+}
