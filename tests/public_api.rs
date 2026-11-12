@@ -81,3 +81,14 @@ fn cot_streamer_builds_event_with_track_uid() {
     assert!(xml.contains(r#"uid="TRACK-0007""#));
     assert!(xml.contains(r#"type="a-f-G-E-V-C""#));
 }
+
+#[test]
+fn detection_and_result_types_are_public() {
+    fn assert_public(
+        _: Option<TargetDetection>,
+        _: Option<GroundIntersection>,
+        _: Option<TrackedObject>,
+    ) {
+    }
+    assert_public(None, None, None);
+}
