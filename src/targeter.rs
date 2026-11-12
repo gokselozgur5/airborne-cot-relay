@@ -71,3 +71,18 @@ impl Targeter {
         }
     }
 }
+
+impl Targeter {
+    /// Create a new Targeter with customized tracker parameters.
+    pub fn with_params(
+        intrinsics: &CameraIntrinsics,
+        ground_elevation_m: f64,
+        min_hits: usize,
+        max_age: usize,
+        q_acc: f64,
+    ) -> Self {
+        let mut targeter = Self::new(intrinsics, ground_elevation_m);
+        targeter.tracker = MultiTargetTracker::new(min_hits, max_age, q_acc);
+        targeter
+    }
+}
