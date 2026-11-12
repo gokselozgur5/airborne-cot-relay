@@ -22,3 +22,23 @@ fn detection(pixel_u: f64) -> TargetDetection {
         embedding: None,
     }
 }
+
+fn main() -> Result<(), airborne_cot_relay::RelayError> {
+    let cfg = RelayConfig::default();
+    let mut targeter = Targeter::with_params(&cfg.camera, cfg.ground_elevation_m, 2, 5, 1.0);
+    for step in 0..=8u64 {
+        let pose = nadir_pose(1_000 + step * 100);
+        // The left object moves right and the right object moves left.
+        let left = detection(300.0 + 30.0 * step as f64);
+        let right = detection(700.0 - 30.0 * step as f64);
+        for track in targeter.update(&pose, &[left, right])? {
+            if track.is_confirmed {
+                println!(
+                    "step {step:>2}: id={} lat={:.6} lon={:.6} ce90={:.2} m",
+                    track.id, track.lat_deg, track.lon_deg, track.ce90_m
+                );
+            }
+        }
+    }
+    Ok(())
+}
