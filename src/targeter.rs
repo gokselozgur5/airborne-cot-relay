@@ -52,3 +52,22 @@ pub struct Targeter {
     last_timestamp_ms: Option<u64>,
     class_map: std::collections::HashMap<u64, String>,
 }
+
+impl Targeter {
+    /// Create a new Targeter instance from intrinsics and ground elevation.
+    pub fn new(intrinsics: &CameraIntrinsics, ground_elevation_m: f64) -> Self {
+        let cam = Intrinsics::Pinhole {
+            fx: intrinsics.focal_length_px,
+            fy: intrinsics.focal_length_px,
+            cx: intrinsics.principal_u,
+            cy: intrinsics.principal_v,
+        };
+        Self {
+            camera: cam,
+            ground_elevation_m,
+            tracker: MultiTargetTracker::default(),
+            last_timestamp_ms: None,
+            class_map: std::collections::HashMap::new(),
+        }
+    }
+}
