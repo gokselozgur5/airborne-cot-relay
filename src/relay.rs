@@ -301,6 +301,19 @@ mod tests {
     }
 
     #[test]
+    fn test_bounded_queue_drop_oldest() {
+        let mut queue = BoundedQueue::new(2, DropPolicy::DropOldest);
+        assert_eq!(queue.push(1), None);
+        assert_eq!(queue.push(2), None);
+        assert_eq!(queue.push(3), Some(1));
+        assert_eq!(queue.len(), 2);
+        assert_eq!(queue.dropped(), 1);
+        assert_eq!(queue.pop(), Some(2));
+        assert_eq!(queue.pop(), Some(3));
+        assert!(queue.is_empty());
+    }
+
+    #[test]
     fn test_udp_socket_dispatch_loopback() {
         let rx_sock = UdpSocket::bind("127.0.0.1:0").unwrap();
         rx_sock
