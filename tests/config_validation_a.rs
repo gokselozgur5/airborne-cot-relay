@@ -22,3 +22,17 @@ fn rejects_out_of_range_port() {
     assert!(msg(&cfg).contains("cot broadcast addr"));
 }
 
+#[test]
+fn rejects_port_zero() {
+    let mut cfg = RelayConfig::default();
+    cfg.telemetry_listen_addr = "0.0.0.0:0".into();
+    assert!(msg(&cfg).contains("port"));
+}
+
+#[test]
+fn accepts_ipv6_socket_addr() {
+    let mut cfg = RelayConfig::default();
+    cfg.cot_broadcast_addr = "[ff02::1]:6969".into();
+    assert!(cfg.validate().is_ok());
+}
+
