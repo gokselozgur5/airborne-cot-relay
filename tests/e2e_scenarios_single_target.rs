@@ -57,3 +57,24 @@ fn emit(s: &CotStreamer, o: &TrackedObject, now_ms: i64) {
     };
     s.send_track(&t, now_ms).unwrap();
 }
+fn recv(rx: &UdpSocket) -> String {
+    let mut buf = [0u8; 2048];
+    let n = rx.recv(&mut buf).unwrap();
+    String::from_utf8_lossy(&buf[..n]).into_owned()
+}
+
+#[test]
+fn emitted_cot_carries_uid_and_type() {
+    let (mut targeter, rx, s) = rig();
+    for i in 0..2u64 {
+        let objs = targeter
+            .update(&pose(1000 + i * 100), &[det(640.0, 360.0)])
+            .unwrap();
+        if objs[0].is_confirmed {
+            emit(&s, &objs[0], T0_MS);
+        }
+    }
+    let xml = recv(&rx);
+    assert!(xml.contains("uid=\"TRACK-0001\""));
+    assert!(xml.contains("type=\"a-f-G-E-V-C\""));
+}
