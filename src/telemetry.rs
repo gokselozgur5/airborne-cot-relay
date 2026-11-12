@@ -206,3 +206,26 @@ mod test_crc {
         assert!(ingest.process_bytes(&bad).is_empty());
     }
 }
+
+#[cfg(test)]
+mod test_chunking {
+    use super::*;
+
+    #[test]
+    fn test_stream_boundary_recovery() {
+        let mut ingest = TelemetryIngest::new(35.0, 139.0, 200.0, 1000);
+        let telem = NavTelemetry {
+            timestamp_ms: 2000,
+            pos_ned_m: [0.0, 0.0, 0.0],
+            vel_ned_mps: [0.0, 0.0, 0.0],
+            euler_rad: [0.0, 0.0, 0.0],
+            status: 0,
+        };
+        let mut buf = [0u8; 64];
+        let len = telem.pack_uart(&mut buf).unwrap();
+        assert!(ingest.process_bytes(&buf[..len / 2]).is_empty());
+        let res = ingest.process_bytes(&buf[len / 2..len]);
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0].timestamp_ms, 2000);
+    }
+}
