@@ -29,4 +29,3 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
       - name: Run test suite
         run: cargo test --all-targets
-        working-directory: airborne-cot-relay
