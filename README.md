@@ -10,6 +10,8 @@ The `airborne-cot-relay` binary is still a placeholder. It prints fixed messages
 
 ## System Architecture
 
+The diagram shows the intended data flow. The binary does not connect these stages yet.
+
 ```mermaid
 graph TD
     A[Telemetry Stream] --> B[TelemetryIngest]
