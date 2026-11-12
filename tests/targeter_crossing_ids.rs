@@ -58,3 +58,20 @@ fn target_moving_30_px_per_frame_stays_associated() {
         "ids per step: {steps:?}"
     );
 }
+
+#[test]
+fn appearance_change_keeps_id_with_predicted_box() {
+    let (mut a, mut b) = ([0.0f32; 8], [0.0f32; 8]);
+    (a[1], b[2]) = (1.0, 1.0);
+    let frames: Vec<_> = (0..10)
+        .map(|k| {
+            let emb = if k < 5 { a } else { b };
+            vec![det(300.0 + 30.0 * k as f64, 400.0, Some(emb))]
+        })
+        .collect();
+    let steps = ids_per_step(&frames);
+    assert!(
+        steps.iter().all(|ids| ids == &[1]),
+        "ids per step: {steps:?}"
+    );
+}
