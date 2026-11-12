@@ -62,3 +62,24 @@ fn short_gap_keeps_track_id() {
     assert_eq!(objs[0].id, id);
     assert!(objs[0].is_confirmed);
 }
+
+fn emit(s: &CotStreamer, o: &TrackedObject, now_ms: i64) {
+    let t = TrackSummary {
+        id: o.id,
+        classification: o.classification.clone(),
+        lat_deg: o.lat_deg,
+        lon_deg: o.lon_deg,
+        hae_m: o.hae_m,
+        ce90_m: o.ce90_m,
+        le90_m: 10.0,
+        course_deg: o.course_deg,
+        speed_mps: o.speed_mps,
+    };
+    s.send_track(&t, now_ms).unwrap();
+}
+
+fn recv(rx: &UdpSocket) -> String {
+    let mut buf = [0u8; 2048];
+    let n = rx.recv(&mut buf).unwrap();
+    String::from_utf8_lossy(&buf[..n]).into_owned()
+}
