@@ -99,3 +99,19 @@ impl CotStreamer {
         let time_str = format_iso8601_utc(now_ms);
         let stale_str = format_iso8601_utc(stale_ms);
         let uid = format!("TRACK-{:04}", track.id);
+        format!(
+            r#"<event version="2.0" uid="{}" type="{}" how="m-g" time="{}" start="{}" stale="{}"><point lat="{:.7}" lon="{:.7}" hae="{:.2}" ce="{:.2}" le="{:.2}"/><detail><track course="{:.2}" speed="{:.2}"/></detail></event>"#,
+            escape_xml_attr(&uid),
+            escape_xml_attr(cot_type),
+            time_str,
+            time_str,
+            stale_str,
+            track.lat_deg,
+            track.lon_deg,
+            track.hae_m,
+            track.ce90_m,
+            track.le90_m,
+            track.course_deg,
+            track.speed_mps,
+        )
+    }
