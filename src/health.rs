@@ -18,3 +18,14 @@ pub struct HealthThresholds {
     pub degraded_send_age: Duration,
     pub offline_failures: u32,
 }
+
+impl Default for HealthThresholds {
+    fn default() -> Self {
+        Self {
+            degraded_telemetry_age: Duration::from_secs(2),
+            offline_telemetry_age: Duration::from_secs(10),
+            degraded_send_age: Duration::from_secs(5),
+            offline_failures: 5,
+        }
+    }
+}
