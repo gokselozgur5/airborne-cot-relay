@@ -32,3 +32,17 @@ fn degrades_then_offline_by_telemetry_age() {
     t.set(110);
     assert_eq!(m.status(), HealthStatus::Offline);
 }
+
+#[test]
+fn failures_degrade_then_offline_and_reset() {
+    let (mut m, _t) = mon();
+    m.record_telemetry();
+    m.record_send(false);
+    assert_eq!(m.status(), HealthStatus::Degraded);
+    for _ in 0..4 {
+        m.record_send(false);
+    }
+    assert_eq!(m.status(), HealthStatus::Offline);
+    m.record_send(true);
+    assert_eq!(m.status(), HealthStatus::Healthy);
+}
