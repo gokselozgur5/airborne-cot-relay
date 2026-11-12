@@ -152,3 +152,22 @@ impl Targeter {
         })
     }
 }
+
+impl Targeter {
+    fn build_detection(det: &TargetDetection, gi: &GroundIntersection) -> Detection {
+        Detection {
+            east_m: gi.enu_m[0],
+            north_m: gi.enu_m[1],
+            hae_m: gi.hae_m,
+            ce90_m: gi.ce90_m,
+            le90_m: gi.le90_m,
+            bbox: BoundingBox {
+                x1: det.bbox.0,
+                y1: det.bbox.1,
+                x2: det.bbox.2,
+                y2: det.bbox.3,
+            },
+            embedding: det.embedding.unwrap_or([0.0; 8]),
+        }
+    }
+}
