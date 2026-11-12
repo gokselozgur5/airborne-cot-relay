@@ -25,3 +25,25 @@ fn main() -> Result<(), airborne_cot_relay::RelayError> {
         confidence: 0.95,
         embedding: None,
     };
+    for frame in 0..3u64 {
+        let pose = nadir_pose(1_000 + frame * 100, 100.0);
+        for track in targeter.update(&pose, std::slice::from_ref(&detection))? {
+            if !track.is_confirmed {
+                continue;
+            }
+            let summary = TrackSummary {
+                id: track.id,
+                classification: track.classification.clone(),
+                lat_deg: track.lat_deg,
+                lon_deg: track.lon_deg,
+                hae_m: track.hae_m,
+                ce90_m: track.ce90_m,
+                le90_m: track.ce90_m,
+                course_deg: track.course_deg,
+                speed_mps: track.speed_mps,
+            };
+            println!("{}", streamer.build_cot_xml(&summary, 1_700_000_000_000));
+        }
+    }
+    Ok(())
+}
