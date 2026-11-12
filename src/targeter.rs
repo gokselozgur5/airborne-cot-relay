@@ -16,3 +16,14 @@ pub struct TargetDetection {
     pub confidence: f32,
     pub embedding: Option<[f32; 8]>,
 }
+
+/// Projected ground coordinates and covariance bounds.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct GroundIntersection {
+    pub lat_deg: f64,
+    pub lon_deg: f64,
+    pub hae_m: f64,
+    pub ce90_m: f64,
+    pub le90_m: f64,
+    pub enu_m: [f64; 3],
+}
