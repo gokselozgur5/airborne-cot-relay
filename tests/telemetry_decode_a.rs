@@ -24,3 +24,20 @@ fn garbage_frame_is_counted_and_recorded() {
         Some(RelayError::DecodeError(_))
     ));
 }
+
+#[test]
+fn valid_frame_after_garbage_still_decodes() {
+    let mut ingest = TelemetryIngest::new(35.0, 139.0, 200.0, 5000);
+    let mut bytes = vec![0x07, 0xFF, 0x00];
+    bytes.extend(good_frame());
+    assert_eq!(ingest.process_bytes(&bytes).len(), 1);
+    assert_eq!(ingest.decode_errors(), 1);
+}
+
+#[test]
+fn valid_frames_leave_counter_at_zero() {
+    let mut ingest = TelemetryIngest::new(35.0, 139.0, 200.0, 5000);
+    ingest.process_bytes(&good_frame());
+    assert_eq!(ingest.decode_errors(), 0);
+    assert!(ingest.last_decode_error().is_none());
+}
