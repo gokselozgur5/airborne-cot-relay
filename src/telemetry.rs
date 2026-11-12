@@ -59,8 +59,18 @@ pub fn interpolate_pose(a: &PlatformPose, b: &PlatformPose, t_ms: u64) -> Platfo
         lerp(a.hae_m, b.hae_m, f),
         lerp(a.roll_rad, b.roll_rad, f),
         lerp(a.pitch_rad, b.pitch_rad, f),
-        lerp(a.yaw_rad, b.yaw_rad, f),
+        a.yaw_rad + shortest_arc(a.yaw_rad, b.yaw_rad) * f,
     )
+}
+
+fn shortest_arc(from: f64, to: f64) -> f64 {
+    let tau = std::f64::consts::TAU;
+    let d = (to - from).rem_euclid(tau);
+    if d > std::f64::consts::PI {
+        d - tau
+    } else {
+        d
+    }
 }
 
 pub struct TelemetryIngest {
