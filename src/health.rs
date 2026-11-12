@@ -43,3 +43,19 @@ pub struct HealthMonitor<T: TimeSource> {
     last_send: Option<Duration>,
     failures: u32,
 }
+
+impl<T: TimeSource> HealthMonitor<T> {
+    pub fn new(clock: T, thresholds: HealthThresholds) -> Self {
+        Self {
+            clock,
+            thresholds,
+            last_telemetry: None,
+            last_send: None,
+            failures: 0,
+        }
+    }
+
+    pub fn record_telemetry(&mut self) {
+        self.last_telemetry = Some(self.clock.now());
+    }
+}
