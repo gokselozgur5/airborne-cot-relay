@@ -40,3 +40,12 @@ cargo run --bin airborne-cot-relay -- --help
 cargo run --example mock_flight_mission
 cargo test --all-targets
 ```
+
+The binary reads only its first argument:
+
+| Argument | Behavior |
+| --- | --- |
+| `--mock`, `-m`, or any unknown value | Print the simulated 60-second flight message (default) |
+| `--live`, `-l` | Print the live listening notice |
+| `--help`, `-h` | Print usage and exit with status 0 |
+
