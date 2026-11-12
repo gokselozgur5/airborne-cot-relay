@@ -192,3 +192,11 @@ mod tests {
             course_deg: 0.0,
             speed_mps: 1.5,
         };
+        let sent = streamer.send_track(&track, 1731369600000).unwrap();
+        assert!(sent > 0);
+        let mut buf = [0u8; 1024];
+        let (len, _) = rx_sock.recv_from(&mut buf).unwrap();
+        let received_xml = std::str::from_utf8(&buf[..len]).unwrap();
+        assert!(received_xml.contains(r#"uid="TRACK-0001""#));
+    }
+}
