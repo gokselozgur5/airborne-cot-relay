@@ -21,3 +21,31 @@ fn det(u: f64, v: f64) -> TargetDetection {
         embedding: None,
     }
 }
+fn rig() -> (Targeter, UdpSocket, CotStreamer) {
+    let cam = CameraIntrinsics::default();
+    let targeter = Targeter::with_params(&cam, 0.0, 2, 5, 1.0);
+    let rx = UdpSocket::bind("127.0.0.1:0").unwrap();
+    rx.set_read_timeout(Some(Duration::from_millis(200)))
+        .unwrap();
+    let addr = rx.local_addr().unwrap().to_string();
+    let streamer = CotStreamer::new("127.0.0.1:0", &addr, 5000).unwrap();
+    (targeter, rx, streamer)
+}
+
+fn frame(t: &mut Targeter, i: u64, seen: bool) -> Vec<TrackedObject> {
+    let dets = if seen {
+        vec![det(640.0, 360.0)]
+    } else {
+        vec![]
+    };
+    t.update(&pose(1000 + i * 100), &dets).unwrap()
+}
+
+#[test]
+fn track_is_dropped_after_long_gap() {
+    let (mut t, _rx, _s) = rig();
+    for i in 0..11 {
+        frame(&mut t, i, i < 4);
+    }
+    assert!(frame(&mut t, 11, false).is_empty());
+}
