@@ -367,6 +367,17 @@ mod tests {
     use sightline_cot::cot::CotEvent;
 
     #[test]
+    fn test_manual_clock_moves_only_when_advanced() {
+        let clock = ManualClock::new(1_000);
+        assert_eq!(clock.now_ms(), 1_000);
+        clock.advance_ms(250);
+        assert_eq!(clock.now_ms(), 1_250);
+        clock.advance_ms(u64::MAX);
+        assert_eq!(clock.now_ms(), i64::MAX);
+        assert!(SystemClock.now_ms() > 1_700_000_000_000);
+    }
+
+    #[test]
     fn test_classification_mapping() {
         assert_eq!(classification_to_cot_type("vehicle"), "a-f-G-E-V-C");
         assert_eq!(classification_to_cot_type("Car"), "a-f-G-E-V-C");
