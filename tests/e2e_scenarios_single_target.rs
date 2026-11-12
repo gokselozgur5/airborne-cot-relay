@@ -21,3 +21,24 @@ fn det(u: f64, v: f64) -> TargetDetection {
         embedding: None,
     }
 }
+fn rig() -> (Targeter, UdpSocket, CotStreamer) {
+    let cam = CameraIntrinsics::default();
+    let targeter = Targeter::with_params(&cam, 0.0, 2, 5, 1.0);
+    let rx = UdpSocket::bind("127.0.0.1:0").unwrap();
+    rx.set_read_timeout(Some(Duration::from_millis(200)))
+        .unwrap();
+    let addr = rx.local_addr().unwrap().to_string();
+    let streamer = CotStreamer::new("127.0.0.1:0", &addr, 5000).unwrap();
+    (targeter, rx, streamer)
+}
+
+#[test]
+fn target_is_confirmed_on_second_frame() {
+    let (mut targeter, _rx, _s) = rig();
+    let first = targeter.update(&pose(1000), &[det(640.0, 360.0)]).unwrap();
+    assert_eq!(first.len(), 1);
+    assert!(!first[0].is_confirmed);
+    let second = targeter.update(&pose(1100), &[det(640.0, 360.0)]).unwrap();
+    assert!(second[0].is_confirmed);
+    assert_eq!(second[0].id, first[0].id);
+}
