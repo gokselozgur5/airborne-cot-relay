@@ -41,3 +41,12 @@ impl Default for CameraIntrinsics {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RelayConfig {
+    pub telemetry_listen_addr: String,
+    pub cot_broadcast_addr: String,
+    pub camera: CameraIntrinsics,
+    pub ground_elevation_m: f64,
+    pub target_stale_timeout_ms: u64,
+}
