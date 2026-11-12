@@ -38,3 +38,19 @@ fn new_tracks_take_their_own_detection_class() {
     let tracks = targeter.update(&pose, &dets).expect("update failed");
     assert_eq!(sorted_classes(&tracks), ["person", "vehicle"]);
 }
+
+#[test]
+fn track_classes_survive_detection_reordering() {
+    let mut targeter = Targeter::new(&intrinsics(), 0.0);
+    let mut pose = PlatformPose::new(1000, 37.7749, -122.4194, 100.0, 0.0, 0.0, 0.0);
+    let first = [
+        detection(300.0, 300.0, "vehicle"),
+        detection(700.0, 700.0, "person"),
+    ];
+    targeter.update(&pose, &first).expect("update 1 failed");
+    pose.timestamp_ms += 100;
+    let swapped = [first[1].clone(), first[0].clone()];
+    let tracks = targeter.update(&pose, &swapped).expect("update 2 failed");
+    assert_eq!(tracks.len(), 2);
+    assert_eq!(sorted_classes(&tracks), ["person", "vehicle"]);
+}
