@@ -24,3 +24,11 @@ graph TD
 
 3. **Covariance Estimation:**
    Projects angular uncertainty into CE90/LE90 error ellipses.
+
+## Usage Instructions
+
+```bash
+cargo run --bin airborne-cot-relay -- --help
+cargo run --example mock_flight_mission
+cargo test --all-targets
+```
