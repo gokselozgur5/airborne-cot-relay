@@ -113,3 +113,15 @@ fn distance_m(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
     let dx = (lon2 - lon1) * M_PER_DEG * ((lat1 + lat2) / 2.0).to_radians().cos();
     dx.hypot(dy)
 }
+
+impl<C: Clock> TrackFilter<C> {
+    /// Removes uids not accepted within the stale age and returns how many were removed.
+    pub fn evict_stale(&mut self) -> usize {
+        let now = self.clock.now_ms();
+        let max_age = self.config.stale_after_ms;
+        let before = self.tracks.len();
+        self.tracks
+            .retain(|_, e| now.saturating_sub(e.last_ms) <= max_age);
+        before - self.tracks.len()
+    }
+}
