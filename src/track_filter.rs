@@ -48,3 +48,18 @@ impl Default for FilterConfig {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+struct Entry {
+    last_ms: u64,
+    lat: f64,
+    lon: f64,
+}
+
+/// Per-uid filter that decides whether an outbound event is sent.
+#[derive(Debug)]
+pub struct TrackFilter<C: Clock> {
+    config: FilterConfig,
+    clock: C,
+    tracks: HashMap<String, Entry>,
+}
