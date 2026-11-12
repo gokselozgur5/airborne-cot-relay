@@ -36,3 +36,18 @@ fn above_horizon_detection_does_not_drop_the_frame() {
     assert_eq!(tracks[0].hits, 2);
     assert!(tracks[0].is_confirmed);
 }
+
+#[test]
+fn unusable_pose_still_lets_tracks_coast() {
+    let mut t = targeter();
+    let mut pose = PlatformPose::new(1000, 37.7749, -122.4194, 100.0, 0.0, 0.0, 0.0);
+    t.update(&pose, &[detection(500.0)])
+        .expect("update 1 failed");
+    pose.timestamp_ms += 100;
+    pose.hae_m = 0.0;
+    let tracks = t
+        .update(&pose, &[detection(500.0)])
+        .expect("altitude zero must not fail the frame");
+    assert_eq!(tracks.len(), 1);
+    assert_eq!(tracks[0].hits, 1);
+}
