@@ -27,3 +27,19 @@ pub struct GroundIntersection {
     pub le90_m: f64,
     pub enu_m: [f64; 3],
 }
+
+/// Fused tracked target state ready for CoT relay.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TrackedObject {
+    pub id: u64,
+    pub lat_deg: f64,
+    pub lon_deg: f64,
+    pub hae_m: f64,
+    pub velocity_enu: [f64; 2],
+    pub speed_mps: f64,
+    pub course_deg: f64,
+    pub ce90_m: f64,
+    pub classification: String,
+    pub hits: usize,
+    pub is_confirmed: bool,
+}
