@@ -195,6 +195,20 @@ mod tests {
     }
 
     #[test]
+    fn test_backoff_reset_and_clamping() {
+        let mut backoff = Backoff::new(0, 0);
+        assert_eq!(backoff.next_delay_ms(), 1);
+        backoff.reset();
+        assert_eq!(backoff.attempt(), 0);
+        assert_eq!(backoff.next_delay_ms(), 1);
+        let mut long = Backoff::new(50, u64::MAX);
+        for _ in 0..200 {
+            long.next_delay_ms();
+        }
+        assert_eq!(long.next_delay_ms(), u64::MAX);
+    }
+
+    #[test]
     fn test_cot_xml_generation_and_validation() {
         let streamer = CotStreamer::new("127.0.0.1:0", "127.0.0.1:6969", 5000).unwrap();
         let track = TrackSummary {
