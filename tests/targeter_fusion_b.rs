@@ -14,3 +14,12 @@ fn targeter() -> Targeter {
 fn pitched_pose(pitch_rad: f64) -> PlatformPose {
     PlatformPose::new(1000, 37.7749, -122.4194, 100.0, 0.0, pitch_rad, 0.0)
 }
+
+#[test]
+fn near_horizon_projection_does_not_claim_tight_ce90() {
+    let pose = pitched_pose(std::f64::consts::FRAC_PI_2 - 5e-5);
+    if let Ok(gi) = targeter().project_pixel(500.0, 500.0, &pose) {
+        let range_m = gi.enu_m[1];
+        assert!(gi.ce90_m > 1000.0, "ce90 {} m at {range_m} m", gi.ce90_m);
+    }
+}
