@@ -37,3 +37,9 @@ The check does not inspect the principal point, the image size, or the ground el
 | `TargetingError` | `Targeting error:` | `Targeter::project_pixel` and `Targeter::update` |
 | `DecodeError` | `Decode error:` | Not produced by the crate yet |
 
+## Failure modes and exit status
+
+- `TelemetryIngest::process_bytes` drops frames that fail to unpack. It does not return an error, so a corrupted frame produces no pose and no log entry.
+- `CotStreamer::new` fails with `IoError` if the bind address is unavailable or the target address does not resolve. The failure to enable broadcast is ignored.
+- `CotStreamer::send_xml` returns `IoError` for each failed datagram. Callers decide whether to retry.
+- The binary returns exit status 0 in every mode, including `--help`. Unknown arguments fall back to `--mock` and also exit with status 0.
