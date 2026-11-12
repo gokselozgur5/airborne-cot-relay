@@ -86,3 +86,14 @@ impl Targeter {
         targeter
     }
 }
+
+impl Targeter {
+    fn make_camera_pose(pose: &PlatformPose) -> CameraPose {
+        CameraPose {
+            roll_rad: pose.roll_rad,
+            pitch_rad: pose.pitch_rad,
+            yaw_rad: pose.yaw_rad,
+            cam_up_m: pose.hae_m,
+        }
+    }
+}
