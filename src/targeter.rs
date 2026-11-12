@@ -203,8 +203,9 @@ impl Targeter {
         let dt_s = self.compute_dt_s(pose.timestamp_ms);
         let mut tracker_dets = Vec::with_capacity(detections.len());
         for d in detections {
-            let gi = self.project_pixel(d.pixel_u, d.pixel_v, pose)?;
-            tracker_dets.push(Self::build_detection(d, &gi));
+            if let Ok(gi) = self.project_pixel(d.pixel_u, d.pixel_v, pose) {
+                tracker_dets.push(Self::build_detection(d, &gi));
+            }
         }
         self.tracker
             .step(dt_s, &tracker_dets)
