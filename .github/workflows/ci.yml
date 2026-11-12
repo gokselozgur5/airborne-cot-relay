@@ -25,10 +25,8 @@ jobs:
           components: rustfmt, clippy
       - name: Verify formatting
         run: cargo fmt --all -- --check
-        working-directory: airborne-cot-relay
       - name: Run clippy
         run: cargo clippy --all-targets -- -D warnings
-        working-directory: airborne-cot-relay
       - name: Run test suite
         run: cargo test --all-targets
         working-directory: airborne-cot-relay
