@@ -21,3 +21,31 @@ fn det(u: f64, v: f64) -> TargetDetection {
         embedding: None,
     }
 }
+fn rig() -> (Targeter, UdpSocket, CotStreamer) {
+    let cam = CameraIntrinsics::default();
+    let targeter = Targeter::with_params(&cam, 0.0, 2, 5, 1.0);
+    let rx = UdpSocket::bind("127.0.0.1:0").unwrap();
+    rx.set_read_timeout(Some(Duration::from_millis(200)))
+        .unwrap();
+    let addr = rx.local_addr().unwrap().to_string();
+    let streamer = CotStreamer::new("127.0.0.1:0", &addr, 5000).unwrap();
+    (targeter, rx, streamer)
+}
+
+fn burst_dets() -> Vec<TargetDetection> {
+    [300.0, 500.0, 700.0, 900.0]
+        .iter()
+        .map(|u| det(*u, 360.0))
+        .collect()
+}
+
+#[test]
+fn sixty_frame_burst_keeps_four_confirmed_tracks() {
+    let (mut t, _rx, _s) = rig();
+    let mut last = Vec::new();
+    for i in 0..60u64 {
+        last = t.update(&pose(1000 + i * 100), &burst_dets()).unwrap();
+    }
+    assert_eq!(last.len(), 4);
+    assert!(last.iter().all(|o| o.is_confirmed));
+}
