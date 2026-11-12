@@ -15,3 +15,18 @@ fn small_move_is_dropped() {
     assert!(f.accept("t1", 10.0, 20.0));
     assert!(!f.accept("t1", 10.00001, 20.0));
 }
+
+#[test]
+fn large_move_is_accepted() {
+    let mut f = filter();
+    assert!(f.accept("t1", 10.0, 20.0));
+    assert!(f.accept("t1", 10.001, 20.0));
+}
+
+#[test]
+fn diagonal_move_counts_both_axes() {
+    let mut f = filter();
+    assert!(f.accept("t1", 0.0, 0.0));
+    assert!(!f.accept("t1", 0.00005, 0.00005));
+    assert!(f.accept("t1", 0.0001, 0.0001));
+}
