@@ -378,6 +378,27 @@ mod tests {
     }
 
     #[test]
+    fn test_build_cot_xml_now_uses_injected_clock() {
+        let streamer = CotStreamer::new("127.0.0.1:0", "127.0.0.1:6969", 5000).unwrap();
+        let track = TrackSummary {
+            id: 7,
+            classification: "person".to_string(),
+            lat_deg: 36.0,
+            lon_deg: 32.0,
+            hae_m: 10.0,
+            ce90_m: 2.0,
+            le90_m: 5.0,
+            course_deg: 0.0,
+            speed_mps: 1.0,
+        };
+        let clock = ManualClock::new(1731369600000);
+        clock.advance_ms(1_000);
+        let xml = streamer.build_cot_xml_now(&track, &clock);
+        assert!(xml.contains(r#"time="2024-11-12T00:00:01"#));
+        assert!(xml.contains(r#"stale="2024-11-12T00:00:06"#));
+    }
+
+    #[test]
     fn test_classification_mapping() {
         assert_eq!(classification_to_cot_type("vehicle"), "a-f-G-E-V-C");
         assert_eq!(classification_to_cot_type("Car"), "a-f-G-E-V-C");
