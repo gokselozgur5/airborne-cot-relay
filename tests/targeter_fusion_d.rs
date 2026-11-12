@@ -25,3 +25,14 @@ fn detection(pixel_u: f64) -> TargetDetection {
         embedding: None,
     }
 }
+
+fn pose_east_of_origin(east_m: f64, timestamp_ms: u64) -> PlatformPose {
+    let lon = LON + (east_m / (R_M * LAT.to_radians().cos())).to_degrees();
+    PlatformPose::new(timestamp_ms, LAT, lon, 100.0, 0.0, 0.0, 0.0)
+}
+
+fn ground_error_m(lat_deg: f64, lon_deg: f64) -> f64 {
+    let north = (lat_deg - LAT).to_radians() * R_M;
+    let east = (lon_deg - LON).to_radians() * R_M * LAT.to_radians().cos();
+    north.hypot(east)
+}
