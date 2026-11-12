@@ -19,3 +19,8 @@ impl MissionMode {
         }
     }
 }
+
+fn print_banner() {
+    println!("Airborne CoT Relay v0.1.0");
+    println!("Sensor-to-TAK Cursor-on-Target relay runner");
+}
