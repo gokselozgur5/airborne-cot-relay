@@ -215,3 +215,10 @@ impl Targeter {
         (speed, course)
     }
 }
+
+impl Targeter {
+    fn compute_track_ce90(p: &[[f64; 4]; 4]) -> f64 {
+        let var_xy = (p[0][0] + p[1][1]) * 0.5;
+        (2.146 * var_xy.max(0.0).sqrt()).max(1.0)
+    }
+}
