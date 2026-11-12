@@ -12,3 +12,4 @@ fn cardinal_directions() {
     assert!(close(course_deg(-1.0, 0.0), 270.0));
 }
 
+
