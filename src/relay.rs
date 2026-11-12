@@ -171,3 +171,24 @@ mod tests {
         assert_eq!(parsed.uid, "TRACK-0042");
         assert_eq!(parsed.cot_type, "a-f-G-E-V-C");
     }
+
+    #[test]
+    fn test_udp_socket_dispatch_loopback() {
+        let rx_sock = UdpSocket::bind("127.0.0.1:0").unwrap();
+        rx_sock
+            .set_read_timeout(Some(std::time::Duration::from_millis(500)))
+            .unwrap();
+        let rx_port = rx_sock.local_addr().unwrap().port();
+        let target = format!("127.0.0.1:{rx_port}");
+        let streamer = CotStreamer::new("127.0.0.1:0", &target, 3000).unwrap();
+        let track = TrackSummary {
+            id: 1,
+            classification: "person".to_string(),
+            lat_deg: 36.0,
+            lon_deg: 32.0,
+            hae_m: 100.0,
+            ce90_m: 2.0,
+            le90_m: 5.0,
+            course_deg: 0.0,
+            speed_mps: 1.5,
+        };
