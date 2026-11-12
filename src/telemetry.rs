@@ -1,3 +1,4 @@
+use crate::config::RelayError;
 use stm32_navcore::protocol::NavTelemetry;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -81,6 +82,8 @@ pub struct TelemetryIngest {
     max_age_ms: u64,
     reset_threshold_ms: u64,
     latest_pose: Option<PlatformPose>,
+    decode_errors: u64,
+    last_decode_error: Option<RelayError>,
 }
 
 impl TelemetryIngest {
@@ -98,6 +101,8 @@ impl TelemetryIngest {
             max_age_ms,
             reset_threshold_ms: Self::DEFAULT_RESET_THRESHOLD_MS,
             latest_pose: None,
+            decode_errors: 0,
+            last_decode_error: None,
         }
     }
 }
@@ -170,12 +175,28 @@ impl TelemetryIngest {
         while let Some(pos) = self.rx_buf.iter().position(|&b| b == 0x00) {
             let frame: Vec<u8> = self.rx_buf.drain(..=pos).collect();
             if frame.len() > 1 {
-                if let Ok(telem) = NavTelemetry::unpack_uart(&frame) {
-                    poses.push(self.update_from_nav(&telem));
+                match NavTelemetry::unpack_uart(&frame) {
+                    Ok(telem) => poses.push(self.update_from_nav(&telem)),
+                    Err(e) => self.record_decode_error(format!("{e:?}")),
                 }
             }
         }
         poses
+    }
+}
+
+impl TelemetryIngest {
+    pub fn decode_errors(&self) -> u64 {
+        self.decode_errors
+    }
+
+    pub fn last_decode_error(&self) -> Option<&RelayError> {
+        self.last_decode_error.as_ref()
+    }
+
+    fn record_decode_error(&mut self, msg: String) {
+        self.decode_errors = self.decode_errors.saturating_add(1);
+        self.last_decode_error = Some(RelayError::DecodeError(msg));
     }
 }
 
