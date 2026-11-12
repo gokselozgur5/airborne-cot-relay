@@ -93,3 +93,14 @@ mod tests {
         assert_eq!(config.ground_elevation_m, 0.0);
         assert_eq!(config.target_stale_timeout_ms, 5000);
     }
+
+    #[test]
+    fn test_invalid_config_cases() {
+        let mut cfg = RelayConfig::default();
+        cfg.telemetry_listen_addr.clear();
+        assert!(matches!(cfg.validate(), Err(RelayError::InvalidConfig(_))));
+
+        let mut cfg2 = RelayConfig::default();
+        cfg2.camera.focal_length_px = 0.0;
+        assert!(matches!(cfg2.validate(), Err(RelayError::InvalidConfig(_))));
+    }
