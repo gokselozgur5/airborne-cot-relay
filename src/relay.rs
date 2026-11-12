@@ -125,6 +125,23 @@ impl<T> BoundedQueue<T> {
             dropped: 0,
         }
     }
+
+    /// Enqueues `item` and returns the item dropped when the queue was full.
+    pub fn push(&mut self, item: T) -> Option<T> {
+        if self.items.len() < self.capacity {
+            self.items.push_back(item);
+            return None;
+        }
+        self.dropped = self.dropped.saturating_add(1);
+        match self.policy {
+            DropPolicy::DropNewest => Some(item),
+            DropPolicy::DropOldest => {
+                let evicted = self.items.pop_front();
+                self.items.push_back(item);
+                evicted
+            }
+        }
+    }
 }
 
 pub struct CotStreamer {
