@@ -42,3 +42,18 @@ fn target_is_confirmed_on_second_frame() {
     assert!(second[0].is_confirmed);
     assert_eq!(second[0].id, first[0].id);
 }
+
+fn emit(s: &CotStreamer, o: &TrackedObject, now_ms: i64) {
+    let t = TrackSummary {
+        id: o.id,
+        classification: o.classification.clone(),
+        lat_deg: o.lat_deg,
+        lon_deg: o.lon_deg,
+        hae_m: o.hae_m,
+        ce90_m: o.ce90_m,
+        le90_m: 10.0,
+        course_deg: o.course_deg,
+        speed_mps: o.speed_mps,
+    };
+    s.send_track(&t, now_ms).unwrap();
+}
