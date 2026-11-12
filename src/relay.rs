@@ -67,6 +67,19 @@ impl Backoff {
             attempt: 0,
         }
     }
+
+    /// Returns the delay before the next attempt and advances the schedule.
+    pub fn next_delay_ms(&mut self) -> u64 {
+        let factor = 1u64.checked_shl(self.attempt).unwrap_or(u64::MAX);
+        let delay = self.base_ms.saturating_mul(factor).min(self.max_ms);
+        self.attempt = self.attempt.saturating_add(1);
+        delay
+    }
+
+    /// Number of delays handed out since the last reset.
+    pub fn attempt(&self) -> u32 {
+        self.attempt
+    }
 }
 
 pub fn classification_to_cot_type(classification: &str) -> &'static str {
