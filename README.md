@@ -13,3 +13,14 @@ graph TD
     E --> F[CotStreamer]
     F --> G[ATAK / TAK Server]
 ```
+
+## Mathematical Formulation
+
+1. **Ray Back-Projection:**
+   Inverts pinhole intrinsics to camera frame unit vector.
+
+2. **Ground Intersection:**
+   Transforms ray to ENU and computes ground plane intercept.
+
+3. **Covariance Estimation:**
+   Projects angular uncertainty into CE90/LE90 error ellipses.
