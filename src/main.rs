@@ -6,6 +6,7 @@ pub enum MissionMode {
     Live,
     Mock,
     Help,
+    Version,
 }
 
 impl MissionMode {
@@ -15,6 +16,7 @@ impl MissionMode {
             Some("--live") | Some("-l") => Self::Live,
             Some("--mock") | Some("-m") => Self::Mock,
             Some("--help") | Some("-h") => Self::Help,
+            Some("--version") | Some("-V") => Self::Version,
             _ => Self::Mock,
         }
     }
@@ -31,6 +33,10 @@ fn run_mission(mode: MissionMode) -> ExitCode {
             println!("Usage: airborne-cot-relay [--live | --mock | --help]");
             ExitCode::SUCCESS
         }
+        MissionMode::Version => {
+            println!("airborne-cot-relay {}", env!("CARGO_PKG_VERSION"));
+            ExitCode::SUCCESS
+        }
         MissionMode::Mock => {
             println!("Starting simulated 60-second flight path...");
             ExitCode::SUCCESS
@@ -43,7 +49,9 @@ fn run_mission(mode: MissionMode) -> ExitCode {
 }
 
 fn main() -> ExitCode {
-    print_banner();
     let mode = MissionMode::parse_args(env::args());
+    if mode != MissionMode::Version {
+        print_banner();
+    }
     run_mission(mode)
 }
