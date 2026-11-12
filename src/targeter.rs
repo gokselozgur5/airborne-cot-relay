@@ -128,3 +128,27 @@ impl Targeter {
         .unwrap_or((5.0, 5.0))
     }
 }
+
+impl Targeter {
+    /// Intersect pixel ray with ground elevation and estimate CE90/LE90.
+    pub fn project_pixel(
+        &self,
+        pixel_u: f64,
+        pixel_v: f64,
+        pose: &PlatformPose,
+    ) -> Result<GroundIntersection, RelayError> {
+        let cam_pose = Self::make_camera_pose(pose);
+        let enu_pt = self.project_ray_to_enu(pixel_u, pixel_v, &cam_pose)?;
+        let (ce90, le90) = self.estimate_cov_ce_le(&cam_pose, pixel_u, pixel_v);
+        let enu_rel = [enu_pt[0], enu_pt[1], enu_pt[2] - pose.hae_m];
+        let (lat, lon, hae) = enu_to_geodetic(enu_rel, pose.lat_deg, pose.lon_deg, pose.hae_m);
+        Ok(GroundIntersection {
+            lat_deg: lat,
+            lon_deg: lon,
+            hae_m: hae,
+            ce90_m: ce90,
+            le90_m: le90,
+            enu_m: enu_pt,
+        })
+    }
+}
