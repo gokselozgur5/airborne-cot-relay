@@ -242,3 +242,30 @@ impl Targeter {
             .unwrap_or_else(|| "unknown".into())
     }
 }
+
+impl Targeter {
+    fn convert_single_track(
+        &self,
+        trk: &sightline_cot::tracker::Track,
+        pose: &PlatformPose,
+    ) -> TrackedObject {
+        let (lat, lon, hae) = self.resolve_track_geodetic(trk, pose);
+        let (speed, course) = Self::compute_kinematics(trk.x[2], trk.x[3]);
+        let ce90 = Self::compute_track_ce90(&trk.p);
+        let cls = self.resolve_track_class(trk.id);
+        let confirmed = trk.status == TrackStatus::Confirmed;
+        TrackedObject {
+            id: trk.id,
+            lat_deg: lat,
+            lon_deg: lon,
+            hae_m: hae,
+            velocity_enu: [trk.x[2], trk.x[3]],
+            speed_mps: speed,
+            course_deg: course,
+            ce90_m: ce90,
+            classification: cls,
+            hits: trk.hits,
+            is_confirmed: confirmed,
+        }
+    }
+}
