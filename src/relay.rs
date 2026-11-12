@@ -238,6 +238,20 @@ impl CotStreamer {
     }
 }
 
+/// Destination for encoded CoT datagrams, injectable for tests.
+pub trait CotSink {
+    /// Sends one encoded payload and returns the number of bytes written.
+    fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError>;
+}
+
+impl CotSink for CotStreamer {
+    fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
+        self.socket
+            .send_to(payload, self.target_addr)
+            .map_err(|e| RelayError::IoError(format!("UDP send failed: {e}")))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
