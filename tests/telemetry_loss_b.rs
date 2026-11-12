@@ -27,3 +27,12 @@ fn degenerate_equal_timestamps_return_first() {
     let (a, b) = (pose(1000, 10.0, 0.0), pose(1000, 12.0, 1.0));
     assert_eq!(interpolate_pose(&a, &b, 1000), a);
 }
+
+#[test]
+fn yaw_takes_shortest_arc_across_wrap() {
+    let a = pose(0, 10.0, 3.0);
+    let b = pose(1000, 10.0, -3.0);
+    let r = interpolate_pose(&a, &b, 500);
+    let wrapped = r.yaw_rad.rem_euclid(std::f64::consts::TAU);
+    assert!((wrapped - std::f64::consts::PI).abs() < 0.2);
+}
