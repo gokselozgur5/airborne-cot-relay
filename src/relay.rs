@@ -269,6 +269,26 @@ impl SendHealth {
             total_failures: 0,
         }
     }
+
+    /// Records one send result.
+    pub fn record<T>(&mut self, result: &Result<T, RelayError>) {
+        if result.is_ok() {
+            self.consecutive_failures = 0;
+        } else {
+            self.consecutive_failures = self.consecutive_failures.saturating_add(1);
+            self.total_failures = self.total_failures.saturating_add(1);
+        }
+    }
+
+    /// True once consecutive failures reach the configured threshold.
+    pub fn needs_reconnect(&self) -> bool {
+        self.consecutive_failures >= self.max_consecutive_failures
+    }
+
+    /// Failures since the last successful send, and since creation.
+    pub fn failures(&self) -> (u32, u64) {
+        (self.consecutive_failures, self.total_failures)
+    }
 }
 
 #[cfg(test)]
