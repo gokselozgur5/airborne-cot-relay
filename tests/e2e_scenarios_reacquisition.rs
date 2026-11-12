@@ -83,3 +83,23 @@ fn recv(rx: &UdpSocket) -> String {
     let n = rx.recv(&mut buf).unwrap();
     String::from_utf8_lossy(&buf[..n]).into_owned()
 }
+
+#[test]
+fn cot_stops_during_gap_and_resumes_on_return() {
+    let (mut t, rx, s) = rig();
+    let mut sent = 0;
+    for i in 0..16u64 {
+        let seen = !(4..11).contains(&i);
+        for o in frame(&mut t, i, seen).iter().filter(|o| o.is_confirmed) {
+            emit(&s, o, T0_MS + (i as i64) * 100);
+            sent += 1;
+        }
+    }
+    let mut times = Vec::new();
+    for _ in 0..sent {
+        times.push(recv(&rx));
+    }
+    assert!(rx.recv(&mut [0u8; 8]).is_err());
+    assert_eq!(sent, 3 + 4);
+    assert!(times.iter().all(|x| x.contains("uid=\"TRACK-")));
+}
