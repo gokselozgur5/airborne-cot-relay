@@ -240,6 +240,21 @@ impl Targeter {
 }
 
 impl Targeter {
+    /// Move each track box forward by its last measured per-frame pixel shift.
+    fn predict_track_boxes(&mut self) {
+        for trk in &mut self.tracker.tracks {
+            if let Some(m) = self.box_motion.get(&trk.id) {
+                let (du, dv) = m.shift;
+                trk.bbox.x1 += du;
+                trk.bbox.x2 += du;
+                trk.bbox.y1 += dv;
+                trk.bbox.y2 += dv;
+            }
+        }
+    }
+}
+
+impl Targeter {
     /// Shift platform-relative detections into the frame anchored at the first pose.
     fn anchor_detections(&mut self, pose: &PlatformPose, dets: &mut [Detection]) {
         const EARTH_RADIUS_M: f64 = 6378137.0;
