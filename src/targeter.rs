@@ -187,3 +187,23 @@ impl Targeter {
         }
     }
 }
+
+impl Targeter {
+    /// Update tracking filter with new visual detections at current pose.
+    pub fn update(
+        &mut self,
+        pose: &PlatformPose,
+        detections: &[TargetDetection],
+    ) -> Result<Vec<TrackedObject>, RelayError> {
+        let dt_s = self.compute_dt_s(pose.timestamp_ms);
+        let mut tracker_dets = Vec::with_capacity(detections.len());
+        for d in detections {
+            let gi = self.project_pixel(d.pixel_u, d.pixel_v, pose)?;
+            tracker_dets.push(Self::build_detection(d, &gi));
+        }
+        self.tracker
+            .step(dt_s, &tracker_dets)
+            .map_err(|e| RelayError::TargetingError(format!("tracker step error: {e}")))?;
+        self.extract_tracked_objects(pose, detections)
+    }
+}
