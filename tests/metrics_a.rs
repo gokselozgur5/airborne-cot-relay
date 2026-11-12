@@ -20,3 +20,14 @@ fn send_age_does_not_underflow() {
     m.record_sent(u64::MAX);
     assert!(m.last_send_age_ms(u64::MAX).unwrap() <= 1);
 }
+
+#[test]
+fn reconnects_and_sent_accumulate() {
+    let m = Metrics::new();
+    for _ in 0..3 {
+        m.add_reconnect();
+        m.record_sent(1);
+    }
+    let s = m.snapshot(1);
+    assert_eq!((s.reconnects, s.sent), (3, 3));
+}
