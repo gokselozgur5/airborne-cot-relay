@@ -1,0 +1,11 @@
+[package]
+name = "airborne-cot-relay"
+version = "0.1.0"
+edition = "2021"
+authors = ["Goksel Ozgur <gokselozgur5@gmail.com>"]
+license = "MIT"
+description = "Airborne sensor-to-TAK Cursor-on-Target relay"
+
+[dependencies]
+stm32-navcore = { path = "../stm32-navcore", default-features = false }
+sightline-cot = { path = "../sightline-cot" }
