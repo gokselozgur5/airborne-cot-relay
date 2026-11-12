@@ -77,3 +77,18 @@ impl CotStreamer {
             .set_nonblocking(true)
             .map_err(|e| RelayError::IoError(format!("failed to set non-blocking: {e}")))?;
         let _ = socket.set_broadcast(true);
+        let target_addr = target_addr_str
+            .to_socket_addrs()
+            .map_err(|e| {
+                RelayError::IoError(format!("invalid target address {target_addr_str}: {e}"))
+            })?
+            .next()
+            .ok_or_else(|| {
+                RelayError::IoError(format!("no address resolved for {target_addr_str}"))
+            })?;
+        Ok(Self {
+            socket,
+            target_addr,
+            stale_timeout_ms,
+        })
+    }
