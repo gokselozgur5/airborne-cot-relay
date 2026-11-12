@@ -19,3 +19,18 @@ fn encode_frame(timestamp_ms: u32) -> Vec<u8> {
     let len = telem.pack_uart(&mut buf).expect("frame fits in buffer");
     buf[..len].to_vec()
 }
+
+fn main() {
+    // Poses older than this are reported as stale.
+    let max_age_ms = 1_500;
+    let mut ingest = TelemetryIngest::new(37.7749, -122.4194, 100.0, max_age_ms);
+    // The link delivers frames until 2 s, drops out for 3 s, then recovers.
+    let frame_times = [0u64, 1_000, 2_000, 5_000];
+    for now_ms in (0..=5_000u64).step_by(1_000) {
+        if frame_times.contains(&now_ms) {
+            let poses = ingest.process_bytes(&encode_frame(now_ms as u32));
+            println!("t={now_ms:>5} ms: decoded {} pose(s)", poses.len());
+        }
+        println!("t={now_ms:>5} ms: stale={}", ingest.is_stale(now_ms));
+    }
+}
