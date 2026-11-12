@@ -29,3 +29,11 @@ fn small_backward_step_is_ignored_as_reorder() {
     ingest.process_bytes(&frame(99_000, 50.0));
     assert_eq!(ingest.latest_pose().unwrap().timestamp_ms, 100_000);
 }
+
+#[test]
+fn custom_threshold_controls_reset_detection() {
+    let mut ingest = TelemetryIngest::new(35.0, 139.0, 200.0, 5000).with_reset_threshold_ms(500);
+    ingest.process_bytes(&frame(10_000, 10.0));
+    ingest.process_bytes(&frame(9_000, 50.0));
+    assert_eq!(ingest.latest_pose().unwrap().timestamp_ms, 9_000);
+}
