@@ -94,3 +94,20 @@ impl TelemetryIngest {
         (lat, lon, hae)
     }
 }
+
+impl TelemetryIngest {
+    pub fn update_from_nav(&mut self, telem: &NavTelemetry) -> PlatformPose {
+        let (lat, lon, hae) = self.ned_to_geodetic(telem.pos_ned_m);
+        let pose = PlatformPose::new(
+            telem.timestamp_ms as u64,
+            lat,
+            lon,
+            hae,
+            telem.euler_rad[0] as f64,
+            telem.euler_rad[1] as f64,
+            telem.euler_rad[2] as f64,
+        );
+        self.latest_pose = Some(pose);
+        pose
+    }
+}
