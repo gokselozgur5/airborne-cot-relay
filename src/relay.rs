@@ -291,6 +291,26 @@ impl SendHealth {
     }
 }
 
+/// Sends `payload` through `sink`, treating short writes as failures.
+pub fn send_tracked<S: CotSink>(
+    sink: &mut S,
+    health: &mut SendHealth,
+    payload: &[u8],
+) -> Result<usize, RelayError> {
+    let result = sink.send(payload).and_then(|sent| {
+        if sent == payload.len() {
+            Ok(sent)
+        } else {
+            let len = payload.len();
+            Err(RelayError::IoError(format!(
+                "short write: {sent} of {len} bytes"
+            )))
+        }
+    });
+    health.record(&result);
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
