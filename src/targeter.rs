@@ -284,3 +284,16 @@ impl Targeter {
         Ok(results)
     }
 }
+
+impl Targeter {
+    fn update_classification_map(&mut self, detections: &[TargetDetection]) {
+        for trk in &self.tracker.tracks {
+            if self.class_map.contains_key(&trk.id) {
+                continue;
+            }
+            if let Some(det) = detections.first() {
+                self.class_map.insert(trk.id, det.classification.clone());
+            }
+        }
+    }
+}
