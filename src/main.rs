@@ -47,8 +47,10 @@ fn print_banner() {
 fn run_mission(mode: MissionMode) -> ExitCode {
     match mode {
         MissionMode::Help => {
-            println!("Usage: airborne-cot-relay [OPTIONS]
-");
+            println!(
+                "Usage: airborne-cot-relay [OPTIONS]
+"
+            );
             println!("  -l, --live     Use live telemetry and camera streams");
             println!("  -m, --mock     Run a simulated flight path (default)");
             println!("  -h, --help     Print this help text");
