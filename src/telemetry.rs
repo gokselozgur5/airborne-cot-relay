@@ -127,3 +127,9 @@ impl TelemetryIngest {
         poses
     }
 }
+
+impl TelemetryIngest {
+    pub fn clear_buffer(&mut self) {
+        self.rx_buf.clear();
+    }
+}
