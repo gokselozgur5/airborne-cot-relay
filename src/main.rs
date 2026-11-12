@@ -34,7 +34,9 @@ const KNOWN_FLAGS: [&str; 8] = [
 ];
 
 fn find_unknown_arg(args: &[String]) -> Option<&String> {
-    args.iter().skip(1).find(|a| !KNOWN_FLAGS.contains(&a.as_str()))
+    args.iter()
+        .skip(1)
+        .find(|a| !KNOWN_FLAGS.contains(&a.as_str()))
 }
 
 fn print_banner() {
