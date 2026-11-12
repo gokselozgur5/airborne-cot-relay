@@ -80,6 +80,11 @@ impl Backoff {
     pub fn attempt(&self) -> u32 {
         self.attempt
     }
+
+    /// Restarts the schedule after a successful connection.
+    pub fn reset(&mut self) {
+        self.attempt = 0;
+    }
 }
 
 pub fn classification_to_cot_type(classification: &str) -> &'static str {
