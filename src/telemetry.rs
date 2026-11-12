@@ -65,3 +65,16 @@ impl TelemetryIngest {
         }
     }
 }
+
+impl TelemetryIngest {
+    pub fn latest_pose(&self) -> Option<PlatformPose> {
+        self.latest_pose
+    }
+
+    pub fn is_stale(&self, now_ms: u64) -> bool {
+        match self.latest_pose {
+            Some(pose) => pose.is_stale(now_ms, self.max_age_ms),
+            None => true,
+        }
+    }
+}
