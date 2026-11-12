@@ -207,3 +207,11 @@ impl Targeter {
         self.extract_tracked_objects(pose, detections)
     }
 }
+
+impl Targeter {
+    fn compute_kinematics(vx: f64, vy: f64) -> (f64, f64) {
+        let speed = (vx * vx + vy * vy).sqrt();
+        let course = vy.atan2(vx).to_degrees().rem_euclid(360.0);
+        (speed, course)
+    }
+}
