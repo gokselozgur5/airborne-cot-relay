@@ -10,3 +10,25 @@ pub struct PlatformPose {
     pub pitch_rad: f64,
     pub yaw_rad: f64,
 }
+
+impl PlatformPose {
+    pub const fn new(
+        timestamp_ms: u64,
+        lat_deg: f64,
+        lon_deg: f64,
+        hae_m: f64,
+        roll_rad: f64,
+        pitch_rad: f64,
+        yaw_rad: f64,
+    ) -> Self {
+        Self {
+            timestamp_ms,
+            lat_deg,
+            lon_deg,
+            hae_m,
+            roll_rad,
+            pitch_rad,
+            yaw_rad,
+        }
+    }
+}
