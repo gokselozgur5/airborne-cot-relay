@@ -147,3 +147,27 @@ mod tests {
         assert_eq!(classification_to_cot_type("drone"), "a-f-A-M-F");
         assert_eq!(classification_to_cot_type("unknown_object"), "a-u-G");
     }
+
+    #[test]
+    fn test_cot_xml_generation_and_validation() {
+        let streamer = CotStreamer::new("127.0.0.1:0", "127.0.0.1:6969", 5000).unwrap();
+        let track = TrackSummary {
+            id: 42,
+            classification: "vehicle".to_string(),
+            lat_deg: 37.7749,
+            lon_deg: -122.4194,
+            hae_m: 15.0,
+            ce90_m: 3.5,
+            le90_m: 10.0,
+            course_deg: 90.0,
+            speed_mps: 12.5,
+        };
+        let now_ms = 1731369600000;
+        let xml = streamer.build_cot_xml(&track, now_ms);
+        assert!(xml.contains(r#"uid="TRACK-0042""#));
+        assert!(xml.contains(r#"type="a-f-G-E-V-C""#));
+        assert!(xml.contains(r#"lat="37.7749000""#));
+        let parsed = CotEvent::from_xml(&xml).expect("valid CoT 2.0 XML");
+        assert_eq!(parsed.uid, "TRACK-0042");
+        assert_eq!(parsed.cot_type, "a-f-G-E-V-C");
+    }
