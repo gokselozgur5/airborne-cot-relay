@@ -50,3 +50,15 @@ pub struct RelayConfig {
     pub ground_elevation_m: f64,
     pub target_stale_timeout_ms: u64,
 }
+
+impl Default for RelayConfig {
+    fn default() -> Self {
+        Self {
+            telemetry_listen_addr: "0.0.0.0:14550".to_string(),
+            cot_broadcast_addr: "239.2.3.1:6969".to_string(),
+            camera: CameraIntrinsics::default(),
+            ground_elevation_m: 0.0,
+            target_stale_timeout_ms: 5000,
+        }
+    }
+}
