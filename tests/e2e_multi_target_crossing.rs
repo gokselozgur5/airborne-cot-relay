@@ -21,3 +21,28 @@ fn det(u: f64, v: f64) -> TargetDetection {
         embedding: None,
     }
 }
+fn rig() -> (Targeter, UdpSocket, CotStreamer) {
+    let cam = CameraIntrinsics::default();
+    let targeter = Targeter::with_params(&cam, 0.0, 2, 5, 1.0);
+    let rx = UdpSocket::bind("127.0.0.1:0").unwrap();
+    rx.set_read_timeout(Some(Duration::from_millis(200)))
+        .unwrap();
+    let addr = rx.local_addr().unwrap().to_string();
+    let streamer = CotStreamer::new("127.0.0.1:0", &addr, 5000).unwrap();
+    (targeter, rx, streamer)
+}
+
+fn crossing(i: u64) -> Vec<TargetDetection> {
+    let k = i as f64 * 4.0;
+    vec![det(400.0 + k, 340.0), det(440.0 - k, 380.0)]
+}
+
+#[test]
+fn two_targets_get_distinct_confirmed_ids() {
+    let (mut targeter, _rx, _s) = rig();
+    targeter.update(&pose(1000), &crossing(0)).unwrap();
+    let objs = targeter.update(&pose(1100), &crossing(1)).unwrap();
+    assert_eq!(objs.len(), 2);
+    assert!(objs.iter().all(|o| o.is_confirmed));
+    assert_ne!(objs[0].id, objs[1].id);
+}
