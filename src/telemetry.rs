@@ -83,6 +83,7 @@ pub struct TelemetryIngest {
     reset_threshold_ms: u64,
     latest_pose: Option<PlatformPose>,
     decode_errors: u64,
+    dropped_bytes: u64,
     last_decode_error: Option<RelayError>,
 }
 
@@ -102,6 +103,7 @@ impl TelemetryIngest {
             reset_threshold_ms: Self::DEFAULT_RESET_THRESHOLD_MS,
             latest_pose: None,
             decode_errors: 0,
+            dropped_bytes: 0,
             last_decode_error: None,
         }
     }
@@ -197,6 +199,16 @@ impl TelemetryIngest {
     fn record_decode_error(&mut self, msg: String) {
         self.decode_errors = self.decode_errors.saturating_add(1);
         self.last_decode_error = Some(RelayError::DecodeError(msg));
+    }
+}
+
+impl TelemetryIngest {
+    pub fn buffered_len(&self) -> usize {
+        self.rx_buf.len()
+    }
+
+    pub fn dropped_bytes(&self) -> u64 {
+        self.dropped_bytes
     }
 }
 
