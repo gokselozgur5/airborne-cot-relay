@@ -15,11 +15,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: gokselozgur5/stm32-navcore
-          path: stm32-navcore
+          path: ../stm32-navcore
       - uses: actions/checkout@v4
         with:
           repository: gokselozgur5/sightline-cot
-          path: sightline-cot
+          path: ../sightline-cot
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
