@@ -32,3 +32,9 @@ impl PlatformPose {
         }
     }
 }
+
+impl PlatformPose {
+    pub fn is_stale(&self, now_ms: u64, max_age_ms: u64) -> bool {
+        now_ms.saturating_sub(self.timestamp_ms) > max_age_ms
+    }
+}
