@@ -88,3 +88,27 @@ fn datagram_count_matches_confirmed_tracks() {
     }
     assert!(rx.recv(&mut [0u8; 8]).is_err());
 }
+
+fn attr(xml: &str, name: &str) -> String {
+    let key = format!(" {name}=\"");
+    let start = xml.find(&key).unwrap() + key.len();
+    let len = xml[start..].find('"').unwrap();
+    xml[start..start + len].to_string()
+}
+
+#[test]
+fn burst_event_times_never_decrease() {
+    let (mut t, rx, s) = rig();
+    for i in 0..60u64 {
+        let objs = t.update(&pose(1000 + i * 100), &burst_dets()).unwrap();
+        for o in objs.iter().filter(|o| o.is_confirmed) {
+            emit(&s, o, T0_MS + (i as i64) * 100);
+        }
+    }
+    let mut prev = String::new();
+    for _ in 0..59 * 4 {
+        let time = attr(&recv(&rx), "time");
+        assert!(time >= prev);
+        prev = time;
+    }
+}
