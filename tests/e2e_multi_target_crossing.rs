@@ -46,3 +46,24 @@ fn two_targets_get_distinct_confirmed_ids() {
     assert!(objs.iter().all(|o| o.is_confirmed));
     assert_ne!(objs[0].id, objs[1].id);
 }
+
+fn emit(s: &CotStreamer, o: &TrackedObject, now_ms: i64) {
+    let t = TrackSummary {
+        id: o.id,
+        classification: o.classification.clone(),
+        lat_deg: o.lat_deg,
+        lon_deg: o.lon_deg,
+        hae_m: o.hae_m,
+        ce90_m: o.ce90_m,
+        le90_m: 10.0,
+        course_deg: o.course_deg,
+        speed_mps: o.speed_mps,
+    };
+    s.send_track(&t, now_ms).unwrap();
+}
+
+fn recv(rx: &UdpSocket) -> String {
+    let mut buf = [0u8; 2048];
+    let n = rx.recv(&mut buf).unwrap();
+    String::from_utf8_lossy(&buf[..n]).into_owned()
+}
