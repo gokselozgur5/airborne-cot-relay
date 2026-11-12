@@ -61,3 +61,23 @@ fn targeter_accepts_empty_frame() {
         .expect("empty frame must not fail");
     assert!(tracks.is_empty());
 }
+
+#[test]
+fn cot_streamer_builds_event_with_track_uid() {
+    let streamer = CotStreamer::new("127.0.0.1:0", "127.0.0.1:6969", 5_000).expect("bind loopback");
+    assert_eq!(streamer.target_addr().port(), 6969);
+    let track = TrackSummary {
+        id: 7,
+        classification: "vehicle".into(),
+        lat_deg: 37.0,
+        lon_deg: -122.0,
+        hae_m: 0.0,
+        ce90_m: 5.0,
+        le90_m: 10.0,
+        course_deg: 90.0,
+        speed_mps: 12.0,
+    };
+    let xml = streamer.build_cot_xml(&track, 0);
+    assert!(xml.contains(r#"uid="TRACK-0007""#));
+    assert!(xml.contains(r#"type="a-f-G-E-V-C""#));
+}
