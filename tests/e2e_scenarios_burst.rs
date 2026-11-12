@@ -70,3 +70,21 @@ fn recv(rx: &UdpSocket) -> String {
     let n = rx.recv(&mut buf).unwrap();
     String::from_utf8_lossy(&buf[..n]).into_owned()
 }
+
+#[test]
+fn datagram_count_matches_confirmed_tracks() {
+    let (mut t, rx, s) = rig();
+    let mut sent = 0;
+    for i in 0..60u64 {
+        let objs = t.update(&pose(1000 + i * 100), &burst_dets()).unwrap();
+        for o in objs.iter().filter(|o| o.is_confirmed) {
+            emit(&s, o, T0_MS + (i as i64) * 100);
+            sent += 1;
+        }
+    }
+    assert_eq!(sent, 59 * 4);
+    for _ in 0..sent {
+        recv(&rx);
+    }
+    assert!(rx.recv(&mut [0u8; 8]).is_err());
+}
