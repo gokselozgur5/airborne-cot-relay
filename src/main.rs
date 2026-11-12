@@ -49,9 +49,16 @@ fn run_mission(mode: MissionMode) -> ExitCode {
 }
 
 fn main() -> ExitCode {
-    let mode = MissionMode::parse_args(env::args());
+    let mut args: Vec<String> = env::args().collect();
+    let dry_run = args.iter().any(|a| a == "--dry-run");
+    args.retain(|a| a != "--dry-run");
+    let mode = MissionMode::parse_args(args.into_iter());
     if mode != MissionMode::Version {
         print_banner();
+    }
+    if dry_run {
+        println!("dry-run: mode={}", format!("{mode:?}").to_lowercase());
+        return ExitCode::SUCCESS;
     }
     run_mission(mode)
 }
