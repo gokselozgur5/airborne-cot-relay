@@ -233,3 +233,12 @@ impl Targeter {
         enu_to_geodetic(enu, pose.lat_deg, pose.lon_deg, pose.hae_m)
     }
 }
+
+impl Targeter {
+    fn resolve_track_class(&self, id: u64) -> String {
+        self.class_map
+            .get(&id)
+            .cloned()
+            .unwrap_or_else(|| "unknown".into())
+    }
+}
