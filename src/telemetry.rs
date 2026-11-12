@@ -183,7 +183,19 @@ impl TelemetryIngest {
                 }
             }
         }
+        self.trim_buffer();
         poses
+    }
+
+    /// Upper bound for bytes kept while waiting for a frame delimiter.
+    pub const MAX_BUFFERED_BYTES: usize = 128;
+
+    fn trim_buffer(&mut self) {
+        let excess = self.rx_buf.len().saturating_sub(Self::MAX_BUFFERED_BYTES);
+        if excess > 0 {
+            self.rx_buf.drain(..excess);
+            self.dropped_bytes = self.dropped_bytes.saturating_add(excess as u64);
+        }
     }
 }
 
