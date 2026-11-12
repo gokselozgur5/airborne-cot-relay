@@ -76,8 +76,7 @@ impl TrackSummary {
             origin_hae,
         );
         let speed_mps = (track.x[2] * track.x[2] + track.x[3] * track.x[3]).sqrt();
-        let course_rad = track.x[0].atan2(track.x[1]);
-        let course_deg = (course_rad.to_degrees() + 360.0) % 360.0;
+        let course_deg = crate::bearing::course_deg(track.x[2], track.x[3]);
         let ce90_m = 2.146 * track.p[0][0].max(track.p[1][1]).sqrt();
         let le90_m = 10.0;
         Self {
