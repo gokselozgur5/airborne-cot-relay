@@ -252,6 +252,25 @@ impl CotSink for CotStreamer {
     }
 }
 
+/// Tracks consecutive send failures and flags a sink that needs reconnecting.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SendHealth {
+    max_consecutive_failures: u32,
+    consecutive_failures: u32,
+    total_failures: u64,
+}
+
+impl SendHealth {
+    /// Creates a tracker that requests a reconnect after the given failures.
+    pub fn new(max_consecutive_failures: u32) -> Self {
+        Self {
+            max_consecutive_failures: max_consecutive_failures.max(1),
+            consecutive_failures: 0,
+            total_failures: 0,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
