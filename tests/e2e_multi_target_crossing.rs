@@ -86,3 +86,17 @@ fn crossing_emits_two_datagrams_per_frame_with_two_uids() {
     }
     assert_eq!(uids.len(), 2);
 }
+
+#[test]
+fn targets_keep_opposite_east_velocity_after_crossing() {
+    let (mut targeter, _rx, _s) = rig();
+    let mut last = Vec::new();
+    for i in 0..21u64 {
+        last = targeter
+            .update(&pose(1000 + i * 100), &crossing(i))
+            .unwrap();
+    }
+    let east: Vec<f64> = last.iter().map(|o| o.velocity_enu[0]).collect();
+    assert!(east.iter().any(|v| *v > 1.0));
+    assert!(east.iter().any(|v| *v < -1.0));
+}
