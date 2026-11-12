@@ -222,3 +222,14 @@ impl Targeter {
         (2.146 * var_xy.max(0.0).sqrt()).max(1.0)
     }
 }
+
+impl Targeter {
+    fn resolve_track_geodetic(
+        &self,
+        trk: &sightline_cot::tracker::Track,
+        pose: &PlatformPose,
+    ) -> (f64, f64, f64) {
+        let enu = [trk.x[0], trk.x[1], self.ground_elevation_m - pose.hae_m];
+        enu_to_geodetic(enu, pose.lat_deg, pose.lon_deg, pose.hae_m)
+    }
+}
