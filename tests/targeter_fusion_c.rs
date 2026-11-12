@@ -21,3 +21,18 @@ fn detection(pixel_v: f64) -> TargetDetection {
         embedding: None,
     }
 }
+
+#[test]
+fn above_horizon_detection_does_not_drop_the_frame() {
+    let mut t = targeter();
+    let mut pose = PlatformPose::new(1000, 37.7749, -122.4194, 100.0, 0.0, 1.0, 0.0);
+    t.update(&pose, &[detection(500.0)])
+        .expect("update 1 failed");
+    pose.timestamp_ms += 100;
+    let tracks = t
+        .update(&pose, &[detection(500.0), detection(-2000.0)])
+        .expect("valid detection must still be fused");
+    assert_eq!(tracks.len(), 1);
+    assert_eq!(tracks[0].hits, 2);
+    assert!(tracks[0].is_confirmed);
+}
