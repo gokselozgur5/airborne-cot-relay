@@ -14,3 +14,17 @@ impl CotSink for ScriptedSink {
 fn io_err() -> Result<usize, RelayError> {
     Err(RelayError::IoError("link down".to_string()))
 }
+
+#[test]
+fn test_consecutive_failures_trigger_reconnect() {
+    let mut sink = ScriptedSink(vec![io_err(), Ok(3), io_err(), io_err()].into());
+    let mut health = SendHealth::new(2);
+    assert!(send_tracked(&mut sink, &mut health, b"cot").is_err());
+    assert!(!health.needs_reconnect());
+    assert_eq!(send_tracked(&mut sink, &mut health, b"cot").unwrap(), 3);
+    assert_eq!(health.failures(), (0, 1));
+    assert!(send_tracked(&mut sink, &mut health, b"cot").is_err());
+    assert!(send_tracked(&mut sink, &mut health, b"cot").is_err());
+    assert!(health.needs_reconnect());
+    assert_eq!(health.failures(), (2, 3));
+}
