@@ -39,3 +39,29 @@ impl Metrics {
     }
 }
 
+impl Metrics {
+    pub fn add_reconnect(&self) {
+        bump(&self.reconnects, 1);
+    }
+
+    /// Counts one sent packet and records when it happened.
+    pub fn record_sent(&self, now_ms: u64) {
+        bump(&self.sent, 1);
+        // Stored offset by one so that zero means "never sent".
+        self.last_send
+            .store(now_ms.saturating_add(1), Ordering::Relaxed);
+    }
+
+    pub fn set_queue_depth(&self, depth: u64) {
+        self.queue_depth.store(depth, Ordering::Relaxed);
+    }
+
+    /// Milliseconds since the last send, or `None` if nothing was sent.
+    pub fn last_send_age_ms(&self, now_ms: u64) -> Option<u64> {
+        match self.last_send.load(Ordering::Relaxed) {
+            0 => None,
+            stored => Some(now_ms.saturating_sub(stored - 1)),
+        }
+    }
+}
+
