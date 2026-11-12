@@ -105,6 +105,28 @@ pub enum DropPolicy {
     DropNewest,
 }
 
+/// Fixed-capacity FIFO that never grows past its capacity.
+#[derive(Debug)]
+pub struct BoundedQueue<T> {
+    items: std::collections::VecDeque<T>,
+    capacity: usize,
+    policy: DropPolicy,
+    dropped: u64,
+}
+
+impl<T> BoundedQueue<T> {
+    /// Creates a queue holding at most `capacity` items, minimum one.
+    pub fn new(capacity: usize, policy: DropPolicy) -> Self {
+        let capacity = capacity.max(1);
+        Self {
+            items: std::collections::VecDeque::with_capacity(capacity),
+            capacity,
+            policy,
+            dropped: 0,
+        }
+    }
+}
+
 pub struct CotStreamer {
     socket: UdpSocket,
     target_addr: SocketAddr,
