@@ -131,3 +131,19 @@ impl CotStreamer {
         self.target_addr
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sightline_cot::cot::CotEvent;
+
+    #[test]
+    fn test_classification_mapping() {
+        assert_eq!(classification_to_cot_type("vehicle"), "a-f-G-E-V-C");
+        assert_eq!(classification_to_cot_type("Car"), "a-f-G-E-V-C");
+        assert_eq!(classification_to_cot_type("truck"), "a-f-G-E-V-C");
+        assert_eq!(classification_to_cot_type("person"), "a-f-G-E-S");
+        assert_eq!(classification_to_cot_type("pedestrian"), "a-f-G-E-S");
+        assert_eq!(classification_to_cot_type("drone"), "a-f-A-M-F");
+        assert_eq!(classification_to_cot_type("unknown_object"), "a-u-G");
+    }
