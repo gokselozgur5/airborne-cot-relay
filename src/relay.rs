@@ -115,3 +115,19 @@ impl CotStreamer {
             track.speed_mps,
         )
     }
+
+    pub fn send_track(&self, track: &TrackSummary, now_ms: i64) -> Result<usize, RelayError> {
+        let xml = self.build_cot_xml(track, now_ms);
+        self.send_xml(&xml)
+    }
+
+    pub fn send_xml(&self, xml: &str) -> Result<usize, RelayError> {
+        self.socket
+            .send_to(xml.as_bytes(), self.target_addr)
+            .map_err(|e| RelayError::IoError(format!("UDP send failed: {e}")))
+    }
+
+    pub fn target_addr(&self) -> SocketAddr {
+        self.target_addr
+    }
+}
