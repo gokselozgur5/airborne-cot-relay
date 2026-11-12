@@ -160,3 +160,27 @@ mod test_geodetic {
         assert!((hae - 150.0).abs() < 1e-4);
     }
 }
+
+#[cfg(test)]
+mod test_stream {
+    use super::*;
+
+    #[test]
+    fn test_process_bytes_valid_frame() {
+        let mut ingest = TelemetryIngest::new(35.0, 139.0, 200.0, 5000);
+        let telem = NavTelemetry {
+            timestamp_ms: 5000,
+            pos_ned_m: [100.0, -50.0, -30.0],
+            vel_ned_mps: [15.0, 0.0, 0.0],
+            euler_rad: [0.05, -0.02, 0.8],
+            status: 1,
+        };
+        let mut buf = [0u8; 64];
+        let len = telem.pack_uart(&mut buf).unwrap();
+        let poses = ingest.process_bytes(&buf[..len]);
+        assert_eq!(poses.len(), 1);
+        assert_eq!(poses[0].timestamp_ms, 5000);
+        assert!(ingest.latest_pose().is_some());
+        assert!(!ingest.is_stale(6000));
+    }
+}
