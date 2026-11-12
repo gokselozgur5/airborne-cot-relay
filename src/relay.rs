@@ -49,6 +49,26 @@ impl TrackSummary {
     }
 }
 
+/// Bounded exponential backoff schedule for reconnect attempts.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Backoff {
+    base_ms: u64,
+    max_ms: u64,
+    attempt: u32,
+}
+
+impl Backoff {
+    /// Creates a schedule starting at `base_ms` and capped at `max_ms`.
+    pub fn new(base_ms: u64, max_ms: u64) -> Self {
+        let base_ms = base_ms.max(1);
+        Self {
+            base_ms,
+            max_ms: max_ms.max(base_ms),
+            attempt: 0,
+        }
+    }
+}
+
 pub fn classification_to_cot_type(classification: &str) -> &'static str {
     match classification.to_ascii_lowercase().as_str() {
         "vehicle" | "car" | "truck" => "a-f-G-E-V-C",
