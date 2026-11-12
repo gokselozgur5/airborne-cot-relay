@@ -162,6 +162,14 @@ impl Targeter {
     }
 }
 
+/// Fixed unit embedding for detections without appearance features.
+///
+/// The tracker always compares embeddings, and a zero vector scores as a
+/// non-match, so absent embeddings would only associate on raw box overlap.
+/// A shared unit vector makes the appearance check neutral, leaving the
+/// kinematic Mahalanobis gate to decide the association.
+const NEUTRAL_EMBEDDING: [f32; 8] = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+
 impl Targeter {
     fn build_detection(det: &TargetDetection, gi: &GroundIntersection) -> Detection {
         Detection {
@@ -176,7 +184,7 @@ impl Targeter {
                 x2: det.bbox.2,
                 y2: det.bbox.3,
             },
-            embedding: det.embedding.unwrap_or([0.0; 8]),
+            embedding: det.embedding.unwrap_or(NEUTRAL_EMBEDDING),
         }
     }
 }
