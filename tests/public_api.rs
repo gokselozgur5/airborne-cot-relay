@@ -47,3 +47,17 @@ fn telemetry_ingest_starts_without_pose() {
     assert!(ingest.latest_pose().is_none());
     assert!(ingest.process_bytes(&[]).is_empty());
 }
+
+use airborne_cot_relay::{
+    CotStreamer, GroundIntersection, TargetDetection, Targeter, TrackSummary, TrackedObject,
+};
+
+#[test]
+fn targeter_accepts_empty_frame() {
+    let mut targeter = Targeter::new(&CameraIntrinsics::default(), 0.0);
+    let pose = PlatformPose::new(1_000, 37.0, -122.0, 500.0, 0.0, 0.0, 0.0);
+    let tracks = targeter
+        .update(&pose, &[])
+        .expect("empty frame must not fail");
+    assert!(tracks.is_empty());
+}
