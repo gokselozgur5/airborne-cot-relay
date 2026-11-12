@@ -21,3 +21,11 @@ fn large_backward_jump_is_accepted_as_clock_reset() {
     ingest.process_bytes(&frame(500, 50.0));
     assert_eq!(ingest.latest_pose().unwrap().timestamp_ms, 500);
 }
+
+#[test]
+fn small_backward_step_is_ignored_as_reorder() {
+    let mut ingest = TelemetryIngest::new(35.0, 139.0, 200.0, 5000);
+    ingest.process_bytes(&frame(100_000, 10.0));
+    ingest.process_bytes(&frame(99_000, 50.0));
+    assert_eq!(ingest.latest_pose().unwrap().timestamp_ms, 100_000);
+}
