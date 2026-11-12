@@ -11,7 +11,10 @@ fn run(args: &[&str]) -> std::process::Output {
 fn version_flag_prints_package_version() {
     let out = run(&["--version"]);
     let text = String::from_utf8_lossy(&out.stdout);
-    assert_eq!(text.trim(), concat!("airborne-cot-relay ", env!("CARGO_PKG_VERSION")));
+    assert_eq!(
+        text.trim(),
+        concat!("airborne-cot-relay ", env!("CARGO_PKG_VERSION"))
+    );
 }
 
 #[test]
