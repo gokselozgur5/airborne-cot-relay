@@ -17,3 +17,11 @@ impl SimulatedPlatform {
         self.lon_deg += (d_east / (6378137.0 * lat_rad.cos())).to_degrees();
     }
 }
+
+#[derive(Debug)]
+pub struct GroundTarget {
+    pub id: u32,
+    pub lat_deg: f64,
+    pub lon_deg: f64,
+    pub speed_mps: f64,
+}
