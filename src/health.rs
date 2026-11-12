@@ -103,3 +103,11 @@ fn xml_escape(s: &str) -> String {
         .replace('"', "&quot;")
         .replace('\'', "&apos;")
 }
+
+/// Fields of a heartbeat event.
+pub struct Heartbeat<'a> {
+    pub uid: &'a str,
+    pub status: &'a str,
+    pub time: &'a str,
+    pub stale: &'a str,
+}
