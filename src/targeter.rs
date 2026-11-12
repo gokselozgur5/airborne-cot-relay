@@ -324,3 +324,23 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+mod tests_projection {
+    use super::tests::*;
+    use super::*;
+
+    #[test]
+    fn test_nadir_pixel_projection() {
+        let targeter = Targeter::new(&sample_intrinsics(), 0.0);
+        let pose = nadir_pose(100.0);
+        let pt = targeter
+            .project_pixel(500.0, 500.0, &pose)
+            .expect("projection failed");
+        assert!(pt.enu_m[0].abs() < 1e-4);
+        assert!(pt.enu_m[1].abs() < 1e-4);
+        assert_eq!(pt.hae_m.round() as i64, 0);
+        assert!((pt.lat_deg - pose.lat_deg).abs() < 1e-5);
+        assert!((pt.lon_deg - pose.lon_deg).abs() < 1e-5);
+    }
+}
