@@ -28,3 +28,12 @@ fn test_consecutive_failures_trigger_reconnect() {
     assert!(health.needs_reconnect());
     assert_eq!(health.failures(), (2, 3));
 }
+
+#[test]
+fn test_short_write_counts_as_failure() {
+    let mut sink = ScriptedSink(vec![Ok(2)].into());
+    let mut health = SendHealth::new(1);
+    let err = send_tracked(&mut sink, &mut health, b"cot").unwrap_err();
+    assert!(err.to_string().contains("short write: 2 of 3 bytes"));
+    assert!(health.needs_reconnect());
+}
