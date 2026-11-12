@@ -79,6 +79,7 @@ pub struct TelemetryIngest {
     origin_lon_deg: f64,
     origin_alt_m: f64,
     max_age_ms: u64,
+    reset_threshold_ms: u64,
     latest_pose: Option<PlatformPose>,
 }
 
@@ -95,12 +96,21 @@ impl TelemetryIngest {
             origin_lon_deg,
             origin_alt_m,
             max_age_ms,
+            reset_threshold_ms: Self::DEFAULT_RESET_THRESHOLD_MS,
             latest_pose: None,
         }
     }
 }
 
 impl TelemetryIngest {
+    /// Backward jumps larger than this are treated as a clock reset.
+    pub const DEFAULT_RESET_THRESHOLD_MS: u64 = 5000;
+
+    pub fn with_reset_threshold_ms(mut self, threshold_ms: u64) -> Self {
+        self.reset_threshold_ms = threshold_ms;
+        self
+    }
+
     pub fn latest_pose(&self) -> Option<PlatformPose> {
         self.latest_pose
     }
@@ -132,7 +142,9 @@ impl TelemetryIngest {
 impl TelemetryIngest {
     pub fn update_from_nav(&mut self, telem: &NavTelemetry) -> PlatformPose {
         if let Some(current) = self.latest_pose {
-            if (telem.timestamp_ms as u64) <= current.timestamp_ms {
+            let ts = telem.timestamp_ms as u64;
+            let is_reset = current.timestamp_ms.saturating_sub(ts) > self.reset_threshold_ms;
+            if ts <= current.timestamp_ms && !is_reset {
                 return current;
             }
         }
