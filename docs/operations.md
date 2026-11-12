@@ -18,3 +18,13 @@ This guide covers configuration, validation, errors and exit status for the `air
 | `camera.image_width` | `1280` |
 | `camera.image_height` | `720` |
 
+## Validation
+
+`RelayConfig::validate` checks three rules and returns `RelayError::InvalidConfig` for the first one that fails:
+
+1. `telemetry_listen_addr` must not be empty.
+2. `cot_broadcast_addr` must not be empty.
+3. `camera.focal_length_px` must be greater than zero.
+
+The check does not inspect the principal point, the image size, or the ground elevation. A focal length of `NaN` also passes, because `NaN <= 0.0` is false.
+
