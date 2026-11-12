@@ -46,3 +46,15 @@ fn crossing_targets_keep_two_stable_ids() {
         "ids per step: {steps:?}"
     );
 }
+
+#[test]
+fn target_moving_30_px_per_frame_stays_associated() {
+    let frames: Vec<_> = (0..10)
+        .map(|k| vec![det(300.0 + 30.0 * k as f64, 400.0, None)])
+        .collect();
+    let steps = ids_per_step(&frames);
+    assert!(
+        steps.iter().all(|ids| ids == &[1]),
+        "ids per step: {steps:?}"
+    );
+}
