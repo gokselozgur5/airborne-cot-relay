@@ -211,10 +211,26 @@ impl Targeter {
                 tracker_dets.push(Self::build_detection(d, &gi));
             }
         }
+        self.anchor_detections(pose, &mut tracker_dets);
         self.tracker
             .step(dt_s, &tracker_dets)
             .map_err(|e| RelayError::TargetingError(format!("tracker step error: {e}")))?;
         self.extract_tracked_objects(pose, detections)
+    }
+}
+
+impl Targeter {
+    /// Shift platform-relative detections into the frame anchored at the first pose.
+    fn anchor_detections(&mut self, pose: &PlatformPose, dets: &mut [Detection]) {
+        const EARTH_RADIUS_M: f64 = 6378137.0;
+        let (lat0, lon0) = *self.anchor_deg.get_or_insert((pose.lat_deg, pose.lon_deg));
+        let north = (pose.lat_deg - lat0).to_radians() * EARTH_RADIUS_M;
+        let east = (pose.lon_deg - lon0).to_radians() * EARTH_RADIUS_M * lat0.to_radians().cos();
+        self.frame_offset_m = [east, north];
+        for d in dets.iter_mut() {
+            d.east_m += east;
+            d.north_m += north;
+        }
     }
 }
 
