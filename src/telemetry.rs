@@ -47,3 +47,21 @@ pub struct TelemetryIngest {
     max_age_ms: u64,
     latest_pose: Option<PlatformPose>,
 }
+
+impl TelemetryIngest {
+    pub fn new(
+        origin_lat_deg: f64,
+        origin_lon_deg: f64,
+        origin_alt_m: f64,
+        max_age_ms: u64,
+    ) -> Self {
+        Self {
+            rx_buf: Vec::with_capacity(256),
+            origin_lat_deg,
+            origin_lon_deg,
+            origin_alt_m,
+            max_age_ms,
+            latest_pose: None,
+        }
+    }
+}
