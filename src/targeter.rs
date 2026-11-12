@@ -115,7 +115,12 @@ impl Targeter {
 }
 
 impl Targeter {
-    fn estimate_cov_ce_le(&self, cam_pose: &CameraPose, pixel_u: f64, pixel_v: f64) -> (f64, f64) {
+    fn estimate_cov_ce_le(
+        &self,
+        cam_pose: &CameraPose,
+        pixel_u: f64,
+        pixel_v: f64,
+    ) -> Result<(f64, f64), RelayError> {
         estimate_covariance_ce_le(
             &self.camera,
             cam_pose,
@@ -125,7 +130,7 @@ impl Targeter {
             1.0,
             0.01,
         )
-        .unwrap_or((5.0, 5.0))
+        .map_err(|e| RelayError::TargetingError(format!("covariance error: {e}")))
     }
 }
 
@@ -139,7 +144,7 @@ impl Targeter {
     ) -> Result<GroundIntersection, RelayError> {
         let cam_pose = Self::make_camera_pose(pose);
         let enu_pt = self.project_ray_to_enu(pixel_u, pixel_v, &cam_pose)?;
-        let (ce90, le90) = self.estimate_cov_ce_le(&cam_pose, pixel_u, pixel_v);
+        let (ce90, le90) = self.estimate_cov_ce_le(&cam_pose, pixel_u, pixel_v)?;
         let enu_rel = [enu_pt[0], enu_pt[1], enu_pt[2] - pose.hae_m];
         let (lat, lon, hae) = enu_to_geodetic(enu_rel, pose.lat_deg, pose.lon_deg, pose.hae_m);
         Ok(GroundIntersection {
