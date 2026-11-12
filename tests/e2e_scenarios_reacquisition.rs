@@ -103,3 +103,27 @@ fn cot_stops_during_gap_and_resumes_on_return() {
     assert_eq!(sent, 3 + 4);
     assert!(times.iter().all(|x| x.contains("uid=\"TRACK-")));
 }
+
+fn attr(xml: &str, name: &str) -> String {
+    let key = format!(" {name}=\"");
+    let start = xml.find(&key).unwrap() + key.len();
+    let len = xml[start..].find('"').unwrap();
+    xml[start..start + len].to_string()
+}
+
+#[test]
+fn event_times_follow_frame_order_across_reacquisition() {
+    let (mut t, rx, s) = rig();
+    for i in 0..16u64 {
+        let seen = !(4..11).contains(&i);
+        for o in frame(&mut t, i, seen).iter().filter(|o| o.is_confirmed) {
+            emit(&s, o, T0_MS + (i as i64) * 100);
+        }
+    }
+    let mut prev = String::new();
+    for _ in 0..7 {
+        let time = attr(&recv(&rx), "time");
+        assert!(time >= prev);
+        prev = time;
+    }
+}
