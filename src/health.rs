@@ -59,3 +59,14 @@ impl<T: TimeSource> HealthMonitor<T> {
         self.last_telemetry = Some(self.clock.now());
     }
 }
+
+impl<T: TimeSource> HealthMonitor<T> {
+    pub fn record_send(&mut self, ok: bool) {
+        if ok {
+            self.last_send = Some(self.clock.now());
+            self.failures = 0;
+        } else {
+            self.failures += 1;
+        }
+    }
+}
