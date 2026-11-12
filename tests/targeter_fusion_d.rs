@@ -36,3 +36,16 @@ fn ground_error_m(lat_deg: f64, lon_deg: f64) -> f64 {
     let east = (lon_deg - LON).to_radians() * R_M * LAT.to_radians().cos();
     north.hypot(east)
 }
+
+#[test]
+fn stationary_target_keeps_one_track_while_platform_moves() {
+    let mut t = targeter();
+    t.update(&pose_east_of_origin(0.0, 1000), &[detection(500.0)])
+        .expect("update 1 failed");
+    let tracks = t
+        .update(&pose_east_of_origin(10.0, 1100), &[detection(400.0)])
+        .expect("update 2 failed");
+    assert_eq!(tracks.len(), 1);
+    let err_m = ground_error_m(tracks[0].lat_deg, tracks[0].lon_deg);
+    assert!(err_m < 1.0, "track is {err_m} m from the target");
+}
