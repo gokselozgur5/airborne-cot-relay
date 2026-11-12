@@ -15,3 +15,8 @@ fn course(ve: f64, vn: f64) -> f64 {
 fn summary_course_follows_velocity_north() {
     assert!((course(0.0, 10.0) - 0.0).abs() < 1e-6);
 }
+
+#[test]
+fn summary_course_follows_velocity_east() {
+    assert!((course(10.0, 0.0) - 90.0).abs() < 1e-6);
+}
