@@ -44,6 +44,14 @@ pub struct TrackedObject {
     pub is_confirmed: bool,
 }
 
+/// Last measured image-space box centre and per-frame shift of one track.
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct BoxMotion {
+    center: (f64, f64),
+    frame: u64,
+    shift: (f64, f64),
+}
+
 /// Multi-target geospatial projection and tracking engine.
 pub struct Targeter {
     camera: Intrinsics,
