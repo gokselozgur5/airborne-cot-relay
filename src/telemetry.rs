@@ -38,3 +38,12 @@ impl PlatformPose {
         now_ms.saturating_sub(self.timestamp_ms) > max_age_ms
     }
 }
+
+pub struct TelemetryIngest {
+    rx_buf: Vec<u8>,
+    origin_lat_deg: f64,
+    origin_lon_deg: f64,
+    origin_alt_m: f64,
+    max_age_ms: u64,
+    latest_pose: Option<PlatformPose>,
+}
