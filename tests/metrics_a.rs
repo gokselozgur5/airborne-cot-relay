@@ -11,3 +11,12 @@ fn counters_saturate_at_max() {
     assert_eq!(s.packets_in, u64::MAX);
     assert_eq!(s.dropped, u64::MAX);
 }
+
+#[test]
+fn send_age_does_not_underflow() {
+    let m = Metrics::new();
+    m.record_sent(1_000);
+    assert_eq!(m.last_send_age_ms(500), Some(0));
+    m.record_sent(u64::MAX);
+    assert!(m.last_send_age_ms(u64::MAX).unwrap() <= 1);
+}
