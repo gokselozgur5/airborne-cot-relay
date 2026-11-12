@@ -21,6 +21,27 @@ impl Clock for SystemClock {
     }
 }
 
+/// Deterministic clock for tests; time only moves when advanced.
+#[derive(Debug, Default)]
+pub struct ManualClock {
+    now_ms: std::cell::Cell<i64>,
+}
+
+impl ManualClock {
+    /// Creates a clock frozen at `start_ms`.
+    pub fn new(start_ms: i64) -> Self {
+        Self {
+            now_ms: std::cell::Cell::new(start_ms),
+        }
+    }
+
+    /// Moves the clock forward by `delta_ms`.
+    pub fn advance_ms(&self, delta_ms: u64) {
+        let delta = i64::try_from(delta_ms).unwrap_or(i64::MAX);
+        self.now_ms.set(self.now_ms.get().saturating_add(delta));
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct TrackSummary {
     pub id: u64,
