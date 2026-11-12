@@ -344,3 +344,18 @@ mod tests_projection {
         assert!((pt.lon_deg - pose.lon_deg).abs() < 1e-5);
     }
 }
+
+#[cfg(test)]
+mod tests_horizon {
+    use super::tests::*;
+    use super::*;
+
+    #[test]
+    fn test_ray_above_horizon_error() {
+        let targeter = Targeter::new(&sample_intrinsics(), 0.0);
+        let mut pose = nadir_pose(100.0);
+        pose.pitch_rad = std::f64::consts::FRAC_PI_2;
+        let res = targeter.project_pixel(500.0, 500.0, &pose);
+        assert!(res.is_err());
+    }
+}
