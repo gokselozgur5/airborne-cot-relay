@@ -96,6 +96,15 @@ pub fn classification_to_cot_type(classification: &str) -> &'static str {
     }
 }
 
+/// What a full queue does with an incoming item.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DropPolicy {
+    /// Evict the oldest queued item to make room for the new one.
+    DropOldest,
+    /// Reject the incoming item and keep the queue unchanged.
+    DropNewest,
+}
+
 pub struct CotStreamer {
     socket: UdpSocket,
     target_addr: SocketAddr,
