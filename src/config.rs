@@ -104,3 +104,12 @@ mod tests {
         cfg2.camera.focal_length_px = 0.0;
         assert!(matches!(cfg2.validate(), Err(RelayError::InvalidConfig(_))));
     }
+
+    #[test]
+    fn test_error_display_formatting() {
+        let err = RelayError::InvalidConfig("bad address".into());
+        assert_eq!(format!("{err}"), "Invalid config: bad address");
+        let err_io = RelayError::IoError("network down".into());
+        assert_eq!(format!("{err_io}"), "IO error: network down");
+    }
+}
