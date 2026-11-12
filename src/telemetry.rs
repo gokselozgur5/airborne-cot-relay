@@ -78,3 +78,19 @@ impl TelemetryIngest {
         }
     }
 }
+
+impl TelemetryIngest {
+    pub fn ned_to_geodetic(&self, pos_ned: [f32; 3]) -> (f64, f64, f64) {
+        const METERS_PER_DEG_LAT: f64 = 111_132.92;
+        let lat = self.origin_lat_deg + (pos_ned[0] as f64) / METERS_PER_DEG_LAT;
+        let lat_rad = self.origin_lat_deg.to_radians();
+        let meters_per_deg_lon = METERS_PER_DEG_LAT * lat_rad.cos();
+        let lon = if meters_per_deg_lon.abs() > 1e-6 {
+            self.origin_lon_deg + (pos_ned[1] as f64) / meters_per_deg_lon
+        } else {
+            self.origin_lon_deg
+        };
+        let hae = self.origin_alt_m - (pos_ned[2] as f64);
+        (lat, lon, hae)
+    }
+}
