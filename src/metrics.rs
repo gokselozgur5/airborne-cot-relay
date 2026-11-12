@@ -18,7 +18,7 @@ fn bump(counter: &AtomicU64, n: u64) {
     while let Err(seen) = counter.compare_exchange_weak(
         cur,
         cur.saturating_add(n),
-        Ordering::Relaxed,
+        Ordering::AcqRel,
         Ordering::Relaxed,
     ) {
         cur = seen;
@@ -46,10 +46,11 @@ impl Metrics {
 impl Metrics {
     /// Counts one sent packet and records when it happened.
     pub fn record_sent(&self, now_ms: u64) {
-        bump(&self.sent, 1);
         // Stored offset by one so that zero means "never sent".
+        // Publish the timestamp first, keeping it monotonic, then count.
         self.last_send
-            .store(now_ms.saturating_add(1), Ordering::Relaxed);
+            .fetch_max(now_ms.saturating_add(1), Ordering::Relaxed);
+        bump(&self.sent, 1);
     }
 
     pub fn set_queue_depth(&self, depth: u64) {
@@ -78,10 +79,13 @@ pub struct Snapshot {
 
 impl Metrics {
     pub fn snapshot(&self, now_ms: u64) -> Snapshot {
+        // Read `sent` first with Acquire: a nonzero count then implies the
+        // matching timestamp is visible to the later `last_send` load.
+        let sent = self.sent.load(Ordering::Acquire);
         Snapshot {
             packets_in: self.packets_in.load(Ordering::Relaxed),
             dropped: self.dropped.load(Ordering::Relaxed),
-            sent: self.sent.load(Ordering::Relaxed),
+            sent,
             reconnects: self.reconnects.load(Ordering::Relaxed),
             queue_depth: self.queue_depth.load(Ordering::Relaxed),
             last_send_age_ms: self.last_send_age_ms(now_ms),
