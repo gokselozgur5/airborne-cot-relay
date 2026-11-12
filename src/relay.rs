@@ -57,3 +57,9 @@ pub fn classification_to_cot_type(classification: &str) -> &'static str {
         _ => "a-u-G",
     }
 }
+
+pub struct CotStreamer {
+    socket: UdpSocket,
+    target_addr: SocketAddr,
+    stale_timeout_ms: u64,
+}
