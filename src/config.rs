@@ -20,3 +20,12 @@ impl fmt::Display for RelayError {
 }
 
 impl std::error::Error for RelayError {}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct CameraIntrinsics {
+    pub focal_length_px: f64,
+    pub principal_u: f64,
+    pub principal_v: f64,
+    pub image_width: u32,
+    pub image_height: u32,
+}
