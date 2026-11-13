@@ -93,3 +93,23 @@ fn parse_key_value(s: &str, line: usize) -> Result<(&str, &str), LexerError> {
     }
     Ok((key, s[eq + 1..].trim()))
 }
+
+#[derive(Default)]
+struct LexerState {
+    sections: Vec<IniSection>,
+    seen: std::collections::HashSet<(String, String)>,
+    cur: Option<usize>,
+}
+
+impl LexerState {
+    fn set_section(&mut self, name: &str, line: usize) {
+        let idx = match self.sections.iter().position(|s| s.name == name) {
+            Some(i) => i,
+            None => {
+                self.sections.push(IniSection::new(name, line));
+                self.sections.len() - 1
+            }
+        };
+        self.cur = Some(idx);
+    }
+}
