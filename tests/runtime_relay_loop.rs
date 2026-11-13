@@ -89,3 +89,20 @@ fn build_loop(
         render,
     )
 }
+
+#[test]
+fn test_relay_loop_emits_cot_to_scripted_sink() {
+    let frames: Vec<_> = (0..5).map(|i| frame(1_000 + i * 100)).collect();
+    let batches: Vec<_> = (0..5).map(|_| vec![detection(640.0, 360.0)]).collect();
+    let mut rloop = build_loop(
+        frames,
+        batches,
+        RunLimit::iterations(5),
+        ShutdownSignal::new(),
+    );
+    let rep = rloop.run().unwrap();
+    assert!(rep.sent >= 1);
+    let payloads = &rloop.outbound().sink().0;
+    assert!(!payloads.is_empty());
+    assert!(payloads[0].starts_with("TRACK-"));
+}
