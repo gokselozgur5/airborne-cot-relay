@@ -41,3 +41,15 @@ fn test_duplicate_key_in_reopened_section_fails() {
     assert_eq!(err.line, 6);
     assert!(err.message.contains("duplicate key 'key1' in section 'relay'"));
 }
+
+#[test]
+fn test_invalid_headers_and_empty_keys() {
+    let unclosed = "[relay\nkey=1\n";
+    assert_eq!(ParsedIni::parse(unclosed).unwrap_err().line, 1);
+
+    let empty_sec = "[]\nkey=1\n";
+    assert_eq!(ParsedIni::parse(empty_sec).unwrap_err().line, 1);
+
+    let empty_key = "[relay]\n= value\n";
+    assert_eq!(ParsedIni::parse(empty_key).unwrap_err().line, 2);
+}
