@@ -25,3 +25,27 @@ impl Method {
         }
     }
 }
+/// Maximum accepted length of an HTTP request line in bytes.
+pub const MAX_REQUEST_LINE_BYTES: usize = 8192;
+
+/// Parsed HTTP/1.1 request line components.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RequestLine {
+    /// HTTP method requested.
+    pub method: Method,
+    /// Target request path.
+    pub path: String,
+    /// HTTP protocol version string.
+    pub version: String,
+}
+
+impl RequestLine {
+    /// Construct a new request line.
+    pub fn new(method: Method, path: impl Into<String>, version: impl Into<String>) -> Self {
+        Self {
+            method,
+            path: path.into(),
+            version: version.into(),
+        }
+    }
+}
