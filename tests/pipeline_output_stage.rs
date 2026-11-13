@@ -59,3 +59,18 @@ fn filtered_tracks_never_reach_the_sink() {
     assert_eq!(sink.payloads.len(), 1);
     assert_eq!(metrics.snapshot(5_000).sent, 1);
 }
+
+#[test]
+fn send_failures_feed_send_health() {
+    let (mut stage, metrics) = (stage(), Metrics::new());
+    let mut sink = ScriptedSink {
+        fail: true,
+        ..ScriptedSink::default()
+    };
+    assert_eq!(stage.emit(&mut sink, &metrics, &[track(1), track(2)]), 0);
+    assert!(!stage.health().needs_reconnect());
+    assert_eq!(stage.emit(&mut sink, &metrics, &[track(3)]), 0);
+    assert_eq!(stage.health().failures(), (3, 3));
+    assert!(stage.health().needs_reconnect());
+    assert_eq!(metrics.snapshot(5_000).sent, 0);
+}
