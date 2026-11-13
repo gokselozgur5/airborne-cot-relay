@@ -16,3 +16,12 @@ fn test_all_relay_and_camera_fields_set_from_file() {
     assert_eq!(res.camera.image_width, 1920);
     assert_eq!(res.camera.image_height, 1080);
 }
+
+#[test]
+fn test_unknown_key_in_relay_section_fails() {
+    let conf = "[relay]\nunknown_foo = 1\n";
+    let ini = ParsedIni::parse(conf).unwrap();
+    let err = map_relay_config(&ini, &RelayConfig::default()).unwrap_err();
+    let msg = err.to_string();
+    assert!(msg.contains("unknown key 'unknown_foo' in section 'relay'"));
+}
