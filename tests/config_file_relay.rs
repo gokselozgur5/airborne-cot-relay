@@ -34,3 +34,14 @@ fn test_unknown_key_in_camera_section_fails() {
     let msg = err.to_string();
     assert!(msg.contains("unknown key 'bad_param' in section 'camera'"));
 }
+
+#[test]
+fn test_invalid_numeric_values_and_validation() {
+    let conf1 = "[relay]\nground_elevation_m = abc\n";
+    let ini1 = ParsedIni::parse(conf1).unwrap();
+    assert!(map_relay_config(&ini1, &RelayConfig::default()).is_err());
+
+    let conf2 = "[camera]\nfocal_length_px = -10.0\n";
+    let ini2 = ParsedIni::parse(conf2).unwrap();
+    assert!(map_relay_config(&ini2, &RelayConfig::default()).is_err());
+}
