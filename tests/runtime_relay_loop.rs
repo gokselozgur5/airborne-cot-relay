@@ -55,3 +55,10 @@ fn build_filter_step() -> OutboundStep<ManualClock, ScriptedSink> {
     let filter = TrackFilter::new(cfg, ManualClock::new(1_000));
     OutboundStep::new(filter, ScriptedSink::default(), SendHealth::new(3))
 }
+
+fn default_pipeline() -> Pipeline {
+    let cfg = RelayConfig::default();
+    Pipeline::from_config(&cfg)
+        .unwrap()
+        .with_origin(35.0, 139.0, 0.0)
+}
