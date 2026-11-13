@@ -71,3 +71,29 @@ impl UdpMulticastSink {
         Self::bind(target, &UdpMulticastConfig::default())
     }
 }
+
+impl UdpMulticastSink {
+    pub fn target_addr(&self) -> SocketAddr {
+        self.target_addr
+    }
+
+    pub fn ttl(&self) -> u32 {
+        self.ttl
+    }
+
+    pub fn loopback(&self) -> bool {
+        self.loopback
+    }
+
+    pub fn socket(&self) -> &UdpSocket {
+        &self.socket
+    }
+}
+
+impl CotSink for UdpMulticastSink {
+    fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
+        self.socket
+            .send_to(payload, self.target_addr)
+            .map_err(RelayError::from)
+    }
+}
