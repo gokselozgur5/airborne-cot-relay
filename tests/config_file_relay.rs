@@ -25,3 +25,12 @@ fn test_unknown_key_in_relay_section_fails() {
     let msg = err.to_string();
     assert!(msg.contains("unknown key 'unknown_foo' in section 'relay'"));
 }
+
+#[test]
+fn test_unknown_key_in_camera_section_fails() {
+    let conf = "[camera]\nbad_param = 1\n";
+    let ini = ParsedIni::parse(conf).unwrap();
+    let err = map_relay_config(&ini, &RelayConfig::default()).unwrap_err();
+    let msg = err.to_string();
+    assert!(msg.contains("unknown key 'bad_param' in section 'camera'"));
+}
