@@ -12,3 +12,31 @@ pub enum PipelineEvent {
     /// A telemetry frame failed to decode.
     DecodeError { message: String },
 }
+
+/// Turns per-call observations into edge-triggered `PipelineEvent`s.
+#[derive(Debug)]
+pub struct EventTracker {
+    degrade_after: u32,
+    failures: u32,
+    degraded: bool,
+    telemetry_stale: bool,
+    pending: Vec<PipelineEvent>,
+}
+
+impl EventTracker {
+    /// Marks the sink degraded after `degrade_after` consecutive failures (at least 1).
+    pub fn new(degrade_after: u32) -> Self {
+        Self {
+            degrade_after: degrade_after.max(1),
+            failures: 0,
+            degraded: false,
+            telemetry_stale: false,
+            pending: Vec::new(),
+        }
+    }
+
+    /// Returns and clears the pending events in emission order.
+    pub fn drain(&mut self) -> Vec<PipelineEvent> {
+        std::mem::take(&mut self.pending)
+    }
+}
