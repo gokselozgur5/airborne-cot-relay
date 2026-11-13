@@ -24,3 +24,15 @@ impl Pipeline {
         }
     }
 }
+
+impl Pipeline {
+    /// Fuses `detections` with the latest pose decoded by the telemetry stage.
+    pub fn process_detections(
+        &mut self,
+        detections: &[TargetDetection],
+        now_ms: u64,
+    ) -> Result<Vec<TrackedObject>, RelayError> {
+        let pose = self.ingest.latest_pose();
+        self.fuse_detections(pose.as_ref(), detections, now_ms)
+    }
+}
