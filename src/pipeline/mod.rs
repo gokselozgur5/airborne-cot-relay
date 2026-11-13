@@ -49,3 +49,14 @@ impl Pipeline {
         &self.targeter
     }
 }
+
+impl Pipeline {
+    /// Replaces the telemetry NED origin used for geodetic conversion.
+    ///
+    /// Any buffered telemetry bytes and the latest pose are discarded.
+    pub fn with_origin(mut self, lat_deg: f64, lon_deg: f64, alt_m: f64) -> Self {
+        let max_age_ms = self.config.target_stale_timeout_ms;
+        self.ingest = TelemetryIngest::new(lat_deg, lon_deg, alt_m, max_age_ms);
+        self
+    }
+}
