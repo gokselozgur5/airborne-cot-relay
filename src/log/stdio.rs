@@ -18,3 +18,24 @@ fn level_color(level: Level) -> &'static str {
         Level::Trace => COLOR_MAGENTA,
     }
 }
+
+/// Formats a record into a human-readable log line.
+pub fn format_record(record: &Record<'_>, colored: bool) -> String {
+    let level_str = record.level.as_str().to_ascii_uppercase();
+    let level_formatted = if colored {
+        format!("{}{}{}", level_color(record.level), level_str, COLOR_RESET)
+    } else {
+        level_str
+    };
+    let mut out = format!(
+        "[{}] {} [{}] {}",
+        record.ts_ms, level_formatted, record.target, record.message
+    );
+    for (k, v) in record.fields {
+        out.push(' ');
+        out.push_str(k);
+        out.push('=');
+        out.push_str(v);
+    }
+    out
+}
