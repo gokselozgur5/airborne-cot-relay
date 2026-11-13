@@ -104,3 +104,13 @@ impl<T, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
         self.limit = limit;
     }
 }
+
+impl<T: TelemetrySource, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
+    /// Ingests one chunk of telemetry if available.
+    pub fn poll_telemetry(&mut self) -> Result<Option<usize>, RelayError> {
+        match self.telemetry.poll_chunk()? {
+            Some(chunk) => Ok(Some(self.pipeline.ingest_telemetry(&chunk).len())),
+            None => Ok(None),
+        }
+    }
+}
