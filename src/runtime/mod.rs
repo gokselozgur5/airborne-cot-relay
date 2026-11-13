@@ -1,5 +1,6 @@
 //! Process runtime primitives shared by long-running relay loops.
 
+pub mod reconnect;
 pub mod signal;
 pub mod sleep;
 
