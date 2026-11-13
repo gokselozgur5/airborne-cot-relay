@@ -49,3 +49,29 @@ impl RequestLine {
         }
     }
 }
+/// Errors encountered during HTTP request parsing.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum HttpError {
+    /// Request line exceeded MAX_REQUEST_LINE_BYTES.
+    OversizedRequestLine,
+    /// Request line was malformed or missing fields.
+    MalformedRequestLine(String),
+}
+
+impl HttpError {
+    /// Return the corresponding HTTP status code.
+    pub fn status_code(&self) -> u16 {
+        400
+    }
+}
+
+impl fmt::Display for HttpError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::OversizedRequestLine => write!(f, "request line exceeds maximum limit"),
+            Self::MalformedRequestLine(reason) => write!(f, "malformed request line: {reason}"),
+        }
+    }
+}
+
+impl std::error::Error for HttpError {}
