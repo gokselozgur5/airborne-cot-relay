@@ -86,3 +86,20 @@ fn test_logger_threshold_filtering() {
     logger.log(&dbg_rec);
     assert_eq!(logger.calls.load(Ordering::SeqCst), 1);
 }
+
+#[test]
+fn test_logger_reference_and_arc() {
+    let logger = Arc::new(TestLogger {
+        level: Level::Debug,
+        calls: AtomicUsize::new(0),
+    });
+    let rec = Record::new(1, Level::Debug, "tgt", "msg", &[]);
+
+    let logger_ref = &*logger;
+    assert!(logger_ref.enabled(Level::Debug));
+    logger_ref.log(&rec);
+
+    assert!(logger.enabled(Level::Debug));
+    logger.log(&rec);
+    assert_eq!(logger.calls.load(Ordering::SeqCst), 2);
+}
