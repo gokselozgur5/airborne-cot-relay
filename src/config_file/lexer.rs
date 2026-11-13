@@ -70,3 +70,26 @@ impl ParsedIni {
         self.sections.iter().flat_map(|s| s.entries.iter())
     }
 }
+
+fn parse_section_name(s: &str, line: usize) -> Result<String, LexerError> {
+    if !s.ends_with(']') {
+        return Err(LexerError { line, message: "unclosed section header".into() });
+    }
+    let name = s[1..s.len() - 1].trim();
+    if name.is_empty() {
+        return Err(LexerError { line, message: "empty section name".into() });
+    }
+    Ok(name.to_string())
+}
+
+fn parse_key_value(s: &str, line: usize) -> Result<(&str, &str), LexerError> {
+    let eq = s.find('=').ok_or_else(|| LexerError {
+        line,
+        message: "missing '=' in key-value pair".into(),
+    })?;
+    let key = s[..eq].trim();
+    if key.is_empty() {
+        return Err(LexerError { line, message: "empty key".into() });
+    }
+    Ok((key, s[eq + 1..].trim()))
+}
