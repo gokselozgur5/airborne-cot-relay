@@ -163,3 +163,19 @@ impl HttpResponse {
         Self::new(StatusCode::METHOD_NOT_ALLOWED, "Method Not Allowed\n", Some("text/plain"))
     }
 }
+impl HttpResponse {
+    /// Format response to HTTP/1.1 wire bytes.
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut out = Vec::new();
+        let code = self.status.0;
+        let reason = self.status.reason_phrase();
+        out.extend_from_slice(format!("HTTP/1.1 {code} {reason}\r\n").as_bytes());
+        if let Some(ct) = &self.content_type {
+            out.extend_from_slice(format!("Content-Type: {ct}\r\n").as_bytes());
+        }
+        out.extend_from_slice(format!("Content-Length: {}\r\n", self.body.len()).as_bytes());
+        out.extend_from_slice(b"Connection: close\r\n\r\n");
+        out.extend_from_slice(&self.body);
+        out
+    }
+}
