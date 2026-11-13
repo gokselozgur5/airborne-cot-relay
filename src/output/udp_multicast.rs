@@ -30,3 +30,12 @@ impl UdpMulticastConfig {
         self
     }
 }
+
+/// UDP multicast sink delivering payloads to a target address.
+#[derive(Debug)]
+pub struct UdpMulticastSink {
+    socket: UdpSocket,
+    target_addr: SocketAddr,
+    ttl: u32,
+    loopback: bool,
+}

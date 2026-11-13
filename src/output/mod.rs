@@ -2,4 +2,4 @@
 
 pub mod udp_multicast;
 
-pub use udp_multicast::UdpMulticastConfig;
+pub use udp_multicast::{UdpMulticastConfig, UdpMulticastSink};
