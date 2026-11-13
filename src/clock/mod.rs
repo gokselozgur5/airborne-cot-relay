@@ -81,3 +81,5 @@ impl ManualClock {
         self.now_ms.store(now_ms, Ordering::SeqCst);
     }
 }
+
+pub mod monotonic;
