@@ -13,6 +13,6 @@ impl From<std::io::Error> for RelayError {
     }
 }
 
+pub mod context;
 mod cot;
 pub mod exit;
-pub mod context;
