@@ -31,3 +31,14 @@ fn filter_accepts_shared_and_borrowed_clocks() {
     assert!(by_arc.accept("t1", 10.1, 20.1));
     assert!(by_ref.accept("t1", 10.1, 20.1));
 }
+
+fn read_unified<C: Clock>(clock: &C) -> u64 {
+    clock.now_ms()
+}
+
+#[test]
+fn legacy_manual_clock_implements_unified_trait() {
+    let legacy = track_filter::ManualClock::new(5);
+    legacy.advance(10);
+    assert_eq!(read_unified(&legacy), 15);
+}
