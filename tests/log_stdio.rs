@@ -6,7 +6,10 @@ fn test_format_record_uncolored() {
     let fields = [("key", "val"), ("mode", "live")];
     let record = Record::new(1234, Level::Info, "network", "client connected", &fields);
     let rendered = format_record(&record, false);
-    assert_eq!(rendered, "[1234] INFO [network] client connected key=val mode=live");
+    assert_eq!(
+        rendered,
+        "[1234] INFO [network] client connected key=val mode=live"
+    );
 }
 
 #[test]
