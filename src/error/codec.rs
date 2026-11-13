@@ -17,3 +17,9 @@ impl From<sightline_cot::mgrs::GridError> for RelayError {
         RelayError::DecodeError(format!("MGRS grid: {err:?}"))
     }
 }
+
+impl From<stm32_navcore::protocol::ProtocolError> for RelayError {
+    fn from(err: stm32_navcore::protocol::ProtocolError) -> Self {
+        RelayError::DecodeError(format!("navcore protocol: {err:?}"))
+    }
+}
