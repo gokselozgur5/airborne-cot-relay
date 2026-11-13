@@ -106,3 +106,14 @@ fn test_relay_loop_emits_cot_to_scripted_sink() {
     assert!(!payloads.is_empty());
     assert!(payloads[0].starts_with("TRACK-"));
 }
+
+#[test]
+fn test_relay_loop_exits_within_one_tick_after_shutdown() {
+    let shutdown = ShutdownSignal::new();
+    let frames: Vec<_> = (0..20).map(|i| frame(1_000 + i * 100)).collect();
+    let batches: Vec<_> = (0..20).map(|_| vec![detection(640.0, 360.0)]).collect();
+    let mut rloop = build_loop(frames, batches, RunLimit::unbounded(), shutdown.clone());
+    shutdown.trigger();
+    let rep = rloop.run().unwrap();
+    assert_eq!(rep.sent, 0);
+}
