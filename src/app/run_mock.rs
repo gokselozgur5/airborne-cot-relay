@@ -1,5 +1,5 @@
 //! Runs the mock mission through ingest, targeter, track filter and CoT output.
-use crate::app::mock_mission::MockStep;
+use crate::app::mock_mission::{generate, MockStep};
 use crate::config::{RelayConfig, RelayError};
 use crate::metrics::Metrics;
 use crate::relay::{Clock, CotStreamer, SystemClock, TrackSummary};
@@ -85,4 +85,10 @@ impl MockRelay {
         }
         sent
     }
+}
+
+/// Runs the full mock mission and returns the number of CoT events sent.
+pub fn run_mock(config: &RelayConfig, metrics: &Metrics) -> Result<u64, RelayError> {
+    let mut relay = MockRelay::new(config)?;
+    Ok(generate().iter().map(|s| relay.step(s, metrics)).sum())
 }
