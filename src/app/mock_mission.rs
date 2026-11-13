@@ -34,3 +34,17 @@ fn encode_frame(timestamp_ms: u32) -> Vec<u8> {
         .expect("finite mock frame fits the UART buffer");
     buf[..len].to_vec()
 }
+
+/// Detection of the single mock vehicle, drifting one pixel per tick.
+fn detection_at(tick: u32) -> TargetDetection {
+    let u = 340.0 + f64::from(tick);
+    let v = 360.0;
+    TargetDetection {
+        pixel_u: u,
+        pixel_v: v,
+        bbox: (u - 12.0, v - 8.0, u + 12.0, v + 8.0),
+        classification: "vehicle".into(),
+        confidence: 0.9,
+        embedding: None,
+    }
+}
