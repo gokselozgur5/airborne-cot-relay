@@ -32,3 +32,12 @@ fn message_is_non_empty_even_without_detail() {
         assert!(!err.to_string().trim().is_empty(), "{err:?}");
     }
 }
+
+#[test]
+fn every_variant_is_a_std_error_without_source() {
+    for (err, prefix) in all_variants("x") {
+        let boxed: Box<dyn std::error::Error> = Box::new(err);
+        assert!(boxed.source().is_none());
+        assert!(boxed.to_string().starts_with(prefix));
+    }
+}
