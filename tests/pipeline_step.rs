@@ -20,3 +20,27 @@ impl CotSink for Recorder {
         Ok(payload.len())
     }
 }
+
+fn track(id: u64, lat_deg: f64) -> TrackSummary {
+    TrackSummary {
+        id,
+        classification: "vehicle".into(),
+        lat_deg,
+        lon_deg: 139.0,
+        hae_m: 0.0,
+        ce90_m: 5.0,
+        le90_m: 10.0,
+        course_deg: 0.0,
+        speed_mps: 0.0,
+    }
+}
+
+fn queue_of(tracks: Vec<TrackSummary>) -> BoundedQueue<TrackSummary> {
+    let mut queue = BoundedQueue::new(8, DropPolicy::DropOldest);
+    tracks.into_iter().for_each(|t| drop(queue.push(t)));
+    queue
+}
+
+fn render(t: &TrackSummary, now_ms: u64) -> String {
+    format!("TRACK-{:04}@{now_ms}", t.id)
+}
