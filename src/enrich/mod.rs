@@ -2,6 +2,8 @@
 
 pub mod callsign;
 
+pub use callsign::{CallsignTemplate, CallsignTemplateError};
+
 use sightline_cot::cot::escape_xml_attr;
 
 /// Single child XML element inside a `<detail>` block.
