@@ -13,3 +13,8 @@ where
     config.validate()?;
     Ok(config)
 }
+
+/// Builds a validated config from the process environment.
+pub fn boot_config_from_env() -> Result<RelayConfig, RelayError> {
+    boot_config(|key| std::env::var(key).ok())
+}
