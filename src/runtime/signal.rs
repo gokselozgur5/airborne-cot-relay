@@ -43,4 +43,17 @@ mod imp {
             unsafe { (*target).store(true, Ordering::SeqCst) };
         }
     }
+
+    pub fn install(shutdown: &ShutdownSignal) -> Result<(), RelayError> {
+        let raw = Arc::into_raw(shutdown.shared_flag()) as *mut AtomicBool;
+        TARGET.store(raw, Ordering::SeqCst);
+        for signum in [SIGINT, SIGTERM] {
+            // SAFETY: on_signal only performs an atomic load and store.
+            if unsafe { signal(signum, on_signal) } == SIG_ERR {
+                let msg = format!("cannot install handler for signal {signum}");
+                return Err(RelayError::IoError(msg));
+            }
+        }
+        Ok(())
+    }
 }
