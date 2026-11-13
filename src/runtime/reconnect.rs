@@ -47,6 +47,7 @@ impl<S: Sleeper> ReconnectLoop<S> {
                     self.backoff.reset();
                     return Ok(value);
                 }
+                Err(err @ RelayError::InvalidConfig(_)) => return Err(err),
                 Err(err) if self.shutdown.is_triggered() => return Err(err),
                 Err(_) => {
                     let delay = self.backoff.next_delay_ms();
