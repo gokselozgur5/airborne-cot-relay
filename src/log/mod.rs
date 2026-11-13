@@ -99,3 +99,17 @@ impl<'a> Record<'a> {
         self.fields.iter().find(|(k, _)| *k == key).map(|(_, v)| *v)
     }
 }
+
+/// Trait for receiving structured log records.
+pub trait Logger: Send + Sync {
+    /// Returns the maximum enabled log level.
+    fn level(&self) -> Level;
+
+    /// Checks if a record with the given level would be logged.
+    fn enabled(&self, level: Level) -> bool {
+        level <= self.level()
+    }
+
+    /// Logs a record if its level is enabled.
+    fn log(&self, record: &Record<'_>);
+}
