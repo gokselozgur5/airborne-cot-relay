@@ -49,3 +49,12 @@ fn shutdown_returns_the_next_failure_without_sleeping() {
     assert_eq!(calls, 3);
     assert_eq!(reconnect.sleeper().slept().len(), 2);
 }
+
+#[test]
+fn invalid_config_is_returned_without_retrying() {
+    let mut reconnect = manual_loop(50, &ShutdownSignal::new());
+    let bad_port = || RelayError::InvalidConfig("bad port".into());
+    let result: Result<(), RelayError> = reconnect.run(|| Err(bad_port()));
+    assert_eq!(result, Err(bad_port()));
+    assert!(reconnect.sleeper().slept().is_empty());
+}
