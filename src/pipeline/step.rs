@@ -51,3 +51,32 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
         &self.health
     }
 }
+
+use crate::metrics::Metrics;
+use crate::relay::{send_tracked, TrackSummary};
+impl<C: Clock, S: CotSink> OutboundStep<C, S> {
+    /// Filters, renders and sends one track; `None` means the filter held it back.
+    fn send_one<F>(
+        &mut self,
+        track: &TrackSummary,
+        now_ms: u64,
+        metrics: &Metrics,
+        render: &mut F,
+    ) -> Option<bool>
+    where
+        F: FnMut(&TrackSummary, u64) -> String,
+    {
+        let uid = format!("TRACK-{:04}", track.id);
+        if !self.filter.accept(&uid, track.lat_deg, track.lon_deg) {
+            return None;
+        }
+        let xml = render(track, now_ms);
+        let ok = send_tracked(&mut self.sink, &mut self.health, xml.as_bytes()).is_ok();
+        if ok {
+            metrics.record_sent(now_ms);
+        } else {
+            metrics.add_dropped(1);
+        }
+        Some(ok)
+    }
+}
