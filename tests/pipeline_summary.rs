@@ -27,3 +27,18 @@ fn projection(le90_m: f64) -> GroundIntersection {
         enu_m: [0.0; 3],
     }
 }
+
+#[test]
+fn summary_copies_track_fields() {
+    let s = track_summary(&track(), &projection(7.5));
+    assert_eq!((s.id, s.classification.as_str()), (42, "vehicle"));
+    assert_eq!((s.lat_deg, s.lon_deg, s.hae_m), (35.1, 139.2, 12.5));
+    assert_eq!((s.speed_mps, s.course_deg), (5.0, 36.87));
+    assert_eq!(s.ce90_m, 4.25);
+}
+
+#[test]
+fn le90_comes_from_the_projection() {
+    assert_eq!(track_summary(&track(), &projection(7.5)).le90_m, 7.5);
+    assert_eq!(track_summary(&track(), &projection(2.0)).le90_m, 2.0);
+}
