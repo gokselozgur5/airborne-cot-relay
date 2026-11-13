@@ -67,3 +67,22 @@ fn test_record_fields_and_lookup() {
     assert_eq!(record.get_field("key1"), Some("val1"));
     assert_eq!(record.get_field("missing"), None);
 }
+
+#[test]
+fn test_logger_threshold_filtering() {
+    let logger = TestLogger {
+        level: Level::Info,
+        calls: AtomicUsize::new(0),
+    };
+    assert!(logger.enabled(Level::Error));
+    assert!(logger.enabled(Level::Warn));
+    assert!(logger.enabled(Level::Info));
+    assert!(!logger.enabled(Level::Debug));
+    assert!(!logger.enabled(Level::Trace));
+
+    let err_rec = Record::new(1, Level::Error, "tgt", "err", &[]);
+    let dbg_rec = Record::new(2, Level::Debug, "tgt", "dbg", &[]);
+    logger.log(&err_rec);
+    logger.log(&dbg_rec);
+    assert_eq!(logger.calls.load(Ordering::SeqCst), 1);
+}
