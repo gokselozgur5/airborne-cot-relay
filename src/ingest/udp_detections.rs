@@ -1,6 +1,7 @@
 //! Non-blocking UDP socket source for target detections.
 
 use crate::config::RelayError;
+use crate::targeter::TargetDetection;
 
 fn parse_f64(s: &str, field: &str) -> Result<f64, RelayError> {
     s.parse()
@@ -10,6 +11,28 @@ fn parse_f64(s: &str, field: &str) -> Result<f64, RelayError> {
 fn parse_f32(s: &str, field: &str) -> Result<f32, RelayError> {
     s.parse()
         .map_err(|e| RelayError::DecodeError(format!("{field}: {e}")))
+}
+
+pub fn parse_detection_line(line: &str) -> Result<TargetDetection, RelayError> {
+    let p: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+    let (u, v, x, y, w, h, c, q) = match p.len() {
+        8 => (p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]),
+        9 => (p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]),
+        _ => return Err(RelayError::DecodeError("invalid field count".into())),
+    };
+    Ok(TargetDetection {
+        pixel_u: parse_f64(u, "pixel_u")?,
+        pixel_v: parse_f64(v, "pixel_v")?,
+        bbox: (
+            parse_f64(x, "x")?,
+            parse_f64(y, "y")?,
+            parse_f64(w, "w")?,
+            parse_f64(h, "h")?,
+        ),
+        classification: c.to_string(),
+        confidence: parse_f32(q, "confidence")?,
+        embedding: None,
+    })
 }
 
 pub struct UdpDetectionSource;
