@@ -39,3 +39,20 @@ impl UdpBroadcastSink {
         UdpSocket::bind(bind_addr).map_err(RelayError::from)
     }
 }
+
+impl UdpBroadcastSink {
+    pub fn bind(target: SocketAddr, cfg: &UdpBroadcastConfig) -> Result<Self, RelayError> {
+        let socket = Self::bind_socket(target, cfg.outbound_interface)?;
+        socket.set_broadcast(true)?;
+        let broadcast = socket.broadcast().unwrap_or(true);
+        Ok(Self {
+            socket,
+            target_addr: target,
+            broadcast,
+        })
+    }
+
+    pub fn with_defaults(target: SocketAddr) -> Result<Self, RelayError> {
+        Self::bind(target, &UdpBroadcastConfig::default())
+    }
+}
