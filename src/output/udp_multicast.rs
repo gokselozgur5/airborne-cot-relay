@@ -1,6 +1,6 @@
-use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
 use crate::config::RelayError;
 use crate::relay::CotSink;
+use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
 
 /// Configuration options for UDP multicast egress.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -64,7 +64,12 @@ impl UdpMulticastSink {
         }
         let ttl = socket.multicast_ttl_v4().unwrap_or(1);
         let loopback = socket.multicast_loop_v4().unwrap_or(false);
-        Ok(Self { socket, target_addr: target, ttl, loopback })
+        Ok(Self {
+            socket,
+            target_addr: target,
+            ttl,
+            loopback,
+        })
     }
 
     pub fn with_defaults(target: SocketAddr) -> Result<Self, RelayError> {
