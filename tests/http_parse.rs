@@ -36,3 +36,26 @@ fn test_malformed_request_lines_return_400() {
         assert_eq!(err.status_code(), 400);
     }
 }
+
+use airborne_cot_relay::http::{HttpResponse, StatusCode};
+
+#[test]
+fn test_http_response_ok_serialization() {
+    let resp = HttpResponse::ok("prometheus_metrics 1\n", "text/plain");
+    let bytes = resp.to_bytes();
+    let text = String::from_utf8(bytes).expect("valid utf8");
+    assert!(text.starts_with("HTTP/1.1 200 OK\r\n"));
+    assert!(text.contains("Content-Type: text/plain\r\n"));
+    assert!(text.contains("Content-Length: 21\r\n"));
+    assert!(text.ends_with("\r\n\r\nprometheus_metrics 1\n"));
+}
+
+#[test]
+fn test_http_response_error_helpers() {
+    let bad = HttpResponse::bad_request("bad\n");
+    assert_eq!(bad.status, StatusCode::BAD_REQUEST);
+    let nf = HttpResponse::not_found();
+    assert_eq!(nf.status, StatusCode::NOT_FOUND);
+    let na = HttpResponse::method_not_allowed();
+    assert_eq!(na.status, StatusCode::METHOD_NOT_ALLOWED);
+}
