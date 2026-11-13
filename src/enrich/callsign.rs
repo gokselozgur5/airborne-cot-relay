@@ -7,14 +7,14 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CallsignTemplateError {
     UnknownPlaceholder(String),
-    UnclosedBrace(usize),
+    UnclosedBrace,
 }
 
 impl fmt::Display for CallsignTemplateError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::UnknownPlaceholder(p) => write!(f, "unknown placeholder: {{{p}}}"),
-            Self::UnclosedBrace(idx) => write!(f, "unclosed placeholder at index {idx}"),
+            Self::UnclosedBrace => write!(f, "unclosed placeholder brace"),
         }
     }
 }
@@ -51,7 +51,7 @@ impl CallsignTemplate {
                 tokens.push(TemplateToken::Literal(rest[..start].to_string()));
             }
             let after = &rest[start + 1..];
-            let end = after.find('}').ok_or(CallsignTemplateError::UnclosedBrace(start))?;
+            let end = after.find('}').ok_or(CallsignTemplateError::UnclosedBrace)?;
             let name = &after[..end];
             let token = match name {
                 "prefix" => TemplateToken::Prefix,

@@ -1,4 +1,4 @@
-use airborne_cot_relay::enrich::{CallsignTemplate, CotDetail};
+use airborne_cot_relay::enrich::{CallsignTemplate, CallsignTemplateError, CotDetail};
 
 #[test]
 fn test_callsign_template_default_formatting() {
@@ -12,4 +12,16 @@ fn test_callsign_template_default_formatting() {
     let mut detail = CotDetail::new();
     detail.add_element(contact);
     assert_eq!(detail.render(), "<detail><contact callsign=\"HAWK-vehicle-42\"/></detail>");
+}
+
+#[test]
+fn test_callsign_template_validation_errors() {
+    let err = CallsignTemplate::parse("{prefix}-{unknown}-{id}").unwrap_err();
+    assert_eq!(err, CallsignTemplateError::UnknownPlaceholder("unknown".to_string()));
+
+    let unclosed = CallsignTemplate::parse("{prefix}-{class").unwrap_err();
+    assert_eq!(unclosed, CallsignTemplateError::UnclosedBrace);
+
+    let custom = CallsignTemplate::parse("VIPER_{class}_{id}").unwrap();
+    assert_eq!(custom.format("UNUSED", "air", 7), "VIPER_air_7");
 }
