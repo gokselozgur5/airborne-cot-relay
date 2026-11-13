@@ -1,5 +1,8 @@
 //! Structured logging levels and logger traits.
 
+pub mod stdio;
+pub use stdio::{format_record, StdioLogger};
+
 use std::fmt;
 use std::str::FromStr;
 use std::sync::Arc;
