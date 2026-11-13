@@ -16,3 +16,15 @@ fn detections(n: usize) -> Vec<TargetDetection> {
     };
     vec![det; n]
 }
+
+fn pose(timestamp_ms: u64) -> PlatformPose {
+    PlatformPose {
+        timestamp_ms,
+        lat_deg: 35.0,
+        lon_deg: 139.0,
+        hae_m: 120.0,
+        roll_rad: 0.0,
+        pitch_rad: 0.0,
+        yaw_rad: 0.0,
+    }
+}
