@@ -65,3 +65,13 @@ impl FromStr for Level {
         }
     }
 }
+
+/// A structured log record with metadata, message, and key-value fields.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Record<'a> {
+    pub ts_ms: u64,
+    pub level: Level,
+    pub target: &'a str,
+    pub message: &'a str,
+    pub fields: &'a [(&'a str, &'a str)],
+}
