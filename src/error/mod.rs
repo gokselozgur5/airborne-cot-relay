@@ -15,3 +15,4 @@ impl From<std::io::Error> for RelayError {
 
 mod cot;
 pub mod exit;
+pub mod class;
