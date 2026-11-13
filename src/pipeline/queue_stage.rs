@@ -41,3 +41,20 @@ impl<T> QueueStage<T> {
         metrics.set_queue_depth(self.queue.len() as u64);
     }
 }
+
+impl<T> QueueStage<T> {
+    /// Number of queued events.
+    pub fn len(&self) -> usize {
+        self.queue.len()
+    }
+
+    /// True when no events are queued.
+    pub fn is_empty(&self) -> bool {
+        self.queue.is_empty()
+    }
+
+    /// Total overflow drops since the stage was created.
+    pub fn dropped(&self) -> u64 {
+        self.queue.dropped()
+    }
+}
