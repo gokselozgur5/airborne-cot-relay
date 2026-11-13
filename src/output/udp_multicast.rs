@@ -52,3 +52,22 @@ impl UdpMulticastSink {
         UdpSocket::bind(bind_addr).map_err(RelayError::from)
     }
 }
+
+impl UdpMulticastSink {
+    pub fn bind(target: SocketAddr, cfg: &UdpMulticastConfig) -> Result<Self, RelayError> {
+        let socket = Self::bind_socket(target, cfg.outbound_interface)?;
+        if let Some(ttl) = cfg.ttl {
+            socket.set_multicast_ttl_v4(ttl)?;
+        }
+        if let Some(loopback) = cfg.loopback {
+            socket.set_multicast_loop_v4(loopback)?;
+        }
+        let ttl = socket.multicast_ttl_v4().unwrap_or(1);
+        let loopback = socket.multicast_loop_v4().unwrap_or(false);
+        Ok(Self { socket, target_addr: target, ttl, loopback })
+    }
+
+    pub fn with_defaults(target: SocketAddr) -> Result<Self, RelayError> {
+        Self::bind(target, &UdpMulticastConfig::default())
+    }
+}
