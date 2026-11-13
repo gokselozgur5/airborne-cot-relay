@@ -40,3 +40,22 @@ impl EventTracker {
         std::mem::take(&mut self.pending)
     }
 }
+
+impl EventTracker {
+    /// Records one send result, emitting `SinkDegraded` or `SinkRecovered` on a transition.
+    pub fn record_send(&mut self, ok: bool) {
+        if ok {
+            self.failures = 0;
+            if std::mem::replace(&mut self.degraded, false) {
+                self.pending.push(PipelineEvent::SinkRecovered);
+            }
+            return;
+        }
+        self.failures = self.failures.saturating_add(1);
+        if !self.degraded && self.failures >= self.degrade_after {
+            self.degraded = true;
+            let failures = self.failures;
+            self.pending.push(PipelineEvent::SinkDegraded { failures });
+        }
+    }
+}
