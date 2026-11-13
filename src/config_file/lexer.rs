@@ -75,7 +75,9 @@ impl ParsedIni {
                 state.add_entry(k, v, line)?;
             }
         }
-        Ok(Self { sections: state.sections })
+        Ok(Self {
+            sections: state.sections,
+        })
     }
 
     pub fn section(&self, name: &str) -> Option<&IniSection> {
@@ -93,11 +95,17 @@ impl ParsedIni {
 
 fn parse_section_name(s: &str, line: usize) -> Result<String, LexerError> {
     if !s.ends_with(']') {
-        return Err(LexerError { line, message: "unclosed section header".into() });
+        return Err(LexerError {
+            line,
+            message: "unclosed section header".into(),
+        });
     }
     let name = s[1..s.len() - 1].trim();
     if name.is_empty() {
-        return Err(LexerError { line, message: "empty section name".into() });
+        return Err(LexerError {
+            line,
+            message: "empty section name".into(),
+        });
     }
     Ok(name.to_string())
 }
@@ -109,7 +117,10 @@ fn parse_key_value(s: &str, line: usize) -> Result<(&str, &str), LexerError> {
     })?;
     let key = s[..eq].trim();
     if key.is_empty() {
-        return Err(LexerError { line, message: "empty key".into() });
+        return Err(LexerError {
+            line,
+            message: "empty key".into(),
+        });
     }
     Ok((key, s[eq + 1..].trim()))
 }

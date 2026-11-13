@@ -31,7 +31,9 @@ fn test_duplicate_key_in_section_fails() {
     let input = "[relay]\nkey1 = a\nkey2 = b\nkey1 = c\n";
     let err = ParsedIni::parse(input).expect_err("duplicate key must fail");
     assert_eq!(err.line, 4);
-    assert!(err.message.contains("duplicate key 'key1' in section 'relay'"));
+    assert!(err
+        .message
+        .contains("duplicate key 'key1' in section 'relay'"));
 }
 
 #[test]
@@ -39,7 +41,9 @@ fn test_duplicate_key_in_reopened_section_fails() {
     let input = "[relay]\nkey1 = a\n[camera]\nkey2 = b\n[relay]\nkey1 = c\n";
     let err = ParsedIni::parse(input).expect_err("reopened duplicate must fail");
     assert_eq!(err.line, 6);
-    assert!(err.message.contains("duplicate key 'key1' in section 'relay'"));
+    assert!(err
+        .message
+        .contains("duplicate key 'key1' in section 'relay'"));
 }
 
 #[test]
