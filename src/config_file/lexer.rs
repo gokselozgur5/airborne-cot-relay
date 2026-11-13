@@ -33,3 +33,26 @@ pub struct IniSection {
     pub line: usize,
     pub entries: Vec<IniEntry>,
 }
+
+impl IniSection {
+    pub fn new(name: impl Into<String>, line: usize) -> Self {
+        Self {
+            name: name.into(),
+            line,
+            entries: Vec::new(),
+        }
+    }
+
+    pub fn get(&self, key: &str) -> Option<&str> {
+        self.entries
+            .iter()
+            .find(|e| e.key == key)
+            .map(|e| e.value.as_str())
+    }
+}
+
+/// A fully parsed INI document.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct ParsedIni {
+    pub sections: Vec<IniSection>,
+}
