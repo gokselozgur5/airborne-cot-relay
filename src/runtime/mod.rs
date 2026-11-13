@@ -26,4 +26,9 @@ impl ShutdownSignal {
     pub fn is_triggered(&self) -> bool {
         self.flag.load(Ordering::SeqCst)
     }
+
+    /// Returns the underlying flag for integrations that set it directly.
+    pub fn shared_flag(&self) -> Arc<AtomicBool> {
+        Arc::clone(&self.flag)
+    }
 }
