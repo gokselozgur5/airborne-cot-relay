@@ -48,3 +48,18 @@ fn detection_at(tick: u32) -> TargetDetection {
         embedding: None,
     }
 }
+
+/// Generates the full mission; every call returns the same sequence.
+pub fn generate() -> Vec<MockStep> {
+    let period_ms = 1000 / MOCK_RATE_HZ;
+    (0..MOCK_DURATION_S * MOCK_RATE_HZ)
+        .map(|tick| {
+            let ts = MOCK_START_MS + tick * period_ms;
+            MockStep {
+                timestamp_ms: u64::from(ts),
+                frame: encode_frame(ts),
+                detections: vec![detection_at(tick)],
+            }
+        })
+        .collect()
+}
