@@ -59,3 +59,22 @@ impl EventTracker {
         }
     }
 }
+
+use crate::config::RelayError;
+
+impl EventTracker {
+    /// Records the telemetry age, emitting `TelemetryStale` once per stale period.
+    pub fn record_telemetry_age(&mut self, age_ms: u64, stale_after_ms: u64) {
+        let stale = age_ms > stale_after_ms;
+        if stale && !self.telemetry_stale {
+            self.pending.push(PipelineEvent::TelemetryStale { age_ms });
+        }
+        self.telemetry_stale = stale;
+    }
+
+    /// Records one decode failure as a `DecodeError` event.
+    pub fn record_decode_error(&mut self, error: &RelayError) {
+        let message = error.to_string();
+        self.pending.push(PipelineEvent::DecodeError { message });
+    }
+}
