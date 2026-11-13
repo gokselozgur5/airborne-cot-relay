@@ -51,7 +51,9 @@ impl CallsignTemplate {
                 tokens.push(TemplateToken::Literal(rest[..start].to_string()));
             }
             let after = &rest[start + 1..];
-            let end = after.find('}').ok_or(CallsignTemplateError::UnclosedBrace)?;
+            let end = after
+                .find('}')
+                .ok_or(CallsignTemplateError::UnclosedBrace)?;
             let name = &after[..end];
             let token = match name {
                 "prefix" => TemplateToken::Prefix,
@@ -65,7 +67,10 @@ impl CallsignTemplate {
         if !rest.is_empty() {
             tokens.push(TemplateToken::Literal(rest.to_string()));
         }
-        Ok(Self { tokens, raw: template.to_string() })
+        Ok(Self {
+            tokens,
+            raw: template.to_string(),
+        })
     }
 
     /// Formats callsign from prefix, class, and track id.
