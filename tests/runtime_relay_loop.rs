@@ -117,3 +117,20 @@ fn test_relay_loop_exits_within_one_tick_after_shutdown() {
     let rep = rloop.run().unwrap();
     assert_eq!(rep.sent, 0);
 }
+
+#[test]
+fn test_relay_loop_stops_on_iteration_limit() {
+    let frames: Vec<_> = (0..10).map(|i| frame(1_000 + i * 100)).collect();
+    let batches: Vec<_> = (0..10).map(|_| vec![detection(640.0, 360.0)]).collect();
+    let mut rloop = build_loop(
+        frames,
+        batches,
+        RunLimit::iterations(3),
+        ShutdownSignal::new(),
+    );
+    let _ = rloop.run().unwrap();
+    assert_eq!(
+        rloop.telemetry_mut().poll_chunk().unwrap(),
+        Some(frame(1_300))
+    );
+}
