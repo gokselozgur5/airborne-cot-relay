@@ -43,3 +43,13 @@ fn stale_telemetry_emits_once_until_fresh_again() {
     let expected = [2_500, 3_000].map(|age_ms| PipelineEvent::TelemetryStale { age_ms });
     assert_eq!(events, expected);
 }
+
+#[test]
+fn decode_error_carries_the_error_text() {
+    let mut tracker = EventTracker::new(3);
+    tracker.record_decode_error(&RelayError::DecodeError("bad crc".into()));
+    let events = tracker.drain();
+    assert!(
+        matches!(&events[..], [PipelineEvent::DecodeError { message }] if message.contains("bad crc"))
+    );
+}
