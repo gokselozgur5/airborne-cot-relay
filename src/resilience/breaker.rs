@@ -46,3 +46,30 @@ pub struct CircuitBreaker<C> {
     rejected_count: u64,
     probe_in_flight: bool,
 }
+
+impl<C: Clock> CircuitBreaker<C> {
+    pub fn new(config: BreakerConfig, clock: C) -> Self {
+        Self {
+            config,
+            clock,
+            consecutive_failures: 0,
+            opened_at_ms: 0,
+            rejected_count: 0,
+            probe_in_flight: false,
+        }
+    }
+
+    pub fn rejected_count(&self) -> u64 {
+        self.rejected_count
+    }
+
+    pub fn state(&self) -> CircuitState {
+        if self.consecutive_failures < self.config.failure_threshold {
+            CircuitState::Closed
+        } else if self.clock.now_ms().saturating_sub(self.opened_at_ms) >= self.config.cooldown_ms {
+            CircuitState::HalfOpen
+        } else {
+            CircuitState::Open
+        }
+    }
+}
