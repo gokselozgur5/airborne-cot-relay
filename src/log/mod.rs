@@ -38,3 +38,30 @@ impl Level {
         }
     }
 }
+
+impl fmt::Display for Level {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl FromStr for Level {
+    type Err = ParseLevelError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let trimmed = s.trim();
+        if trimmed.eq_ignore_ascii_case("error") {
+            Ok(Self::Error)
+        } else if trimmed.eq_ignore_ascii_case("warn") || trimmed.eq_ignore_ascii_case("warning") {
+            Ok(Self::Warn)
+        } else if trimmed.eq_ignore_ascii_case("info") {
+            Ok(Self::Info)
+        } else if trimmed.eq_ignore_ascii_case("debug") {
+            Ok(Self::Debug)
+        } else if trimmed.eq_ignore_ascii_case("trace") {
+            Ok(Self::Trace)
+        } else {
+            Err(ParseLevelError(s.to_string()))
+        }
+    }
+}
