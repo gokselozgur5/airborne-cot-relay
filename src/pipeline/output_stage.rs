@@ -25,3 +25,15 @@ impl<C: Clock> OutputStage<C> {
         }
     }
 }
+
+impl<C: Clock> OutputStage<C> {
+    /// Send health fed by every send result.
+    pub fn health(&self) -> &SendHealth {
+        &self.health
+    }
+
+    /// Track filter deciding which tracks are sent.
+    pub fn filter(&self) -> &TrackFilter<C> {
+        &self.filter
+    }
+}
