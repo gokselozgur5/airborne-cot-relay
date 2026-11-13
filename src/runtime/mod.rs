@@ -10,3 +10,20 @@ use std::sync::Arc;
 pub struct ShutdownSignal {
     flag: Arc<AtomicBool>,
 }
+
+impl ShutdownSignal {
+    /// Creates a signal that has not been triggered.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Requests shutdown; every clone observes the request.
+    pub fn trigger(&self) {
+        self.flag.store(true, Ordering::SeqCst);
+    }
+
+    /// Returns true once any clone has called `trigger`.
+    pub fn is_triggered(&self) -> bool {
+        self.flag.load(Ordering::SeqCst)
+    }
+}
