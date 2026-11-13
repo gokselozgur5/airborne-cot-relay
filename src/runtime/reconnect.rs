@@ -33,4 +33,26 @@ impl<S: Sleeper> ReconnectLoop<S> {
     pub fn sleeper(&self) -> &S {
         &self.sleeper
     }
+
+    /// Calls `connect` until it succeeds or shutdown is requested.
+    ///
+    /// Success resets the backoff; after shutdown the last error is returned.
+    pub fn run<T, F>(&mut self, mut connect: F) -> Result<T, RelayError>
+    where
+        F: FnMut() -> Result<T, RelayError>,
+    {
+        loop {
+            match connect() {
+                Ok(value) => {
+                    self.backoff.reset();
+                    return Ok(value);
+                }
+                Err(err) if self.shutdown.is_triggered() => return Err(err),
+                Err(_) => {
+                    let delay = self.backoff.next_delay_ms();
+                    self.sleeper.sleep(Duration::from_millis(delay));
+                }
+            }
+        }
+    }
 }
