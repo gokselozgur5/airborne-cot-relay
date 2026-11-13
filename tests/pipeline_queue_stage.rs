@@ -21,3 +21,25 @@ fn drop_oldest_keeps_newest_and_counts_overflow() {
     assert_eq!(metrics.snapshot(0).dropped, 2);
     assert_eq!(drain(&mut stage, &metrics), vec![2, 3, 4]);
 }
+
+#[test]
+fn drop_newest_keeps_oldest_and_counts_overflow() {
+    let metrics = Metrics::new();
+    let mut stage = QueueStage::new(2, DropPolicy::DropNewest);
+    fill(&mut stage, &metrics, 4);
+    assert_eq!(metrics.snapshot(0).dropped, 2);
+    assert_eq!(drain(&mut stage, &metrics), vec![0, 1]);
+}
+
+#[test]
+fn depth_gauge_follows_push_and_pop() {
+    let metrics = Metrics::new();
+    let mut stage = QueueStage::new(4, DropPolicy::DropOldest);
+    fill(&mut stage, &metrics, 3);
+    assert_eq!(metrics.snapshot(0).queue_depth, 3);
+    stage.pop(&metrics);
+    assert_eq!(metrics.snapshot(0).queue_depth, 2);
+    drain(&mut stage, &metrics);
+    assert!(stage.is_empty());
+    assert_eq!(metrics.snapshot(0).queue_depth, 0);
+}
