@@ -30,7 +30,12 @@ fn test_oversized_request_line_returns_400() {
 
 #[test]
 fn test_malformed_request_lines_return_400() {
-    let bad_lines = ["GET /metrics", "GET metrics HTTP/1.1", "GET /metrics FTP/1.0", ""];
+    let bad_lines = [
+        "GET /metrics",
+        "GET metrics HTTP/1.1",
+        "GET /metrics FTP/1.0",
+        "",
+    ];
     for line in bad_lines {
         let err = parse_request_line(line).unwrap_err();
         assert_eq!(err.status_code(), 400);

@@ -90,10 +90,14 @@ pub fn parse_request_line(raw: &str) -> Result<RequestLine, HttpError> {
         return Err(HttpError::MalformedRequestLine("empty token".into()));
     }
     if !path.starts_with('/') {
-        return Err(HttpError::MalformedRequestLine("path must start with /".into()));
+        return Err(HttpError::MalformedRequestLine(
+            "path must start with /".into(),
+        ));
     }
     if !version.starts_with("HTTP/") {
-        return Err(HttpError::MalformedRequestLine("invalid version prefix".into()));
+        return Err(HttpError::MalformedRequestLine(
+            "invalid version prefix".into(),
+        ));
     }
     let method = Method::from_str_slice(method_raw);
     Ok(RequestLine::new(method, path, version))
@@ -160,7 +164,11 @@ impl HttpResponse {
 
     /// Helper for 405 Method Not Allowed.
     pub fn method_not_allowed() -> Self {
-        Self::new(StatusCode::METHOD_NOT_ALLOWED, "Method Not Allowed\n", Some("text/plain"))
+        Self::new(
+            StatusCode::METHOD_NOT_ALLOWED,
+            "Method Not Allowed\n",
+            Some("text/plain"),
+        )
     }
 }
 impl HttpResponse {
