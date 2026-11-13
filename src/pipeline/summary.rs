@@ -19,3 +19,19 @@ pub fn track_summary(track: &TrackedObject, projection: &GroundIntersection) -> 
         speed_mps: track.speed_mps,
     }
 }
+
+impl super::Pipeline {
+    /// Summarizes `tracks` with LE90 from the boresight projection at `pose`.
+    pub fn summarize_tracks(
+        &self,
+        tracks: &[TrackedObject],
+        pose: &crate::PlatformPose,
+    ) -> Result<Vec<TrackSummary>, crate::RelayError> {
+        let cam = &self.config.camera;
+        let boresight = self
+            .targeter
+            .project_pixel(cam.principal_u, cam.principal_v, pose)?;
+        let summarize = |t| track_summary(t, &boresight);
+        Ok(tracks.iter().map(summarize).collect())
+    }
+}
