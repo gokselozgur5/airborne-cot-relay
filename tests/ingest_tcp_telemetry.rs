@@ -20,3 +20,20 @@ fn test_tcp_telemetry_source_receives_loopback_bytes() {
     }
     panic!("timed out waiting for tcp chunk");
 }
+
+#[test]
+fn test_tcp_telemetry_source_peer_close_returns_io_error() {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let addr = listener.local_addr().unwrap();
+    let mut client = TcpTelemetrySource::connect(addr).unwrap();
+    let (server, _) = listener.accept().unwrap();
+    drop(server);
+    for _ in 0..50 {
+        match client.poll_chunk() {
+            Ok(None) => std::thread::sleep(Duration::from_millis(10)),
+            Ok(Some(_)) => panic!("unexpected data"),
+            Err(_) => return,
+        }
+    }
+    panic!("timed out waiting for peer close error");
+}
