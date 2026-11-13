@@ -50,3 +50,30 @@ impl<T, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
         }
     }
 }
+
+impl<T, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
+    /// Telemetry source reference.
+    pub fn telemetry(&self) -> &T {
+        &self.telemetry
+    }
+
+    /// Mutable telemetry source reference.
+    pub fn telemetry_mut(&mut self) -> &mut T {
+        &mut self.telemetry
+    }
+
+    /// Detection source reference.
+    pub fn detections(&self) -> &D {
+        &self.detections
+    }
+
+    /// Mutable detection source reference.
+    pub fn detections_mut(&mut self) -> &mut D {
+        &mut self.detections
+    }
+
+    /// Pipeline reference.
+    pub fn pipeline(&self) -> &Pipeline {
+        &self.pipeline
+    }
+}
