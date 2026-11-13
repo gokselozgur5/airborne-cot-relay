@@ -15,10 +15,17 @@ pub(crate) fn apply_relay_section(c: &mut RelayConfig, sec: &IniSection) -> Resu
             }
             "target_stale_timeout_ms" => {
                 c.target_stale_timeout_ms = e.value.parse().map_err(|_| {
-                    RelayError::InvalidConfig(format!("invalid integer for relay.target_stale_timeout_ms: '{}'", e.value))
+                    RelayError::InvalidConfig(format!(
+                        "invalid integer for relay.target_stale_timeout_ms: '{}'",
+                        e.value
+                    ))
                 })?;
             }
-            k => return Err(RelayError::InvalidConfig(format!("unknown key '{k}' in section 'relay'"))),
+            k => {
+                return Err(RelayError::InvalidConfig(format!(
+                    "unknown key '{k}' in section 'relay'"
+                )))
+            }
         }
     }
     Ok(())
