@@ -1,3 +1,4 @@
+use airborne_cot_relay::app::config_boot::{boot_config_from_env, CONFIG_ERROR_EXIT};
 use std::env;
 use std::process::ExitCode;
 
@@ -90,5 +91,17 @@ fn main() -> ExitCode {
         println!("dry-run: mode={}", format!("{mode:?}").to_lowercase());
         return ExitCode::SUCCESS;
     }
+    if matches!(mode, MissionMode::Mock | MissionMode::Live) {
+        if let Err(code) = boot_or_exit() {
+            return code;
+        }
+    }
     run_mission(mode)
+}
+
+fn boot_or_exit() -> Result<airborne_cot_relay::RelayConfig, ExitCode> {
+    boot_config_from_env().map_err(|e| {
+        eprintln!("error: {e}");
+        ExitCode::from(CONFIG_ERROR_EXIT)
+    })
 }
