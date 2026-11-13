@@ -14,3 +14,13 @@ fn monitor_degrades_when_adapted_clock_advances() {
     clock.advance_ms(1);
     assert_eq!(monitor.status(), HealthStatus::Degraded);
 }
+
+#[test]
+fn monitor_goes_offline_with_shared_clock() {
+    let clock = Arc::new(ManualClock::new(0));
+    let adapter = HealthTimeAdapter(Arc::clone(&clock));
+    let mut monitor = HealthMonitor::new(adapter, HealthThresholds::default());
+    monitor.record_telemetry();
+    clock.advance_ms(10_000);
+    assert_eq!(monitor.status(), HealthStatus::Offline);
+}
