@@ -17,3 +17,11 @@ url = udp://127.0.0.1:8087
     assert_eq!(doc.get("relay", "stale_timeout_ms"), Some("5000"));
     assert_eq!(doc.get("output.udp1", "url"), Some("udp://127.0.0.1:8087"));
 }
+
+#[test]
+fn test_line_without_equals_fails_with_line_number() {
+    let input = "[relay]\nvalid = 1\ncorrupted_line\nanother = 2\n";
+    let err = ParsedIni::parse(input).expect_err("should fail");
+    assert_eq!(err.line, 3);
+    assert!(err.message.contains("missing '='"));
+}
