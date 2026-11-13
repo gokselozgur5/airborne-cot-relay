@@ -53,3 +53,20 @@ fn summary(o: &TrackedObject) -> TrackSummary {
         speed_mps: o.speed_mps,
     }
 }
+
+/// Feeds 20 frame and detection batches and queues every confirmed track.
+fn run_batches(queue: &mut BoundedQueue<TrackSummary>) {
+    let mut ingest = TelemetryIngest::new(35.0, 139.0, 0.0, 5_000);
+    let mut targeter = Targeter::with_params(&CameraIntrinsics::default(), 0.0, 2, 5, 1.0);
+    for i in 0..20u32 {
+        let pose = *ingest
+            .process_bytes(&frame(1_000 + i * 100))
+            .last()
+            .unwrap();
+        let tracks = targeter.update(&pose, &[detection(640.0, 360.0)]).unwrap();
+        tracks
+            .iter()
+            .filter(|o| o.is_confirmed)
+            .for_each(|o| drop(queue.push(summary(o))));
+    }
+}
