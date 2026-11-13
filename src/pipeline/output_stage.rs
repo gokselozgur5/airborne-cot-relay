@@ -59,3 +59,21 @@ impl<C: Clock> OutputStage<C> {
         sent
     }
 }
+
+impl<C: Clock> OutputStage<C> {
+    /// Sends every track the filter accepts and returns how many were sent.
+    ///
+    /// Successful sends increment `Metrics::sent`; every send result feeds
+    /// the stage `SendHealth`, and rejected tracks never reach the sink.
+    pub fn emit<S: CotSink>(
+        &mut self,
+        sink: &mut S,
+        metrics: &Metrics,
+        tracks: &[TrackSummary],
+    ) -> usize {
+        tracks
+            .iter()
+            .filter(|t| self.send_one(sink, metrics, t))
+            .count()
+    }
+}
