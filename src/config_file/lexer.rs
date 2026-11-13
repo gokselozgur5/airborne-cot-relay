@@ -112,4 +112,26 @@ impl LexerState {
         };
         self.cur = Some(idx);
     }
+
+    fn add_entry(&mut self, k: &str, v: &str, line: usize) -> Result<(), LexerError> {
+        let idx = self.cur.unwrap_or_else(|| {
+            self.sections.push(IniSection::new("", line));
+            self.sections.len() - 1
+        });
+        self.cur = Some(idx);
+        let sec = self.sections[idx].name.clone();
+        if !self.seen.insert((sec.clone(), k.to_string())) {
+            return Err(LexerError {
+                line,
+                message: format!("duplicate key '{k}' in section '{sec}'"),
+            });
+        }
+        self.sections[idx].entries.push(IniEntry {
+            section: sec,
+            key: k.into(),
+            value: v.into(),
+            line,
+        });
+        Ok(())
+    }
 }
