@@ -1,6 +1,6 @@
 //! Maps `[relay]` and `[camera]` sections to a `RelayConfig`.
 
-use crate::config::{RelayConfig, RelayError};
+use crate::config::{CameraIntrinsics, RelayConfig, RelayError};
 use crate::config_file::lexer::IniSection;
 
 pub(crate) fn apply_relay_section(c: &mut RelayConfig, sec: &IniSection) -> Result<(), RelayError> {
@@ -34,4 +34,21 @@ fn parse_u32(sec: &str, key: &str, val: &str) -> Result<u32, RelayError> {
     val.parse().map_err(|_| {
         RelayError::InvalidConfig(format!("invalid integer for {sec}.{key}: '{val}'"))
     })
+}
+
+pub(crate) fn apply_camera_section(
+    c: &mut CameraIntrinsics,
+    sec: &IniSection,
+) -> Result<(), RelayError> {
+    for e in &sec.entries {
+        match e.key.as_str() {
+            "focal_length_px" => c.focal_length_px = parse_float("camera", &e.key, &e.value)?,
+            "principal_u" => c.principal_u = parse_float("camera", &e.key, &e.value)?,
+            "principal_v" => c.principal_v = parse_float("camera", &e.key, &e.value)?,
+            "image_width" => c.image_width = parse_u32("camera", &e.key, &e.value)?,
+            "image_height" => c.image_height = parse_u32("camera", &e.key, &e.value)?,
+            k => return Err(RelayError::InvalidConfig(format!("unknown key '{k}' in section 'camera'"))),
+        }
+    }
+    Ok(())
 }
