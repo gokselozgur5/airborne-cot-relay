@@ -77,3 +77,30 @@ impl<T, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
         &self.pipeline
     }
 }
+
+impl<T, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
+    /// Outbound step reference.
+    pub fn outbound(&self) -> &OutboundStep<C, S> {
+        &self.outbound
+    }
+
+    /// Queue reference.
+    pub fn queue(&self) -> &BoundedQueue<TrackSummary> {
+        &self.queue
+    }
+
+    /// Shutdown signal reference.
+    pub fn shutdown(&self) -> &ShutdownSignal {
+        &self.shutdown
+    }
+
+    /// Current run limit.
+    pub fn limit(&self) -> RunLimit {
+        self.limit
+    }
+
+    /// Updates the run limit.
+    pub fn set_limit(&mut self, limit: RunLimit) {
+        self.limit = limit;
+    }
+}
