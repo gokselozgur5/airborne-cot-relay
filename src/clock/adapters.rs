@@ -13,3 +13,13 @@ impl<C: Clock> crate::relay::Clock for RelayClockAdapter<C> {
         i64::try_from(self.0.now_ms()).unwrap_or(i64::MAX)
     }
 }
+
+/// Exposes a unified clock as a `health::TimeSource`.
+#[derive(Debug, Default, Clone, Copy)]
+pub struct HealthTimeAdapter<C>(pub C);
+
+impl<C: Clock> crate::health::TimeSource for HealthTimeAdapter<C> {
+    fn now(&self) -> std::time::Duration {
+        std::time::Duration::from_millis(self.0.now_ms())
+    }
+}
