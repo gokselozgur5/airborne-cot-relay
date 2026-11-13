@@ -1,4 +1,5 @@
 use airborne_cot_relay::app::config_boot::{boot_config_from_env, CONFIG_ERROR_EXIT};
+use airborne_cot_relay::app::exit::finish;
 use airborne_cot_relay::app::run_mock::run_mock;
 use std::env;
 use std::process::ExitCode;
@@ -112,16 +113,18 @@ fn boot_or_exit() -> Result<airborne_cot_relay::RelayConfig, ExitCode> {
 }
 
 fn run_mock_mode(config: &airborne_cot_relay::RelayConfig) -> ExitCode {
+    use airborne_cot_relay::relay::{Clock, SystemClock};
     println!("Starting simulated 60-second flight path...");
     let metrics = airborne_cot_relay::metrics::Metrics::new();
-    match run_mock(config, &metrics) {
-        Ok(sent) => {
-            println!("Sent {sent} CoT events to {}", config.cot_broadcast_addr);
-            ExitCode::SUCCESS
-        }
-        Err(e) => {
-            eprintln!("error: {e}");
-            ExitCode::FAILURE
-        }
+    let result = run_mock(config, &metrics);
+    if let Ok(sent) = &result {
+        println!("Sent {sent} CoT events to {}", config.cot_broadcast_addr);
     }
+    let now_ms = SystemClock.now_ms().max(0) as u64;
+    let outcome = finish(&result, &metrics.snapshot(now_ms));
+    print!("{}", outcome.stdout);
+    if let Some(err) = outcome.stderr {
+        eprintln!("{err}");
+    }
+    ExitCode::from(outcome.status)
 }
