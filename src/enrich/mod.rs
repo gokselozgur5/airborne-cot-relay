@@ -93,4 +93,27 @@ impl CotDetail {
         &self.elements
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.elements.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.elements.len()
+    }
+
+    /// Renders the complete <detail>...</detail> block.
+    pub fn render(&self) -> String {
+        let mut out = String::from("<detail>");
+        for el in &self.elements {
+            el.write_xml(&mut out);
+        }
+        out.push_str("</detail>");
+        out
+    }
+}
+
+impl std::fmt::Display for CotDetail {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.render())
+    }
 }
