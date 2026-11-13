@@ -18,3 +18,24 @@ fn frame(timestamp_ms: u32) -> Vec<u8> {
     let len = telem.pack_uart(&mut buf).unwrap();
     buf[..len].to_vec()
 }
+
+fn detection(u: f64, v: f64) -> TargetDetection {
+    TargetDetection {
+        pixel_u: u,
+        pixel_v: v,
+        bbox: (u - 10.0, v - 10.0, u + 10.0, v + 10.0),
+        classification: "vehicle".into(),
+        confidence: 0.9,
+        embedding: None,
+    }
+}
+
+#[derive(Default)]
+struct Recorder(Vec<String>);
+
+impl CotSink for Recorder {
+    fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
+        self.0.push(String::from_utf8(payload.to_vec()).unwrap());
+        Ok(payload.len())
+    }
+}
