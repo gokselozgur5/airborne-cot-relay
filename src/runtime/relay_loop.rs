@@ -158,3 +158,29 @@ where
         Ok(report)
     }
 }
+
+impl<T, D, C, S, R> RelayLoop<T, D, C, S, R>
+where
+    T: TelemetrySource,
+    D: DetectionSource,
+    C: Clock,
+    S: CotSink,
+    R: FnMut(&TrackSummary, u64) -> String,
+{
+    /// Loops until shutdown is triggered or RunLimit stops the loop.
+    pub fn run(&mut self) -> Result<StepReport, RelayError> {
+        let mut acc = StepReport::default();
+        while !self.shutdown.is_triggered() {
+            let adapter = RelayClockAdapter(&self.clock);
+            if !self.limit.should_continue(&adapter) {
+                break;
+            }
+            let r = self.step()?;
+            acc.sent += r.sent;
+            acc.failed += r.failed;
+            acc.filtered += r.filtered;
+            acc.evicted += r.evicted;
+        }
+        Ok(acc)
+    }
+}
