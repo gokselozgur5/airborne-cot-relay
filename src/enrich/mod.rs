@@ -50,4 +50,23 @@ impl DetailElement {
         &self.attributes
     }
 
+    pub(crate) fn write_xml(&self, out: &mut String) {
+        out.push('<');
+        out.push_str(&self.tag);
+        for (k, v) in &self.attributes {
+            out.push_str(&format!(" {k}=\"{}\"", escape_xml_attr(v)));
+        }
+        if self.text.is_none() && self.children.is_empty() {
+            out.push_str("/>");
+            return;
+        }
+        out.push('>');
+        if let Some(ref text) = self.text {
+            out.push_str(&escape_xml_attr(text));
+        }
+        for child in &self.children {
+            child.write_xml(out);
+        }
+        out.push_str(&format!("</{}>", self.tag));
+    }
 }
