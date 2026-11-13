@@ -92,3 +92,25 @@ pub fn run_mock(config: &RelayConfig, metrics: &Metrics) -> Result<u64, RelayErr
     let mut relay = MockRelay::new(config)?;
     Ok(generate().iter().map(|s| relay.step(s, metrics)).sum())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::net::UdpSocket;
+
+    #[test]
+    fn run_mock_sends_cot_to_loopback() {
+        let rx = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let config = RelayConfig {
+            cot_broadcast_addr: rx.local_addr().unwrap().to_string(),
+            ..RelayConfig::default()
+        };
+        let metrics = Metrics::new();
+        let sent = run_mock(&config, &metrics).unwrap();
+        assert!(sent >= 1);
+        let mut buf = [0u8; 2048];
+        let n = rx.recv(&mut buf).unwrap();
+        assert!(String::from_utf8_lossy(&buf[..n]).contains("uid=\"TRACK-"));
+        assert_eq!(metrics.snapshot(0).packets_in, 600);
+    }
+}
