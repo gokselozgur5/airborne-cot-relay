@@ -1,4 +1,5 @@
 //! Runs the mock mission through ingest, targeter, track filter and CoT output.
+use crate::app::mock_mission::MockStep;
 use crate::config::{RelayConfig, RelayError};
 use crate::metrics::Metrics;
 use crate::relay::{Clock, CotStreamer, SystemClock, TrackSummary};
@@ -59,5 +60,29 @@ impl MockRelay {
                 0
             }
         }
+    }
+}
+
+impl MockRelay {
+    /// Feeds one mission tick through the stages; returns the events sent.
+    fn step(&mut self, step: &MockStep, metrics: &Metrics) -> u64 {
+        metrics.add_packets_in(1);
+        let Some(pose) = self.ingest.process_bytes(&step.frame).pop() else {
+            metrics.add_dropped(1);
+            return 0;
+        };
+        self.filter.clock().set(step.timestamp_ms);
+        let Ok(tracks) = self.targeter.update(&pose, &step.detections) else {
+            metrics.add_dropped(1);
+            return 0;
+        };
+        let mut sent = 0;
+        for t in tracks.iter().filter(|t| t.is_confirmed) {
+            let uid = format!("TRACK-{:04}", t.id);
+            if self.filter.accept(&uid, t.lat_deg, t.lon_deg) {
+                sent += self.emit(t, metrics);
+            }
+        }
+        sent
     }
 }
