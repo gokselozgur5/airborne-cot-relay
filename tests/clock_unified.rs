@@ -17,3 +17,25 @@ fn manual_clock_observes_advance_and_set() {
     clock.set_ms(400);
     assert_eq!(clock.now_ms(), 400);
 }
+
+#[test]
+fn manual_clock_advance_is_seen_across_threads() {
+    let clock = Arc::new(ManualClock::new(0));
+    let other = Arc::clone(&clock);
+    std::thread::spawn(move || other.advance_ms(5))
+        .join()
+        .unwrap();
+    assert_eq!(clock.now_ms(), 5);
+}
+
+#[test]
+fn system_clock_never_decreases() {
+    let clock = SystemClock::default();
+    let mut prev = clock.now_ms();
+    for _ in 0..1000 {
+        let now = clock.now_ms();
+        assert!(now >= prev);
+        prev = now;
+    }
+    assert!(prev > 1_700_000_000_000);
+}
