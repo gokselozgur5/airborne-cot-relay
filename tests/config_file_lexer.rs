@@ -53,3 +53,12 @@ fn test_invalid_headers_and_empty_keys() {
     let empty_key = "[relay]\n= value\n";
     assert_eq!(ParsedIni::parse(empty_key).unwrap_err().line, 2);
 }
+
+#[test]
+fn test_root_entries_and_empty_values() {
+    let input = "top_level = hello\n[relay]\nempty_val = \n";
+    let doc = ParsedIni::parse(input).expect("parses");
+    assert_eq!(doc.get("", "top_level"), Some("hello"));
+    assert_eq!(doc.get("relay", "empty_val"), Some(""));
+    assert_eq!(doc.entries().count(), 2);
+}
