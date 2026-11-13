@@ -28,3 +28,21 @@ fn test_format_record_colored() {
     let dbg_rendered = format_record(&debug_rec, true);
     assert!(dbg_rendered.contains("\x1b[34mDEBUG\x1b[0m"));
 }
+
+#[test]
+fn test_stdio_logger_properties_and_filtering() {
+    let logger = StdioLogger::new(Level::Info, true);
+    assert_eq!(logger.level(), Level::Info);
+    assert!(logger.is_colored());
+    assert!(logger.enabled(Level::Error));
+    assert!(logger.enabled(Level::Info));
+    assert!(!logger.enabled(Level::Debug));
+
+    let record = Record::new(999, Level::Info, "app", "boot", &[]);
+    let formatted = logger.format(&record);
+    assert!(formatted.contains("\x1b[32mINFO\x1b[0m"));
+
+    logger.log(&record);
+    let debug_record = Record::new(1000, Level::Debug, "app", "hidden", &[]);
+    logger.log(&debug_record);
+}
