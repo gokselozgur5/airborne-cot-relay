@@ -34,4 +34,17 @@ impl RunLimit {
         let duration = i64::try_from(duration_ms).unwrap_or(i64::MAX);
         Self::Deadline(clock.now_ms().saturating_add(duration))
     }
+
+    /// Returns true if one more iteration may run, consuming it from a count limit.
+    pub fn should_continue(&mut self, clock: &impl Clock) -> bool {
+        match self {
+            Self::Unbounded => true,
+            Self::Iterations(0) => false,
+            Self::Iterations(remaining) => {
+                *remaining -= 1;
+                true
+            }
+            Self::Deadline(deadline_ms) => clock.now_ms() < *deadline_ms,
+        }
+    }
 }
