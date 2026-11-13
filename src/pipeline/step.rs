@@ -34,3 +34,20 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
         }
     }
 }
+
+impl<C: Clock, S: CotSink> OutboundStep<C, S> {
+    /// The rate and movement filter.
+    pub fn filter(&self) -> &TrackFilter<C> {
+        &self.filter
+    }
+
+    /// The sink tracks are sent to.
+    pub fn sink(&self) -> &S {
+        &self.sink
+    }
+
+    /// Consecutive and total send failures.
+    pub fn health(&self) -> &SendHealth {
+        &self.health
+    }
+}
