@@ -72,4 +72,31 @@ impl<C: Clock> CircuitBreaker<C> {
             CircuitState::Open
         }
     }
+
+    pub fn allow_request(&mut self) -> Result<(), BreakerError> {
+        match self.state() {
+            CircuitState::Closed => Ok(()),
+            CircuitState::HalfOpen if !self.probe_in_flight => {
+                self.probe_in_flight = true;
+                Ok(())
+            }
+            _ => {
+                self.rejected_count += 1;
+                Err(BreakerError)
+            }
+        }
+    }
+
+    pub fn record_success(&mut self) {
+        self.consecutive_failures = 0;
+        self.probe_in_flight = false;
+    }
+
+    pub fn record_failure(&mut self) {
+        if self.consecutive_failures < self.config.failure_threshold {
+            self.consecutive_failures += 1;
+        }
+        self.opened_at_ms = self.clock.now_ms();
+        self.probe_in_flight = false;
+    }
 }
