@@ -1,7 +1,9 @@
 //! Non-blocking UDP socket source for target detections.
 
 use crate::config::RelayError;
+use crate::runtime::source::DetectionSource;
 use crate::targeter::TargetDetection;
+use std::io::ErrorKind;
 use std::net::{SocketAddr, ToSocketAddrs, UdpSocket};
 
 fn parse_f64(s: &str, field: &str) -> Result<f64, RelayError> {
@@ -64,6 +66,10 @@ impl UdpDetectionSource {
     pub fn bad_lines(&self) -> u64 {
         self.bad_lines
     }
+
+    pub fn poll(&mut self) -> Result<Option<Vec<TargetDetection>>, RelayError> {
+        self.poll_batch()
+    }
 }
 
 pub fn parse_detection_lines(text: &str) -> (Vec<TargetDetection>, u64) {
@@ -79,4 +85,26 @@ pub fn parse_detection_lines(text: &str) -> (Vec<TargetDetection>, u64) {
         }
     }
     (batch, bad)
+}
+
+impl DetectionSource for UdpDetectionSource {
+    fn poll_batch(&mut self) -> Result<Option<Vec<TargetDetection>>, RelayError> {
+        let n = match self.socket.recv_from(&mut self.buffer) {
+            Ok((n, _)) => n,
+            Err(ref e) if e.kind() == ErrorKind::WouldBlock || e.kind() == ErrorKind::TimedOut => {
+                return Ok(None);
+            }
+            Err(e) => return Err(RelayError::from(e)),
+        };
+        let text = match std::str::from_utf8(&self.buffer[..n]) {
+            Ok(s) => s,
+            Err(_) => {
+                self.bad_lines += 1;
+                return Ok(Some(Vec::new()));
+            }
+        };
+        let (batch, bad) = parse_detection_lines(text);
+        self.bad_lines += bad;
+        Ok(Some(batch))
+    }
 }
