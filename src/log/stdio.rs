@@ -68,3 +68,15 @@ impl StdioLogger {
         format_record(record, self.colored)
     }
 }
+
+impl Logger for StdioLogger {
+    fn level(&self) -> Level {
+        self.level
+    }
+
+    fn log(&self, record: &Record<'_>) {
+        if self.enabled(record.level) {
+            eprintln!("{}", self.format(record));
+        }
+    }
+}
