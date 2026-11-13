@@ -4,3 +4,4 @@ pub mod lexer;
 pub mod map_relay;
 
 pub use lexer::{IniEntry, IniSection, LexerError, ParsedIni};
+pub use map_relay::map_relay_config;
