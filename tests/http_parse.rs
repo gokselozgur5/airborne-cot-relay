@@ -17,3 +17,22 @@ fn test_parse_with_crlf_and_other_paths() {
     assert_eq!(req.path, "/healthz");
     assert_eq!(req.version, "HTTP/1.1");
 }
+
+use airborne_cot_relay::http::{HttpError, MAX_REQUEST_LINE_BYTES};
+
+#[test]
+fn test_oversized_request_line_returns_400() {
+    let large = format!("GET /{} HTTP/1.1", "a".repeat(MAX_REQUEST_LINE_BYTES + 1));
+    let err = parse_request_line(&large).unwrap_err();
+    assert_eq!(err, HttpError::OversizedRequestLine);
+    assert_eq!(err.status_code(), 400);
+}
+
+#[test]
+fn test_malformed_request_lines_return_400() {
+    let bad_lines = ["GET /metrics", "GET metrics HTTP/1.1", "GET /metrics FTP/1.0", ""];
+    for line in bad_lines {
+        let err = parse_request_line(line).unwrap_err();
+        assert_eq!(err.status_code(), 400);
+    }
+}
