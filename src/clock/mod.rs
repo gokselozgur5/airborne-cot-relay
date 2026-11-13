@@ -39,3 +39,24 @@ impl Clock for SystemClock {
         prev.max(wall)
     }
 }
+
+/// Deterministic, thread-safe clock that only moves when told to.
+#[derive(Debug, Default)]
+pub struct ManualClock {
+    now_ms: AtomicU64,
+}
+
+impl ManualClock {
+    /// Creates a clock frozen at `start_ms`.
+    pub fn new(start_ms: u64) -> Self {
+        Self {
+            now_ms: AtomicU64::new(start_ms),
+        }
+    }
+}
+
+impl Clock for ManualClock {
+    fn now_ms(&self) -> u64 {
+        self.now_ms.load(Ordering::SeqCst)
+    }
+}
