@@ -32,3 +32,20 @@ fn three_failures_then_success_sleep_first_three_delays() {
     assert_eq!(reconnect.sleeper().slept(), expected);
     assert_eq!(reconnect.backoff().attempt(), 0);
 }
+
+#[test]
+fn shutdown_returns_the_next_failure_without_sleeping() {
+    let shutdown = ShutdownSignal::new();
+    let mut reconnect = manual_loop(50, &shutdown);
+    let mut calls = 0;
+    let result: Result<(), RelayError> = reconnect.run(|| {
+        calls += 1;
+        if calls == 3 {
+            shutdown.trigger();
+        }
+        Err(refused())
+    });
+    assert_eq!(result, Err(refused()));
+    assert_eq!(calls, 3);
+    assert_eq!(reconnect.sleeper().slept().len(), 2);
+}
