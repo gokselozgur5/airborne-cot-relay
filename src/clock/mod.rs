@@ -2,6 +2,8 @@
 //!
 //! Time is expressed as milliseconds since the Unix epoch in a `u64`.
 
+pub mod adapters;
+
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 
