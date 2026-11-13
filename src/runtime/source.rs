@@ -40,3 +40,28 @@ impl TelemetrySource for VecTelemetrySource {
         Ok(self.chunks.pop_front())
     }
 }
+
+/// In-memory detection source that returns queued batches in order.
+#[derive(Debug, Clone, Default)]
+pub struct VecDetectionSource {
+    batches: VecDeque<Vec<TargetDetection>>,
+}
+
+impl VecDetectionSource {
+    /// Creates a source that yields `batches` in order.
+    pub fn new(batches: Vec<Vec<TargetDetection>>) -> Self {
+        let batches = batches.into();
+        Self { batches }
+    }
+
+    /// Queues one more batch behind the existing ones.
+    pub fn push(&mut self, batch: Vec<TargetDetection>) {
+        self.batches.push_back(batch);
+    }
+}
+
+impl DetectionSource for VecDetectionSource {
+    fn poll_batch(&mut self) -> Result<Option<Vec<TargetDetection>>, RelayError> {
+        Ok(self.batches.pop_front())
+    }
+}
