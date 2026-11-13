@@ -21,4 +21,33 @@ impl DetailElement {
             children: Vec::new(),
         }
     }
+
+    /// Appends an attribute with name and value.
+    pub fn attr(mut self, name: impl Into<String>, value: impl Into<String>) -> Self {
+        self.attributes.push((name.into(), value.into()));
+        self
+    }
+
+    /// Sets inner text content for the element.
+    pub fn with_text(mut self, text: impl Into<String>) -> Self {
+        self.text = Some(text.into());
+        self
+    }
+
+    /// Appends a child detail element.
+    pub fn with_child(mut self, child: DetailElement) -> Self {
+        self.children.push(child);
+        self
+    }
+
+    /// Returns the element tag name.
+    pub fn tag(&self) -> &str {
+        &self.tag
+    }
+
+    /// Returns the element attributes.
+    pub fn attributes(&self) -> &[(String, String)] {
+        &self.attributes
+    }
+
 }
