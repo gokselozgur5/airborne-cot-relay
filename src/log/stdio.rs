@@ -39,3 +39,32 @@ pub fn format_record(record: &Record<'_>, colored: bool) -> String {
     }
     out
 }
+
+/// Standard I/O logger printing formatted lines to standard error.
+#[derive(Debug, Clone)]
+pub struct StdioLogger {
+    level: Level,
+    colored: bool,
+}
+
+impl StdioLogger {
+    /// Constructs a new stdio logger.
+    pub fn new(level: Level, colored: bool) -> Self {
+        Self { level, colored }
+    }
+
+    /// Returns the maximum enabled log level.
+    pub fn level(&self) -> Level {
+        self.level
+    }
+
+    /// Returns whether ANSI coloring is enabled.
+    pub fn is_colored(&self) -> bool {
+        self.colored
+    }
+
+    /// Formats a record using the logger's color configuration.
+    pub fn format(&self, record: &Record<'_>) -> String {
+        format_record(record, self.colored)
+    }
+}
