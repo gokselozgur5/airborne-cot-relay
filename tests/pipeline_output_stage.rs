@@ -41,3 +41,21 @@ fn track(id: u64) -> TrackSummary {
         speed_mps: 0.0,
     }
 }
+
+#[test]
+fn accepted_tracks_are_sent_and_counted() {
+    let (mut stage, mut sink, metrics) = (stage(), ScriptedSink::default(), Metrics::new());
+    assert_eq!(stage.emit(&mut sink, &metrics, &[track(1), track(2)]), 2);
+    assert_eq!(sink.payloads, vec!["1@5000", "2@5000"]);
+    assert_eq!(metrics.snapshot(5_000).sent, 2);
+    assert_eq!(stage.health().failures(), (0, 0));
+}
+
+#[test]
+fn filtered_tracks_never_reach_the_sink() {
+    let (mut stage, mut sink, metrics) = (stage(), ScriptedSink::default(), Metrics::new());
+    assert_eq!(stage.emit(&mut sink, &metrics, &[track(1), track(1)]), 1);
+    assert_eq!(stage.emit(&mut sink, &metrics, &[track(1)]), 0);
+    assert_eq!(sink.payloads.len(), 1);
+    assert_eq!(metrics.snapshot(5_000).sent, 1);
+}
