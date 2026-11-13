@@ -70,3 +70,27 @@ impl DetailElement {
         out.push_str(&format!("</{}>", self.tag));
     }
 }
+
+/// Builder for Cursor-on-Target `<detail>` element and child elements.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct CotDetail {
+    elements: Vec<DetailElement>,
+}
+
+impl CotDetail {
+    pub fn new() -> Self {
+        Self {
+            elements: Vec::new(),
+        }
+    }
+
+    pub fn add_element(&mut self, element: DetailElement) -> &mut Self {
+        self.elements.push(element);
+        self
+    }
+
+    pub fn elements(&self) -> &[DetailElement] {
+        &self.elements
+    }
+
+}
