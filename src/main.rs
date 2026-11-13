@@ -1,4 +1,5 @@
 use airborne_cot_relay::app::config_boot::{boot_config_from_env, CONFIG_ERROR_EXIT};
+use airborne_cot_relay::app::run_mock::run_mock;
 use std::env;
 use std::process::ExitCode;
 
@@ -92,8 +93,12 @@ fn main() -> ExitCode {
         return ExitCode::SUCCESS;
     }
     if matches!(mode, MissionMode::Mock | MissionMode::Live) {
-        if let Err(code) = boot_or_exit() {
-            return code;
+        let config = match boot_or_exit() {
+            Ok(config) => config,
+            Err(code) => return code,
+        };
+        if mode == MissionMode::Mock {
+            return run_mock_mode(&config);
         }
     }
     run_mission(mode)
@@ -104,4 +109,19 @@ fn boot_or_exit() -> Result<airborne_cot_relay::RelayConfig, ExitCode> {
         eprintln!("error: {e}");
         ExitCode::from(CONFIG_ERROR_EXIT)
     })
+}
+
+fn run_mock_mode(config: &airborne_cot_relay::RelayConfig) -> ExitCode {
+    println!("Starting simulated 60-second flight path...");
+    let metrics = airborne_cot_relay::metrics::Metrics::new();
+    match run_mock(config, &metrics) {
+        Ok(sent) => {
+            println!("Sent {sent} CoT events to {}", config.cot_broadcast_addr);
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("error: {e}");
+            ExitCode::FAILURE
+        }
+    }
 }
