@@ -4,6 +4,6 @@ pub mod tcp_client;
 pub mod udp_broadcast;
 pub mod udp_multicast;
 
-pub use tcp_client::TcpClientConfig;
+pub use tcp_client::{TcpClientConfig, TcpClientSink};
 pub use udp_broadcast::{UdpBroadcastConfig, UdpBroadcastSink};
 pub use udp_multicast::{UdpMulticastConfig, UdpMulticastSink};

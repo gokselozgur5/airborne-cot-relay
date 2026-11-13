@@ -38,3 +38,12 @@ impl TcpClientConfig {
         self
     }
 }
+
+/// Outbound TCP sink that connects on demand with reconnect backoff.
+#[derive(Debug)]
+pub struct TcpClientSink {
+    target_addr: SocketAddr,
+    config: TcpClientConfig,
+    stream: Option<TcpStream>,
+    backoff: Backoff,
+}
