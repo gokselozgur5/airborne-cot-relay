@@ -22,3 +22,27 @@ impl CotSink for ScriptedSink {
         Ok(payload.len())
     }
 }
+
+fn frame(ts: u32) -> Vec<u8> {
+    let t = NavTelemetry {
+        timestamp_ms: ts,
+        pos_ned_m: [0.0, 0.0, -100.0],
+        vel_ned_mps: [0.0; 3],
+        euler_rad: [0.0; 3],
+        status: 0,
+    };
+    let mut b = [0u8; 64];
+    let n = t.pack_uart(&mut b).unwrap();
+    b[..n].to_vec()
+}
+
+fn detection(u: f64, v: f64) -> TargetDetection {
+    TargetDetection {
+        pixel_u: u,
+        pixel_v: v,
+        bbox: (u - 10.0, v - 10.0, u + 10.0, v + 10.0),
+        classification: "vehicle".into(),
+        confidence: 0.9,
+        embedding: None,
+    }
+}
