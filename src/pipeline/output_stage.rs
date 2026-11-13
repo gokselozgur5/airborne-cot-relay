@@ -37,3 +37,25 @@ impl<C: Clock> OutputStage<C> {
         &self.filter
     }
 }
+
+impl<C: Clock> OutputStage<C> {
+    /// Filters, encodes and sends one track; true when it was sent.
+    fn send_one<S: CotSink>(
+        &mut self,
+        sink: &mut S,
+        metrics: &Metrics,
+        track: &TrackSummary,
+    ) -> bool {
+        let now_ms = self.filter.clock().now_ms();
+        let uid = format!("TRACK-{:04}", track.id);
+        if !self.filter.accept(&uid, track.lat_deg, track.lon_deg) {
+            return false;
+        }
+        let payload = (self.encode)(track, now_ms);
+        let sent = send_tracked(sink, &mut self.health, payload.as_bytes()).is_ok();
+        if sent {
+            metrics.record_sent(now_ms);
+        }
+        sent
+    }
+}
