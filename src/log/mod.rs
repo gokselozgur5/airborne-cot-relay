@@ -113,3 +113,31 @@ pub trait Logger: Send + Sync {
     /// Logs a record if its level is enabled.
     fn log(&self, record: &Record<'_>);
 }
+
+impl<L: Logger + ?Sized> Logger for &L {
+    fn level(&self) -> Level {
+        (**self).level()
+    }
+
+    fn enabled(&self, level: Level) -> bool {
+        (**self).enabled(level)
+    }
+
+    fn log(&self, record: &Record<'_>) {
+        (**self).log(record);
+    }
+}
+
+impl<L: Logger + ?Sized> Logger for Arc<L> {
+    fn level(&self) -> Level {
+        (**self).level()
+    }
+
+    fn enabled(&self, level: Level) -> bool {
+        (**self).enabled(level)
+    }
+
+    fn log(&self, record: &Record<'_>) {
+        (**self).log(record);
+    }
+}
