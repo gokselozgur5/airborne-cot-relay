@@ -69,3 +69,6 @@ impl Pipeline {
 mod detect_stage;
 
 pub mod queue_stage;
+//! Relay pipeline stages from targeter output to the CoT sink.
+
+pub mod step;
