@@ -22,3 +22,12 @@ fn bind_error_exits_3_and_keeps_the_snapshot() {
     assert!(out.stdout.starts_with("packets_in 7\n"));
     assert!(out.stderr.unwrap().contains("IO error: failed to bind"));
 }
+
+#[test]
+fn success_exits_0_without_stderr() {
+    let snapshot = Metrics::new().snapshot(0);
+    let out = finish(&Ok::<u64, RelayError>(3), &snapshot);
+    assert_eq!(out.status, 0);
+    assert_eq!(out.stderr, None);
+    assert!(out.stdout.contains("sent 0\n"));
+}
