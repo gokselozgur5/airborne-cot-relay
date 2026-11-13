@@ -80,3 +80,31 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
         Some(ok)
     }
 }
+
+use crate::relay::BoundedQueue;
+
+impl<C: Clock, S: CotSink> OutboundStep<C, S> {
+    /// Drains `queue` through `render` to the sink, evicts stale entries, sets the gauge.
+    pub fn step<F>(
+        &mut self,
+        now_ms: u64,
+        queue: &mut BoundedQueue<TrackSummary>,
+        metrics: &Metrics,
+        mut render: F,
+    ) -> StepReport
+    where
+        F: FnMut(&TrackSummary, u64) -> String,
+    {
+        let mut report = StepReport::default();
+        while let Some(track) = queue.pop() {
+            match self.send_one(&track, now_ms, metrics, &mut render) {
+                None => report.filtered += 1,
+                Some(true) => report.sent += 1,
+                Some(false) => report.failed += 1,
+            }
+        }
+        report.evicted = self.filter.evict_stale();
+        metrics.set_queue_depth(queue.len() as u64);
+        report
+    }
+}
