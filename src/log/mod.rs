@@ -75,3 +75,27 @@ pub struct Record<'a> {
     pub message: &'a str,
     pub fields: &'a [(&'a str, &'a str)],
 }
+
+impl<'a> Record<'a> {
+    /// Constructs a new log record.
+    pub fn new(
+        ts_ms: u64,
+        level: Level,
+        target: &'a str,
+        message: &'a str,
+        fields: &'a [(&'a str, &'a str)],
+    ) -> Self {
+        Self {
+            ts_ms,
+            level,
+            target,
+            message,
+            fields,
+        }
+    }
+
+    /// Looks up a field value by key name.
+    pub fn get_field(&self, key: &str) -> Option<&'a str> {
+        self.fields.iter().find(|(k, _)| *k == key).map(|(_, v)| *v)
+    }
+}
