@@ -99,3 +99,17 @@ impl TcpClientSink {
             .ok_or_else(|| RelayError::IoError("Not connected".to_string()))
     }
 }
+
+impl CotSink for TcpClientSink {
+    fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
+        let stream = self.ensure_connected()?;
+        match stream.write_all(payload) {
+            Ok(()) => Ok(payload.len()),
+            Err(err) => {
+                self.stream = None;
+                let _delay = self.backoff.next_delay_ms();
+                Err(RelayError::from(err))
+            }
+        }
+    }
+}
