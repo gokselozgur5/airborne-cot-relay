@@ -22,3 +22,16 @@ fn drain(rx: &UdpSocket) -> Vec<String> {
     }
     out
 }
+
+#[test]
+fn mock_mode_delivers_parseable_cot_and_exits_zero() {
+    let rx = UdpSocket::bind("127.0.0.1:0").unwrap();
+    let out = run_mock_to(&rx.local_addr().unwrap().to_string());
+    assert_eq!(out.status.code(), Some(0), "{out:?}");
+    let datagrams = drain(&rx);
+    assert!(!datagrams.is_empty(), "no CoT datagram received");
+    let xml = &datagrams[0];
+    assert!(xml.contains("version=\"2.0\""));
+    let event = sightline_cot::cot::CotEvent::from_xml(xml).expect("valid CoT");
+    assert!(event.uid.starts_with("TRACK-"), "uid {}", event.uid);
+}
