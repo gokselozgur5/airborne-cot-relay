@@ -1,3 +1,4 @@
+pub mod app;
 pub mod bearing;
 pub mod config;
 pub mod relay;
