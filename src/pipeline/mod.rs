@@ -62,3 +62,5 @@ impl Pipeline {
         self
     }
 }
+
+mod detect_stage;
