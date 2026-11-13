@@ -19,5 +19,6 @@ pub mod log;
 pub mod metrics;
 pub mod output;
 pub mod pipeline;
+pub mod resilience;
 pub mod runtime;
 pub mod track_filter;
