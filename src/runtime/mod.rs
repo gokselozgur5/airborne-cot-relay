@@ -1,6 +1,7 @@
 //! Process runtime primitives shared by long-running relay loops.
 
 pub mod signal;
+pub mod sleep;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
