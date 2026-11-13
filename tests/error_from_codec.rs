@@ -21,3 +21,27 @@ fn grid_error_keeps_variant_name() {
     let msg = decode_text(GridError::InvalidZone.into());
     assert_eq!(msg, "MGRS grid: InvalidZone");
 }
+
+#[test]
+fn navcore_protocol_error_keeps_variant_name() {
+    let msg = decode_text(ProtocolError::CrcMismatch.into());
+    assert_eq!(msg, "navcore protocol: CrcMismatch");
+}
+
+#[test]
+fn question_mark_converts_codec_errors() {
+    fn decode(bad_crc: bool) -> Result<(), RelayError> {
+        if bad_crc {
+            Err(ProtocolError::CrcMismatch)?;
+        }
+        Err(ProtoError::InvalidMagic)?
+    }
+    assert!(decode(true)
+        .unwrap_err()
+        .to_string()
+        .contains("CrcMismatch"));
+    assert!(decode(false)
+        .unwrap_err()
+        .to_string()
+        .contains("InvalidMagic"));
+}
