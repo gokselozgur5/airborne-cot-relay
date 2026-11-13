@@ -3,6 +3,7 @@
 pub mod reconnect;
 pub mod signal;
 pub mod sleep;
+pub mod source;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
