@@ -44,3 +44,18 @@ fn queue_of(tracks: Vec<TrackSummary>) -> BoundedQueue<TrackSummary> {
 fn render(t: &TrackSummary, now_ms: u64) -> String {
     format!("TRACK-{:04}@{now_ms}", t.id)
 }
+
+fn stepper(fail: bool) -> OutboundStep<ManualClock, Recorder> {
+    let config = FilterConfig {
+        stale_after_ms: 1_000,
+        ..FilterConfig::default()
+    };
+    let mut filter = TrackFilter::new(config, ManualClock::new(0));
+    assert!(filter.accept("TRACK-0099", 35.0, 139.0));
+    filter.clock().set(5_000);
+    let sink = Recorder {
+        fail,
+        ..Recorder::default()
+    };
+    OutboundStep::new(filter, sink, SendHealth::new(3))
+}
