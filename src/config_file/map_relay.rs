@@ -23,3 +23,15 @@ pub(crate) fn apply_relay_section(c: &mut RelayConfig, sec: &IniSection) -> Resu
     }
     Ok(())
 }
+
+fn parse_float(sec: &str, key: &str, val: &str) -> Result<f64, RelayError> {
+    val.parse().map_err(|_| {
+        RelayError::InvalidConfig(format!("invalid float for {sec}.{key}: '{val}'"))
+    })
+}
+
+fn parse_u32(sec: &str, key: &str, val: &str) -> Result<u32, RelayError> {
+    val.parse().map_err(|_| {
+        RelayError::InvalidConfig(format!("invalid integer for {sec}.{key}: '{val}'"))
+    })
+}
