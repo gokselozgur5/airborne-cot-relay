@@ -20,3 +20,15 @@ pub fn classify(err: &crate::config::RelayError) -> ErrorClass {
         RelayError::DecodeError(_) | RelayError::TargetingError(_) => ErrorClass::Droppable,
     }
 }
+
+impl ErrorClass {
+    /// True when the process must stop.
+    pub fn is_fatal(self) -> bool {
+        self == ErrorClass::Fatal
+    }
+
+    /// True when the operation should be retried with backoff.
+    pub fn is_retryable(self) -> bool {
+        self == ErrorClass::Retryable
+    }
+}
