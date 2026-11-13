@@ -1,7 +1,7 @@
 //! Runs the mock mission through ingest, targeter, track filter and CoT output.
 use crate::config::{RelayConfig, RelayError};
-use crate::relay::CotStreamer;
-use crate::targeter::Targeter;
+use crate::relay::{CotStreamer, TrackSummary};
+use crate::targeter::{Targeter, TrackedObject};
 use crate::telemetry::TelemetryIngest;
 use crate::track_filter::{FilterConfig, ManualClock, TrackFilter};
 
@@ -26,5 +26,20 @@ impl MockRelay {
             filter: TrackFilter::new(FilterConfig::default(), ManualClock::new(0)),
             streamer: CotStreamer::new("0.0.0.0:0", &config.cot_broadcast_addr, stale_ms)?,
         })
+    }
+}
+
+/// Converts a fused track into the CoT summary sent on the wire.
+fn to_summary(t: &TrackedObject) -> TrackSummary {
+    TrackSummary {
+        id: t.id,
+        classification: t.classification.clone(),
+        lat_deg: t.lat_deg,
+        lon_deg: t.lon_deg,
+        hae_m: t.hae_m,
+        ce90_m: t.ce90_m,
+        le90_m: 10.0,
+        course_deg: t.course_deg,
+        speed_mps: t.speed_mps,
     }
 }
