@@ -121,3 +121,29 @@ impl StatusCode {
         }
     }
 }
+/// HTTP response representation.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HttpResponse {
+    /// Response status code.
+    pub status: StatusCode,
+    /// Optional Content-Type header.
+    pub content_type: Option<String>,
+    /// Response payload bytes.
+    pub body: Vec<u8>,
+}
+
+impl HttpResponse {
+    /// Create a generic response.
+    pub fn new(status: StatusCode, body: impl Into<Vec<u8>>, content_type: Option<&str>) -> Self {
+        Self {
+            status,
+            content_type: content_type.map(String::from),
+            body: body.into(),
+        }
+    }
+
+    /// Helper for 200 OK response.
+    pub fn ok(body: impl Into<Vec<u8>>, content_type: &str) -> Self {
+        Self::new(StatusCode::OK, body, Some(content_type))
+    }
+}
