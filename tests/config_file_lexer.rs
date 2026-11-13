@@ -25,3 +25,11 @@ fn test_line_without_equals_fails_with_line_number() {
     assert_eq!(err.line, 3);
     assert!(err.message.contains("missing '='"));
 }
+
+#[test]
+fn test_duplicate_key_in_section_fails() {
+    let input = "[relay]\nkey1 = a\nkey2 = b\nkey1 = c\n";
+    let err = ParsedIni::parse(input).expect_err("duplicate key must fail");
+    assert_eq!(err.line, 4);
+    assert!(err.message.contains("duplicate key 'key1' in section 'relay'"));
+}
