@@ -1,0 +1,1 @@
+//! INI-style configuration lexer.
