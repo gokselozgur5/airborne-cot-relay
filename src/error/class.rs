@@ -10,3 +10,13 @@ pub enum ErrorClass {
     /// A bad input item; drop it and keep running.
     Droppable,
 }
+
+/// Returns how a loop should react to `err`.
+pub fn classify(err: &crate::config::RelayError) -> ErrorClass {
+    use crate::config::RelayError;
+    match err {
+        RelayError::InvalidConfig(_) => ErrorClass::Fatal,
+        RelayError::IoError(_) => ErrorClass::Retryable,
+        RelayError::DecodeError(_) | RelayError::TargetingError(_) => ErrorClass::Droppable,
+    }
+}
