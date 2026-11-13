@@ -23,3 +23,23 @@ fn recovery_emits_one_recovered_event() {
     (0..3).for_each(|_| tracker.record_send(true));
     assert_eq!(tracker.drain(), [PipelineEvent::SinkRecovered]);
 }
+
+#[test]
+fn success_before_threshold_emits_nothing() {
+    let mut tracker = EventTracker::new(3);
+    [false, false, true, false, false]
+        .into_iter()
+        .for_each(|ok| tracker.record_send(ok));
+    assert!(tracker.drain().is_empty());
+}
+
+#[test]
+fn stale_telemetry_emits_once_until_fresh_again() {
+    let mut tracker = EventTracker::new(3);
+    [500, 2_500, 4_000, 100, 3_000]
+        .into_iter()
+        .for_each(|age| tracker.record_telemetry_age(age, 2_000));
+    let events = tracker.drain();
+    let expected = [2_500, 3_000].map(|age_ms| PipelineEvent::TelemetryStale { age_ms });
+    assert_eq!(events, expected);
+}
