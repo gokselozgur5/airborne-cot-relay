@@ -1,7 +1,7 @@
 //! Maps `[relay]` and `[camera]` sections to a `RelayConfig`.
 
 use crate::config::{CameraIntrinsics, RelayConfig, RelayError};
-use crate::config_file::lexer::IniSection;
+use crate::config_file::lexer::{IniSection, ParsedIni};
 
 pub(crate) fn apply_relay_section(c: &mut RelayConfig, sec: &IniSection) -> Result<(), RelayError> {
     for e in &sec.entries {
@@ -51,4 +51,17 @@ pub(crate) fn apply_camera_section(
         }
     }
     Ok(())
+}
+
+/// Maps `[relay]` and `[camera]` sections from `ini` onto `base`, validating the result.
+pub fn map_relay_config(ini: &ParsedIni, base: &RelayConfig) -> Result<RelayConfig, RelayError> {
+    let mut config = base.clone();
+    if let Some(sec) = ini.section("relay") {
+        apply_relay_section(&mut config, sec)?;
+    }
+    if let Some(sec) = ini.section("camera") {
+        apply_camera_section(&mut config.camera, sec)?;
+    }
+    config.validate()?;
+    Ok(config)
 }
