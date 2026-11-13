@@ -13,3 +13,17 @@ fn test_tcp_client_config_builder() {
     assert_eq!(cfg.backoff_base_ms, 50);
     assert_eq!(cfg.backoff_max_ms, 2000);
 }
+
+#[test]
+fn test_tcp_client_sink_deliver_payload() {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let addr = listener.local_addr().unwrap();
+    let mut sink = TcpClientSink::with_defaults(addr);
+    let payload = b"<event uid=\"test-tcp\"/>";
+    let sent = sink.send(payload).unwrap();
+    assert_eq!(sent, payload.len());
+    let (mut stream, _) = listener.accept().unwrap();
+    let mut buf = [0u8; 64];
+    let n = stream.read(&mut buf).unwrap();
+    assert_eq!(&buf[..n], payload);
+}
