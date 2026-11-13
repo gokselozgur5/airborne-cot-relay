@@ -42,3 +42,23 @@ fn le90_comes_from_the_projection() {
     assert_eq!(track_summary(&track(), &projection(7.5)).le90_m, 7.5);
     assert_eq!(track_summary(&track(), &projection(2.0)).le90_m, 2.0);
 }
+
+#[test]
+fn pipeline_le90_follows_boresight_projection() {
+    use airborne_cot_relay::{pipeline::Pipeline, PlatformPose, RelayConfig};
+    let p = Pipeline::from_config(&RelayConfig::default()).unwrap();
+    let pose = |hae_m| PlatformPose {
+        timestamp_ms: 0,
+        lat_deg: 35.0,
+        lon_deg: 139.0,
+        hae_m,
+        roll_rad: 0.0,
+        pitch_rad: 0.0,
+        yaw_rad: 0.0,
+    };
+    let low = p.summarize_tracks(&[track()], &pose(100.0)).unwrap();
+    let high = p.summarize_tracks(&[track()], &pose(400.0)).unwrap();
+    let expected = p.targeter().project_pixel(640.0, 360.0, &pose(100.0));
+    assert_eq!(low[0].le90_m, expected.unwrap().le90_m);
+    assert_ne!(low[0].le90_m, high[0].le90_m);
+}
