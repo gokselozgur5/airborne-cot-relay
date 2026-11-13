@@ -13,3 +13,24 @@ pub struct ReconnectLoop<S: Sleeper> {
     sleeper: S,
     shutdown: ShutdownSignal,
 }
+
+impl<S: Sleeper> ReconnectLoop<S> {
+    /// Creates a loop that stops retrying once `shutdown` is triggered.
+    pub fn new(backoff: Backoff, sleeper: S, shutdown: ShutdownSignal) -> Self {
+        Self {
+            backoff,
+            sleeper,
+            shutdown,
+        }
+    }
+
+    /// The backoff schedule, for inspecting the attempt counter.
+    pub fn backoff(&self) -> &Backoff {
+        &self.backoff
+    }
+
+    /// The sleeper, for inspecting recorded delays.
+    pub fn sleeper(&self) -> &S {
+        &self.sleeper
+    }
+}
