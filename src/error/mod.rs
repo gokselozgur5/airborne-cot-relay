@@ -12,3 +12,5 @@ impl From<std::io::Error> for RelayError {
         RelayError::IoError(format!("{:?}: {err}", err.kind()))
     }
 }
+
+mod cot;
