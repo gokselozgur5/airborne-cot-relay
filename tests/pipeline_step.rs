@@ -74,3 +74,23 @@ fn one_step_drains_queue_resets_gauge_and_evicts_stale() {
     assert_eq!(step.filter().tracked_count(), 2);
     assert_eq!(step.sink().payloads, ["TRACK-0001@5000", "TRACK-0002@5000"]);
 }
+
+#[test]
+fn duplicate_track_is_filtered_within_one_step() {
+    let metrics = Metrics::new();
+    let mut queue = queue_of(vec![track(1, 35.0), track(1, 35.0)]);
+    let report = stepper(false).step(5_000, &mut queue, &metrics, render);
+    assert_eq!((report.sent, report.filtered), (1, 1));
+    assert_eq!(metrics.snapshot(5_000).sent, 1);
+}
+
+#[test]
+fn failed_send_is_dropped_and_recorded_in_health() {
+    let metrics = Metrics::new();
+    let mut queue = queue_of(vec![track(1, 35.0), track(2, 35.1)]);
+    let mut step = stepper(true);
+    let report = step.step(5_000, &mut queue, &metrics, render);
+    assert_eq!(report.failed, 2);
+    assert_eq!(metrics.snapshot(5_000).dropped, 2);
+    assert_eq!(step.health().failures(), (2, 2));
+}
