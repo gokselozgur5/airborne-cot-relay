@@ -1,4 +1,4 @@
-use airborne_cot_relay::log::{Level, ParseLevelError};
+use airborne_cot_relay::log::{Level, ParseLevelError, Record};
 use std::str::FromStr;
 
 #[test]
@@ -35,4 +35,16 @@ fn test_level_from_str_invalid() {
     let err = "unknown".parse::<Level>().unwrap_err();
     assert_eq!(err, ParseLevelError("unknown".to_string()));
     assert!(format!("{}", err).contains("invalid log level"));
+}
+
+#[test]
+fn test_record_fields_and_lookup() {
+    let fields: [(&str, &str); 2] = [("key1", "val1"), ("key2", "val2")];
+    let record = Record::new(1000, Level::Info, "relay", "msg", &fields);
+    assert_eq!(record.ts_ms, 1000);
+    assert_eq!(record.level, Level::Info);
+    assert_eq!(record.target, "relay");
+    assert_eq!(record.message, "msg");
+    assert_eq!(record.get_field("key1"), Some("val1"));
+    assert_eq!(record.get_field("missing"), None);
 }
