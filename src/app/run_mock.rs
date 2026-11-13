@@ -15,3 +15,16 @@ struct MockRelay {
     filter: TrackFilter<ManualClock>,
     streamer: CotStreamer,
 }
+
+impl MockRelay {
+    fn new(config: &RelayConfig) -> Result<Self, RelayError> {
+        let (lat, lon, alt) = MOCK_ORIGIN;
+        let stale_ms = config.target_stale_timeout_ms;
+        Ok(Self {
+            ingest: TelemetryIngest::new(lat, lon, alt, stale_ms),
+            targeter: Targeter::new(&config.camera, config.ground_elevation_m),
+            filter: TrackFilter::new(FilterConfig::default(), ManualClock::new(0)),
+            streamer: CotStreamer::new("0.0.0.0:0", &config.cot_broadcast_addr, stale_ms)?,
+        })
+    }
+}
