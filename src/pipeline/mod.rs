@@ -1,5 +1,7 @@
 //! Relay pipeline wiring telemetry ingest, targeting and output stages.
 
+mod telemetry_stage;
+
 use std::sync::Arc;
 
 use crate::metrics::Metrics;
