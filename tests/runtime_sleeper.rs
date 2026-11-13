@@ -21,3 +21,10 @@ fn manual_sleeper_advances_attached_clock() {
     sleeper.sleep(Duration::from_secs(2));
     assert_eq!(clock.now_ms(), 3_250);
 }
+
+#[test]
+fn thread_sleeper_blocks_for_at_least_the_duration() {
+    let start = Instant::now();
+    ThreadSleeper.sleep(Duration::from_millis(2));
+    assert!(start.elapsed() >= Duration::from_millis(2));
+}
