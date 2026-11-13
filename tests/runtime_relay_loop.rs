@@ -46,3 +46,12 @@ fn detection(u: f64, v: f64) -> TargetDetection {
         embedding: None,
     }
 }
+
+fn build_filter_step() -> OutboundStep<ManualClock, ScriptedSink> {
+    let cfg = FilterConfig {
+        min_interval_ms: 0,
+        ..Default::default()
+    };
+    let filter = TrackFilter::new(cfg, ManualClock::new(1_000));
+    OutboundStep::new(filter, ScriptedSink::default(), SendHealth::new(3))
+}
