@@ -39,3 +39,17 @@ impl CotSink for Recorder {
         Ok(payload.len())
     }
 }
+
+fn summary(o: &TrackedObject) -> TrackSummary {
+    TrackSummary {
+        id: o.id,
+        classification: o.classification.clone(),
+        lat_deg: o.lat_deg,
+        lon_deg: o.lon_deg,
+        hae_m: o.hae_m,
+        ce90_m: o.ce90_m,
+        le90_m: 10.0,
+        course_deg: o.course_deg,
+        speed_mps: o.speed_mps,
+    }
+}
