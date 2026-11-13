@@ -147,3 +147,19 @@ impl HttpResponse {
         Self::new(StatusCode::OK, body, Some(content_type))
     }
 }
+impl HttpResponse {
+    /// Helper for 400 Bad Request.
+    pub fn bad_request(body: impl Into<Vec<u8>>) -> Self {
+        Self::new(StatusCode::BAD_REQUEST, body, Some("text/plain"))
+    }
+
+    /// Helper for 404 Not Found.
+    pub fn not_found() -> Self {
+        Self::new(StatusCode::NOT_FOUND, "Not Found\n", Some("text/plain"))
+    }
+
+    /// Helper for 405 Method Not Allowed.
+    pub fn method_not_allowed() -> Self {
+        Self::new(StatusCode::METHOD_NOT_ALLOWED, "Method Not Allowed\n", Some("text/plain"))
+    }
+}
