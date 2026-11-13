@@ -75,3 +75,27 @@ impl TcpClientSink {
         &self.backoff
     }
 }
+
+impl TcpClientSink {
+    fn ensure_connected(&mut self) -> Result<&mut TcpStream, RelayError> {
+        if self.stream.is_none() {
+            let stream = match self.config.connect_timeout {
+                Some(timeout) => TcpStream::connect_timeout(&self.target_addr, timeout),
+                None => TcpStream::connect(self.target_addr),
+            };
+            match stream {
+                Ok(s) => {
+                    self.backoff.reset();
+                    self.stream = Some(s);
+                }
+                Err(err) => {
+                    let _delay = self.backoff.next_delay_ms();
+                    return Err(RelayError::from(err));
+                }
+            }
+        }
+        self.stream
+            .as_mut()
+            .ok_or_else(|| RelayError::IoError("Not connected".to_string()))
+    }
+}
