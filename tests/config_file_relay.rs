@@ -1,0 +1,18 @@
+use airborne_cot_relay::config::RelayConfig;
+use airborne_cot_relay::config_file::{map_relay_config, ParsedIni};
+
+#[test]
+fn test_all_relay_and_camera_fields_set_from_file() {
+    let conf = "[relay]\ntelemetry_listen_addr = 127.0.0.1:15000\ncot_broadcast_addr = 239.2.3.4:7000\nground_elevation_m = 125.5\ntarget_stale_timeout_ms = 8000\n[camera]\nfocal_length_px = 1500.0\nprincipal_u = 960.0\nprincipal_v = 540.0\nimage_width = 1920\nimage_height = 1080\n";
+    let ini = ParsedIni::parse(conf).expect("parse INI");
+    let res = map_relay_config(&ini, &RelayConfig::default()).expect("map");
+    assert_eq!(res.telemetry_listen_addr, "127.0.0.1:15000");
+    assert_eq!(res.cot_broadcast_addr, "239.2.3.4:7000");
+    assert_eq!(res.ground_elevation_m, 125.5);
+    assert_eq!(res.target_stale_timeout_ms, 8000);
+    assert_eq!(res.camera.focal_length_px, 1500.0);
+    assert_eq!(res.camera.principal_u, 960.0);
+    assert_eq!(res.camera.principal_v, 540.0);
+    assert_eq!(res.camera.image_width, 1920);
+    assert_eq!(res.camera.image_height, 1080);
+}
