@@ -15,3 +15,16 @@ fn test_format_record_without_fields() {
     let rendered = format_record(&record, false);
     assert_eq!(rendered, "[5678] WARN [tracker] lost target");
 }
+
+#[test]
+fn test_format_record_colored() {
+    let record = Record::new(100, Level::Error, "core", "critical error", &[]);
+    let rendered = format_record(&record, true);
+    assert!(rendered.contains("\x1b[31mERROR\x1b[0m"));
+    assert!(rendered.starts_with("[100] "));
+    assert!(rendered.ends_with(" critical error"));
+
+    let debug_rec = Record::new(101, Level::Debug, "core", "debug info", &[]);
+    let dbg_rendered = format_record(&debug_rec, true);
+    assert!(dbg_rendered.contains("\x1b[34mDEBUG\x1b[0m"));
+}
