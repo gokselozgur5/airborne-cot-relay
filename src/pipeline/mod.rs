@@ -7,6 +7,7 @@ use std::sync::Arc;
 use crate::metrics::Metrics;
 use crate::{RelayConfig, RelayError, Targeter, TelemetryIngest};
 
+pub mod output_stage;
 pub mod summary;
 
 /// Library pipeline built from a validated relay configuration.
