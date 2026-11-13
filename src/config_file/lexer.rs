@@ -56,3 +56,17 @@ impl IniSection {
 pub struct ParsedIni {
     pub sections: Vec<IniSection>,
 }
+
+impl ParsedIni {
+    pub fn section(&self, name: &str) -> Option<&IniSection> {
+        self.sections.iter().find(|s| s.name == name)
+    }
+
+    pub fn get(&self, section: &str, key: &str) -> Option<&str> {
+        self.section(section)?.get(key)
+    }
+
+    pub fn entries(&self) -> impl Iterator<Item = &IniEntry> {
+        self.sections.iter().flat_map(|s| s.entries.iter())
+    }
+}
