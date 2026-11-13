@@ -58,6 +58,26 @@ pub struct ParsedIni {
 }
 
 impl ParsedIni {
+    /// Parses an INI formatted string into structured sections and key-values.
+    pub fn parse(input: &str) -> Result<Self, LexerError> {
+        let mut state = LexerState::default();
+        for (i, raw) in input.lines().enumerate() {
+            let line = i + 1;
+            let s = raw.trim();
+            if s.is_empty() || s.starts_with('#') {
+                continue;
+            }
+            if s.starts_with('[') {
+                let name = parse_section_name(s, line)?;
+                state.set_section(&name, line);
+            } else {
+                let (k, v) = parse_key_value(s, line)?;
+                state.add_entry(k, v, line)?;
+            }
+        }
+        Ok(Self { sections: state.sections })
+    }
+
     pub fn section(&self, name: &str) -> Option<&IniSection> {
         self.sections.iter().find(|s| s.name == name)
     }
