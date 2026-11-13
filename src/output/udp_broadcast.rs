@@ -12,4 +12,9 @@ impl UdpBroadcastConfig {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn with_outbound_interface(mut self, addr: Ipv4Addr) -> Self {
+        self.outbound_interface = Some(addr);
+        self
+    }
 }
