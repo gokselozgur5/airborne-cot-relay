@@ -19,3 +19,22 @@ fn test_cot_detail_escaping_and_order() {
     assert_eq!(xml, expected);
     assert_eq!(format!("{detail}"), expected);
 }
+
+#[test]
+fn test_cot_detail_empty_and_nested_elements() {
+    let empty = CotDetail::new();
+    assert!(empty.is_empty());
+    assert_eq!(empty.render(), "<detail></detail>");
+
+    let mut detail = CotDetail::new();
+    let parent = DetailElement::new("sensor")
+        .attr("name", "flir")
+        .with_child(DetailElement::new("fov").attr("hfov", "30.5"));
+    detail.add_element(parent);
+
+    assert_eq!(detail.len(), 1);
+    assert_eq!(
+        detail.render(),
+        "<detail><sensor name=\"flir\"><fov hfov=\"30.5\"/></sensor></detail>"
+    );
+}
