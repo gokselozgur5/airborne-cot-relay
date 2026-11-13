@@ -12,3 +12,25 @@ pub struct StepReport {
     /// Filter entries evicted as stale after the drain.
     pub evicted: usize,
 }
+
+use crate::relay::{CotSink, SendHealth};
+use crate::track_filter::{Clock, TrackFilter};
+
+/// Output side of the pipeline: rate filter, sink and send health.
+#[derive(Debug)]
+pub struct OutboundStep<C: Clock, S: CotSink> {
+    filter: TrackFilter<C>,
+    sink: S,
+    health: SendHealth,
+}
+
+impl<C: Clock, S: CotSink> OutboundStep<C, S> {
+    /// Builds the step from its filter, sink and send health tracker.
+    pub fn new(filter: TrackFilter<C>, sink: S, health: SendHealth) -> Self {
+        Self {
+            filter,
+            sink,
+            health,
+        }
+    }
+}
