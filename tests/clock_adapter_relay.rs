@@ -26,3 +26,11 @@ fn adapted_clock_renders_same_time_as_native_clock() {
     assert_eq!(adapted, streamer.build_cot_xml_now(&track(), &native));
     assert!(adapted.contains(r#"time="2024-11-12T00:00:01"#));
 }
+
+#[test]
+fn adapter_saturates_above_i64_max() {
+    let unified = ManualClock::new(u64::MAX);
+    assert_eq!(RelayClockAdapter(&unified).now_ms(), i64::MAX);
+    unified.set_ms(42);
+    assert_eq!(RelayClockAdapter(&unified).now_ms(), 42);
+}
