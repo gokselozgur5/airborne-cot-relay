@@ -43,3 +43,12 @@ impl<'a> ManualSleeper<'a> {
         &self.slept
     }
 }
+
+impl Sleeper for ManualSleeper<'_> {
+    fn sleep(&mut self, duration: Duration) {
+        self.slept.push(duration);
+        if let Some(clock) = self.clock {
+            clock.advance_ms(u64::try_from(duration.as_millis()).unwrap_or(u64::MAX));
+        }
+    }
+}
