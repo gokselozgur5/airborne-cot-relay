@@ -16,3 +16,14 @@ fn track() -> TrackedObject {
         is_confirmed: true,
     }
 }
+
+fn projection(le90_m: f64) -> GroundIntersection {
+    GroundIntersection {
+        lat_deg: 0.0,
+        lon_deg: 0.0,
+        hae_m: 0.0,
+        ce90_m: 99.0,
+        le90_m,
+        enu_m: [0.0; 3],
+    }
+}
