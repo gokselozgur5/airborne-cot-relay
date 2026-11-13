@@ -18,3 +18,19 @@ pub struct MockStep {
     pub frame: Vec<u8>,
     pub detections: Vec<TargetDetection>,
 }
+
+/// Encodes a hovering, level platform frame as a COBS UART frame.
+fn encode_frame(timestamp_ms: u32) -> Vec<u8> {
+    let telem = NavTelemetry {
+        timestamp_ms,
+        pos_ned_m: [0.0, 0.0, -ALTITUDE_M],
+        vel_ned_mps: [0.0; 3],
+        euler_rad: [0.0; 3],
+        status: 0,
+    };
+    let mut buf = [0u8; NavTelemetry::MAX_UART_FRAME_LEN];
+    let len = telem
+        .pack_uart(&mut buf)
+        .expect("finite mock frame fits the UART buffer");
+    buf[..len].to_vec()
+}
