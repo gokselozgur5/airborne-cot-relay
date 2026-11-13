@@ -114,3 +114,24 @@ impl<T: TelemetrySource, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
         }
     }
 }
+
+impl<T, D: DetectionSource, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
+    /// Processes one batch of detections and queues confirmed tracks.
+    pub fn poll_detections(&mut self, now_ms: u64) -> Result<Option<usize>, RelayError> {
+        let Some(batch) = self.detections.poll_batch()? else {
+            return Ok(None);
+        };
+        let tracks = self.pipeline.process_detections(&batch, now_ms)?;
+        let mut queued = 0;
+        if let Some(pose) = self.pipeline.latest_pose() {
+            let conf: Vec<_> = tracks.into_iter().filter(|t| t.is_confirmed).collect();
+            if !conf.is_empty() {
+                for s in self.pipeline.summarize_tracks(&conf, &pose)? {
+                    self.queue.push(s);
+                    queued += 1;
+                }
+            }
+        }
+        Ok(Some(queued))
+    }
+}
