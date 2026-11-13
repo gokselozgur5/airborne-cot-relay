@@ -1,5 +1,24 @@
-use airborne_cot_relay::log::{Level, ParseLevelError, Record};
+use airborne_cot_relay::log::{Level, Logger, ParseLevelError, Record};
 use std::str::FromStr;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
+
+struct TestLogger {
+    level: Level,
+    calls: AtomicUsize,
+}
+
+impl Logger for TestLogger {
+    fn level(&self) -> Level {
+        self.level
+    }
+
+    fn log(&self, record: &Record<'_>) {
+        if self.enabled(record.level) {
+            self.calls.fetch_add(1, Ordering::SeqCst);
+        }
+    }
+}
 
 #[test]
 fn test_level_ordering() {
