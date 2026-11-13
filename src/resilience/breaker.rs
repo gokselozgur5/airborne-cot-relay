@@ -1,3 +1,4 @@
+use crate::clock::Clock;
 use std::fmt;
 
 /// State of a circuit breaker.
@@ -19,3 +20,29 @@ impl fmt::Display for BreakerError {
 }
 
 impl std::error::Error for BreakerError {}
+
+/// Configuration tuning circuit breaker trip and recovery behavior.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BreakerConfig {
+    pub failure_threshold: u32,
+    pub cooldown_ms: u64,
+}
+
+impl BreakerConfig {
+    pub const fn new(failure_threshold: u32, cooldown_ms: u64) -> Self {
+        Self {
+            failure_threshold,
+            cooldown_ms,
+        }
+    }
+}
+
+/// State machine tracking failures and enforcing cooldowns.
+pub struct CircuitBreaker<C> {
+    config: BreakerConfig,
+    clock: C,
+    consecutive_failures: u32,
+    opened_at_ms: u64,
+    rejected_count: u64,
+    probe_in_flight: bool,
+}
