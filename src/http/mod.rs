@@ -98,3 +98,26 @@ pub fn parse_request_line(raw: &str) -> Result<RequestLine, HttpError> {
     let method = Method::from_str_slice(method_raw);
     Ok(RequestLine::new(method, path, version))
 }
+/// HTTP status code with numeric value and reason phrase.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct StatusCode(pub u16);
+
+impl StatusCode {
+    pub const OK: StatusCode = StatusCode(200);
+    pub const BAD_REQUEST: StatusCode = StatusCode(400);
+    pub const NOT_FOUND: StatusCode = StatusCode(404);
+    pub const METHOD_NOT_ALLOWED: StatusCode = StatusCode(405);
+    pub const SERVICE_UNAVAILABLE: StatusCode = StatusCode(503);
+
+    /// Get standard HTTP reason phrase.
+    pub fn reason_phrase(&self) -> &'static str {
+        match self.0 {
+            200 => "OK",
+            400 => "Bad Request",
+            404 => "Not Found",
+            405 => "Method Not Allowed",
+            503 => "Service Unavailable",
+            _ => "Unknown",
+        }
+    }
+}
