@@ -135,3 +135,26 @@ impl<T, D: DetectionSource, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
         Ok(Some(queued))
     }
 }
+
+impl<T, D, C, S, R> RelayLoop<T, D, C, S, R>
+where
+    T: TelemetrySource,
+    D: DetectionSource,
+    C: Clock,
+    S: CotSink,
+    R: FnMut(&TrackSummary, u64) -> String,
+{
+    /// Runs a single iteration: poll telemetry, poll detections, step outbound.
+    pub fn step(&mut self) -> Result<StepReport, RelayError> {
+        let now_ms = self.clock.now_ms();
+        self.poll_telemetry()?;
+        self.poll_detections(now_ms)?;
+        let report = self.outbound.step(
+            now_ms,
+            &mut self.queue,
+            self.pipeline.metrics(),
+            &mut self.render,
+        );
+        Ok(report)
+    }
+}
