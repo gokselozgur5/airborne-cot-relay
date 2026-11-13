@@ -70,3 +70,22 @@ fn run_batches(queue: &mut BoundedQueue<TrackSummary>) {
             .for_each(|o| drop(queue.push(summary(o))));
     }
 }
+
+#[test]
+fn frames_and_detections_reach_the_sink_as_parsable_cot() {
+    let mut queue = BoundedQueue::new(64, DropPolicy::DropOldest);
+    run_batches(&mut queue);
+    let streamer = CotStreamer::new("127.0.0.1:0", "127.0.0.1:9", 5_000).unwrap();
+    let (mut sink, mut health) = (Recorder::default(), SendHealth::new(3));
+    while let Some(track) = queue.pop() {
+        let xml = streamer.build_cot_xml(&track, 1_700_000_000_000);
+        send_tracked(&mut sink, &mut health, xml.as_bytes()).unwrap();
+    }
+    let events: Vec<CotEvent> = sink
+        .0
+        .iter()
+        .map(|x| CotEvent::from_xml(x).unwrap())
+        .collect();
+    assert!(!events.is_empty());
+    assert!(events.iter().all(|e| e.uid.starts_with("TRACK-")));
+}
