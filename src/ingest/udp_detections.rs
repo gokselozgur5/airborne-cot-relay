@@ -2,6 +2,7 @@
 
 use crate::config::RelayError;
 use crate::targeter::TargetDetection;
+use std::net::{SocketAddr, ToSocketAddrs, UdpSocket};
 
 fn parse_f64(s: &str, field: &str) -> Result<f64, RelayError> {
     s.parse()
@@ -35,4 +36,28 @@ pub fn parse_detection_line(line: &str) -> Result<TargetDetection, RelayError> {
     })
 }
 
-pub struct UdpDetectionSource;
+pub struct UdpDetectionSource {
+    socket: UdpSocket,
+    buffer: Vec<u8>,
+    bad_lines: u64,
+}
+
+impl UdpDetectionSource {
+    pub fn new(socket: UdpSocket) -> Result<Self, RelayError> {
+        socket.set_nonblocking(true)?;
+        Ok(Self {
+            socket,
+            buffer: vec![0u8; 65535],
+            bad_lines: 0,
+        })
+    }
+
+    pub fn bind<A: ToSocketAddrs>(addr: A) -> Result<Self, RelayError> {
+        let socket = UdpSocket::bind(addr)?;
+        Self::new(socket)
+    }
+
+    pub fn local_addr(&self) -> Result<SocketAddr, RelayError> {
+        Ok(self.socket.local_addr()?)
+    }
+}
