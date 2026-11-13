@@ -20,3 +20,15 @@ impl<C> MonotonicClock<C> {
         }
     }
 }
+
+impl<C> MonotonicClock<C> {
+    /// Number of reads where the inner clock was behind the held value.
+    pub fn backward_steps(&self) -> u64 {
+        self.backward_steps.load(Ordering::SeqCst)
+    }
+
+    /// Returns the wrapped clock.
+    pub fn inner(&self) -> &C {
+        &self.inner
+    }
+}
