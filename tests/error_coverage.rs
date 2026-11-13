@@ -41,3 +41,16 @@ fn every_variant_is_a_std_error_without_source() {
         assert!(boxed.to_string().starts_with(prefix));
     }
 }
+
+#[test]
+fn equality_depends_on_variant_and_payload() {
+    let a = all_variants("a");
+    let b = all_variants("b");
+    for (i, (left, _)) in a.iter().enumerate() {
+        assert_eq!(left, &all_variants("a")[i].0);
+        assert_ne!(left, &b[i].0);
+        for (j, (right, _)) in a.iter().enumerate() {
+            assert_eq!(i == j, left == right, "{left:?} vs {right:?}");
+        }
+    }
+}
