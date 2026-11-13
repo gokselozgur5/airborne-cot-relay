@@ -60,4 +60,23 @@ impl UdpDetectionSource {
     pub fn local_addr(&self) -> Result<SocketAddr, RelayError> {
         Ok(self.socket.local_addr()?)
     }
+
+    pub fn bad_lines(&self) -> u64 {
+        self.bad_lines
+    }
+}
+
+pub fn parse_detection_lines(text: &str) -> (Vec<TargetDetection>, u64) {
+    let mut batch = Vec::new();
+    let mut bad = 0u64;
+    for line in text.lines() {
+        let t = line.trim();
+        if !t.is_empty() {
+            match parse_detection_line(t) {
+                Ok(det) => batch.push(det),
+                Err(_) => bad += 1,
+            }
+        }
+    }
+    (batch, bad)
 }
