@@ -17,3 +17,23 @@ fn covers_sixty_seconds_in_order() {
     assert!(m.windows(2).all(|w| w[0].timestamp_ms < w[1].timestamp_ms));
     assert!(m.last().unwrap().timestamp_ms - m[0].timestamp_ms >= 59_900);
 }
+
+#[test]
+fn every_frame_decodes_to_one_pose() {
+    let mut ingest = TelemetryIngest::new(37.7749, -122.4194, 0.0, 1_000);
+    for step in generate() {
+        let poses = ingest.process_bytes(&step.frame);
+        assert_eq!(poses.len(), 1);
+        assert_eq!(poses[0].timestamp_ms, step.timestamp_ms);
+    }
+    assert_eq!(ingest.decode_errors(), 0);
+}
+
+#[test]
+fn detections_stay_inside_the_image() {
+    let cam = CameraIntrinsics::default();
+    for d in generate().iter().flat_map(|s| s.detections.iter()) {
+        assert!((0.0..f64::from(cam.image_width)).contains(&d.pixel_u));
+        assert!((0.0..f64::from(cam.image_height)).contains(&d.pixel_v));
+    }
+}
