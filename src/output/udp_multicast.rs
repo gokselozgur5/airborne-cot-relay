@@ -19,4 +19,14 @@ impl UdpMulticastConfig {
         self.ttl = Some(ttl);
         self
     }
+
+    pub fn with_loopback(mut self, loopback: bool) -> Self {
+        self.loopback = Some(loopback);
+        self
+    }
+
+    pub fn with_outbound_interface(mut self, addr: Ipv4Addr) -> Self {
+        self.outbound_interface = Some(addr);
+        self
+    }
 }
