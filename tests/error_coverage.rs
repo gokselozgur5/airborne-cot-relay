@@ -1,7 +1,6 @@
 use airborne_cot_relay::RelayError;
 
 /// One value per variant; the exhaustive match fails to compile on a new one.
-#[allow(dead_code)]
 fn all_variants(msg: &str) -> Vec<(RelayError, &'static str)> {
     let list = vec![
         (RelayError::InvalidConfig(msg.into()), "Invalid config: "),
@@ -18,4 +17,18 @@ fn all_variants(msg: &str) -> Vec<(RelayError, &'static str)> {
         }
     }
     list
+}
+
+#[test]
+fn display_uses_variant_prefix() {
+    for (err, prefix) in all_variants("detail") {
+        assert_eq!(err.to_string(), format!("{prefix}detail"));
+    }
+}
+
+#[test]
+fn message_is_non_empty_even_without_detail() {
+    for (err, _) in all_variants("") {
+        assert!(!err.to_string().trim().is_empty(), "{err:?}");
+    }
 }
