@@ -27,3 +27,25 @@ impl Pipeline {
         })
     }
 }
+
+impl Pipeline {
+    /// Configuration the pipeline was built from.
+    pub fn config(&self) -> &RelayConfig {
+        &self.config
+    }
+
+    /// Shared metrics handle updated by every stage.
+    pub fn metrics(&self) -> &Arc<Metrics> {
+        &self.metrics
+    }
+
+    /// Latest pose decoded by the telemetry stage, if any.
+    pub fn latest_pose(&self) -> Option<crate::PlatformPose> {
+        self.ingest.latest_pose()
+    }
+
+    /// Ground-projection targeter used by the detection stage.
+    pub fn targeter(&self) -> &Targeter {
+        &self.targeter
+    }
+}
