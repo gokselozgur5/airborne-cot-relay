@@ -1,5 +1,6 @@
 //! Callsign template parser and <contact> element generator.
 
+use crate::enrich::DetailElement;
 use std::fmt;
 
 /// Errors when parsing a callsign template.
@@ -65,5 +66,30 @@ impl CallsignTemplate {
             tokens.push(TemplateToken::Literal(rest.to_string()));
         }
         Ok(Self { tokens, raw: template.to_string() })
+    }
+
+    /// Formats callsign from prefix, class, and track id.
+    pub fn format(&self, prefix: &str, class: &str, id: u64) -> String {
+        let mut out = String::new();
+        for token in &self.tokens {
+            match token {
+                TemplateToken::Literal(s) => out.push_str(s),
+                TemplateToken::Prefix => out.push_str(prefix),
+                TemplateToken::Class => out.push_str(class),
+                TemplateToken::Id => out.push_str(&id.to_string()),
+            }
+        }
+        out
+    }
+
+    /// Builds a <contact callsign="..."> detail element.
+    pub fn build_contact(&self, prefix: &str, class: &str, id: u64) -> DetailElement {
+        DetailElement::new("contact").attr("callsign", self.format(prefix, class, id))
+    }
+}
+
+impl Default for CallsignTemplate {
+    fn default() -> Self {
+        Self::parse("{prefix}-{class}-{id}").expect("valid default template")
     }
 }
