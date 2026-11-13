@@ -22,3 +22,10 @@ fn forward_progress_resumes_without_counting() {
     assert_eq!(clock.now_ms(), 60_500);
     assert_eq!(clock.backward_steps(), 1);
 }
+
+fn assert_send_sync<T: Send + Sync>() {}
+
+#[test]
+fn monotonic_clock_is_send_and_sync() {
+    assert_send_sync::<MonotonicClock<ManualClock>>();
+}
