@@ -1,6 +1,7 @@
 //! Runs the mock mission through ingest, targeter, track filter and CoT output.
 use crate::config::{RelayConfig, RelayError};
-use crate::relay::{CotStreamer, TrackSummary};
+use crate::metrics::Metrics;
+use crate::relay::{Clock, CotStreamer, SystemClock, TrackSummary};
 use crate::targeter::{Targeter, TrackedObject};
 use crate::telemetry::TelemetryIngest;
 use crate::track_filter::{FilterConfig, ManualClock, TrackFilter};
@@ -41,5 +42,22 @@ fn to_summary(t: &TrackedObject) -> TrackSummary {
         le90_m: 10.0,
         course_deg: t.course_deg,
         speed_mps: t.speed_mps,
+    }
+}
+
+impl MockRelay {
+    /// Sends one track stamped with wall time; returns 1 when it was sent.
+    fn emit(&self, track: &TrackedObject, metrics: &Metrics) -> u64 {
+        let now_ms = SystemClock.now_ms();
+        match self.streamer.send_track(&to_summary(track), now_ms) {
+            Ok(_) => {
+                metrics.record_sent(now_ms.max(0) as u64);
+                1
+            }
+            Err(_) => {
+                metrics.add_dropped(1);
+                0
+            }
+        }
     }
 }
