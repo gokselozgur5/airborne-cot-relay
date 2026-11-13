@@ -62,3 +62,30 @@ fn default_pipeline() -> Pipeline {
         .unwrap()
         .with_origin(35.0, 139.0, 0.0)
 }
+
+fn build_loop(
+    telem: Vec<Vec<u8>>,
+    dets: Vec<Vec<TargetDetection>>,
+    limit: RunLimit,
+    shutdown: ShutdownSignal,
+) -> RelayLoop<
+    VecTelemetrySource,
+    VecDetectionSource,
+    ManualClock,
+    ScriptedSink,
+    impl FnMut(&TrackSummary, u64) -> String,
+> {
+    let queue = BoundedQueue::new(16, DropPolicy::DropOldest);
+    let render = |t: &TrackSummary, now: u64| format!("TRACK-{:04}@{now}", t.id);
+    RelayLoop::new(
+        VecTelemetrySource::new(telem),
+        VecDetectionSource::new(dets),
+        default_pipeline(),
+        queue,
+        build_filter_step(),
+        ManualClock::new(1_000),
+        shutdown,
+        limit,
+        render,
+    )
+}
