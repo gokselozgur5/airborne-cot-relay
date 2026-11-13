@@ -3,6 +3,7 @@ pub mod bearing;
 pub mod clock;
 pub mod config;
 pub mod error;
+pub mod ingest;
 pub mod relay;
 pub mod telemetry;
 
