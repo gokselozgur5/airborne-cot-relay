@@ -1,5 +1,6 @@
 //! Clock wrapper that never steps backward.
 
+use super::Clock;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 /// Wraps a clock and holds the last value when the inner clock steps back.
@@ -30,5 +31,17 @@ impl<C> MonotonicClock<C> {
     /// Returns the wrapped clock.
     pub fn inner(&self) -> &C {
         &self.inner
+    }
+}
+
+impl<C: Clock> Clock for MonotonicClock<C> {
+    fn now_ms(&self) -> u64 {
+        let now = self.inner.now_ms();
+        let prev = self.last_ms.fetch_max(now, Ordering::SeqCst);
+        if now < prev {
+            self.backward_steps.fetch_add(1, Ordering::SeqCst);
+            return prev;
+        }
+        now
     }
 }
