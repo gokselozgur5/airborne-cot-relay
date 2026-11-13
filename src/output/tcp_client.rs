@@ -21,3 +21,20 @@ impl Default for TcpClientConfig {
         }
     }
 }
+
+impl TcpClientConfig {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_connect_timeout(mut self, timeout: Duration) -> Self {
+        self.connect_timeout = Some(timeout);
+        self
+    }
+
+    pub fn with_backoff(mut self, base_ms: u64, max_ms: u64) -> Self {
+        self.backoff_base_ms = base_ms;
+        self.backoff_max_ms = max_ms;
+        self
+    }
+}
