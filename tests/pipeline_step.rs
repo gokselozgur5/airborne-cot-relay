@@ -59,3 +59,18 @@ fn stepper(fail: bool) -> OutboundStep<ManualClock, Recorder> {
     };
     OutboundStep::new(filter, sink, SendHealth::new(3))
 }
+
+#[test]
+fn one_step_drains_queue_resets_gauge_and_evicts_stale() {
+    let metrics = Metrics::new();
+    metrics.set_queue_depth(2);
+    let mut queue = queue_of(vec![track(1, 35.0), track(2, 35.1)]);
+    let mut step = stepper(false);
+    let report = step.step(5_000, &mut queue, &metrics, render);
+    assert!(queue.is_empty());
+    assert_eq!(metrics.snapshot(5_000).queue_depth, 0);
+    assert_eq!(report.evicted, 1);
+    assert_eq!(report.sent, 2);
+    assert_eq!(step.filter().tracked_count(), 2);
+    assert_eq!(step.sink().payloads, ["TRACK-0001@5000", "TRACK-0002@5000"]);
+}
