@@ -60,3 +60,22 @@ impl Clock for ManualClock {
         self.now_ms.load(Ordering::SeqCst)
     }
 }
+
+impl ManualClock {
+    /// Moves the clock forward by `delta_ms`, saturating at `u64::MAX`.
+    pub fn advance_ms(&self, delta_ms: u64) {
+        let mut cur = self.now_ms.load(Ordering::SeqCst);
+        let next = |t: u64| t.saturating_add(delta_ms);
+        while let Err(seen) =
+            self.now_ms
+                .compare_exchange_weak(cur, next(cur), Ordering::SeqCst, Ordering::SeqCst)
+        {
+            cur = seen;
+        }
+    }
+
+    /// Sets the clock to `now_ms`; backward steps are allowed.
+    pub fn set_ms(&self, now_ms: u64) {
+        self.now_ms.store(now_ms, Ordering::SeqCst);
+    }
+}
