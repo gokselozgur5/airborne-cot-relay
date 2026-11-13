@@ -39,3 +39,16 @@ pub struct UdpMulticastSink {
     ttl: u32,
     loopback: bool,
 }
+
+impl UdpMulticastSink {
+    fn bind_socket(target: SocketAddr, iface: Option<Ipv4Addr>) -> Result<UdpSocket, RelayError> {
+        let bind_addr = match iface {
+            Some(ip) => SocketAddr::from((ip, 0)),
+            None => match target {
+                SocketAddr::V4(_) => SocketAddr::from(([0, 0, 0, 0], 0)),
+                SocketAddr::V6(_) => SocketAddr::from(([0; 16], 0)),
+            },
+        };
+        UdpSocket::bind(bind_addr).map_err(RelayError::from)
+    }
+}
