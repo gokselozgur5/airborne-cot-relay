@@ -3,10 +3,8 @@
 use std::cell::Cell;
 use std::collections::HashMap;
 
-/// Source of monotonic time in milliseconds.
-pub trait Clock {
-    fn now_ms(&self) -> u64;
-}
+/// Source of time in milliseconds, shared with the rest of the crate.
+pub use crate::clock::Clock;
 
 /// Manually advanced clock for deterministic tests.
 #[derive(Debug, Default)]
