@@ -75,3 +75,26 @@ impl fmt::Display for HttpError {
 }
 
 impl std::error::Error for HttpError {}
+/// Parse an HTTP/1.1 request line from a raw string slice.
+pub fn parse_request_line(raw: &str) -> Result<RequestLine, HttpError> {
+    if raw.len() > MAX_REQUEST_LINE_BYTES {
+        return Err(HttpError::OversizedRequestLine);
+    }
+    let trimmed = raw.trim_end_matches(['\r', '\n']);
+    let parts: Vec<&str> = trimmed.split(' ').collect();
+    if parts.len() != 3 {
+        return Err(HttpError::MalformedRequestLine("expected 3 tokens".into()));
+    }
+    let (method_raw, path, version) = (parts[0], parts[1], parts[2]);
+    if method_raw.is_empty() || path.is_empty() || version.is_empty() {
+        return Err(HttpError::MalformedRequestLine("empty token".into()));
+    }
+    if !path.starts_with('/') {
+        return Err(HttpError::MalformedRequestLine("path must start with /".into()));
+    }
+    if !version.starts_with("HTTP/") {
+        return Err(HttpError::MalformedRequestLine("invalid version prefix".into()));
+    }
+    let method = Method::from_str_slice(method_raw);
+    Ok(RequestLine::new(method, path, version))
+}
