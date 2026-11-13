@@ -22,3 +22,31 @@ pub struct RelayLoop<T, D, C: Clock, S: CotSink, R> {
     limit: RunLimit,
     render: R,
 }
+
+impl<T, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
+    /// Builds a new loop from sources, pipeline, queue, outbound step and controls.
+    #[allow(clippy::too_many_arguments)]
+    pub fn new(
+        telemetry: T,
+        detections: D,
+        pipeline: Pipeline,
+        queue: BoundedQueue<TrackSummary>,
+        outbound: OutboundStep<C, S>,
+        clock: C,
+        shutdown: ShutdownSignal,
+        limit: RunLimit,
+        render: R,
+    ) -> Self {
+        Self {
+            telemetry,
+            detections,
+            pipeline,
+            queue,
+            outbound,
+            clock,
+            shutdown,
+            limit,
+            render,
+        }
+    }
+}
