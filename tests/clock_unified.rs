@@ -39,3 +39,9 @@ fn system_clock_never_decreases() {
     }
     assert!(prev > 1_700_000_000_000);
 }
+
+#[test]
+fn system_clock_new_constructs_instance() {
+    let clock = SystemClock::new();
+    assert!(clock.now_ms() > 1_700_000_000_000);
+}
