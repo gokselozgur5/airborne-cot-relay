@@ -30,3 +30,24 @@ impl PipelineStatsTracker {
         self.total_dropped = self.total_dropped.saturating_add(count);
     }
 }
+
+impl PipelineStatsTracker {
+    /// Returns total received packet count.
+    pub fn total_received(&self) -> u64 {
+        self.total_received
+    }
+
+    /// Returns total dropped packet count.
+    pub fn total_dropped(&self) -> u64 {
+        self.total_dropped
+    }
+
+    /// Computes packet drop rate between 0.0 and 1.0.
+    pub fn drop_rate(&self) -> f64 {
+        if self.total_received == 0 {
+            0.0
+        } else {
+            self.total_dropped as f64 / self.total_received as f64
+        }
+    }
+}
