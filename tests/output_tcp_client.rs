@@ -27,3 +27,14 @@ fn test_tcp_client_sink_deliver_payload() {
     let n = stream.read(&mut buf).unwrap();
     assert_eq!(&buf[..n], payload);
 }
+
+#[test]
+fn test_tcp_client_sink_connect_failure_backoff() {
+    let dummy_addr: std::net::SocketAddr = "127.0.0.1:1".parse().unwrap();
+    let cfg = TcpClientConfig::new().with_backoff(25, 500);
+    let mut sink = TcpClientSink::new(dummy_addr, cfg);
+    assert_eq!(sink.backoff().attempt(), 0);
+    let err = sink.send(b"data");
+    assert!(err.is_err());
+    assert_eq!(sink.backoff().attempt(), 1);
+}
