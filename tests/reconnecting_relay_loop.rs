@@ -65,3 +65,20 @@ fn test_reconnecting_relay_loop_capacity_and_drop_policy() {
     assert_eq!(snap.queue_depth, 2);
     assert_eq!(snap.dropped, 1);
 }
+
+struct TrackingSink {
+    fails: bool,
+    partial: bool,
+}
+
+impl CotSink for TrackingSink {
+    fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
+        if self.fails {
+            return Err(RelayError::IoError("send failed".into()));
+        }
+        if self.partial {
+            return Ok(payload.len().saturating_sub(1));
+        }
+        Ok(payload.len())
+    }
+}
