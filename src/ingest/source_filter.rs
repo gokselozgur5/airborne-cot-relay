@@ -23,4 +23,19 @@ impl SourceFilter {
     pub fn rejected_count(&self) -> u64 {
         self.rejected
     }
+
+    /// Returns true if the IP address is allowed.
+    pub fn is_allowed(&self, addr: &IpAddr) -> bool {
+        self.allowed.contains(addr)
+    }
+
+    /// Checks an incoming address, updating the rejected count if disallowed.
+    pub fn check(&mut self, addr: &IpAddr) -> bool {
+        if self.is_allowed(addr) {
+            true
+        } else {
+            self.rejected = self.rejected.saturating_add(1);
+            false
+        }
+    }
 }
