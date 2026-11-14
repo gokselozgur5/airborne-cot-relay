@@ -4,3 +4,23 @@ use std::io::{self, Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream, ToSocketAddrs};
 
 pub type RouteHandler = Box<dyn Fn(&RequestLine) -> HttpResponse + Send + Sync>;
+
+#[derive(Default)]
+pub struct Router {
+    routes: HashMap<String, RouteHandler>,
+}
+
+impl Router {
+    pub fn new() -> Self {
+        Self {
+            routes: HashMap::new(),
+        }
+    }
+
+    pub fn add_route<F>(&mut self, path: impl Into<String>, handler: F)
+    where
+        F: Fn(&RequestLine) -> HttpResponse + Send + Sync + 'static,
+    {
+        self.routes.insert(path.into(), Box::new(handler));
+    }
+}
