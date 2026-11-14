@@ -25,6 +25,12 @@ impl<C> RelayClockAdapter<C> {
     }
 }
 
+impl<C> From<C> for RelayClockAdapter<C> {
+    fn from(clock: C) -> Self {
+        Self(clock)
+    }
+}
+
 impl<C: Clock> crate::relay::Clock for RelayClockAdapter<C> {
     fn now_ms(&self) -> i64 {
         i64::try_from(self.0.now_ms()).unwrap_or(i64::MAX)
