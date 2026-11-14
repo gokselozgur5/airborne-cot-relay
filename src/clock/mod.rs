@@ -31,6 +31,13 @@ pub struct SystemClock {
     last_ms: AtomicU64,
 }
 
+impl SystemClock {
+    /// Creates a new non-decreasing system clock.
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
 impl Clock for SystemClock {
     fn now_ms(&self) -> u64 {
         let wall = std::time::SystemTime::now()
