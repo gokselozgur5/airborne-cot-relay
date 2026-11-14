@@ -18,6 +18,23 @@ impl<C: Clock> crate::relay::Clock for RelayClockAdapter<C> {
 #[derive(Debug, Default, Clone, Copy)]
 pub struct HealthTimeAdapter<C>(pub C);
 
+impl<C> HealthTimeAdapter<C> {
+    /// Wraps a clock in a health time adapter.
+    pub fn new(clock: C) -> Self {
+        Self(clock)
+    }
+
+    /// Borrows the underlying clock.
+    pub fn inner(&self) -> &C {
+        &self.0
+    }
+
+    /// Consumes the adapter, returning the underlying clock.
+    pub fn into_inner(self) -> C {
+        self.0
+    }
+}
+
 impl<C: Clock> crate::health::TimeSource for HealthTimeAdapter<C> {
     fn now(&self) -> std::time::Duration {
         std::time::Duration::from_millis(self.0.now_ms())
