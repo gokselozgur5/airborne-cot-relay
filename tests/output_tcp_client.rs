@@ -38,3 +38,17 @@ fn test_tcp_client_sink_connect_failure_backoff() {
     assert!(err.is_err());
     assert_eq!(sink.backoff().attempt(), 1);
 }
+
+#[test]
+fn test_tcp_client_sink_fast_fails_during_backoff_window() {
+    let dummy_addr: std::net::SocketAddr = "127.0.0.1:1".parse().unwrap();
+    let cfg = TcpClientConfig::new().with_backoff(10_000, 20_000);
+    let mut sink = TcpClientSink::new(dummy_addr, cfg);
+    assert_eq!(sink.backoff().attempt(), 0);
+    let err1 = sink.send(b"packet-1");
+    assert!(err1.is_err());
+    assert_eq!(sink.backoff().attempt(), 1);
+    let err2 = sink.send(b"packet-2");
+    assert!(err2.is_err());
+    assert_eq!(sink.backoff().attempt(), 1);
+}
