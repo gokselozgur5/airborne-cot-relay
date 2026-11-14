@@ -97,3 +97,15 @@ pub(crate) fn apply_http_section(
     }
     Ok(())
 }
+
+/// Maps `[http]` section from `ini` onto `base`.
+pub fn map_http_config(
+    ini: &ParsedIni,
+    base: &HttpServiceConfig,
+) -> Result<HttpServiceConfig, RelayError> {
+    let mut config = base.clone();
+    if let Some(sec) = ini.section("http") {
+        apply_http_section(&mut config, sec)?;
+    }
+    Ok(config)
+}
