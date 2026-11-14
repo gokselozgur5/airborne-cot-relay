@@ -42,3 +42,15 @@ impl FromStr for LogFormat {
         }
     }
 }
+
+/// Configuration for the HTTP status and health service.
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct HttpServiceConfig {
+    pub bind: Option<SocketAddr>,
+}
+
+impl HttpServiceConfig {
+    pub fn is_enabled(&self) -> bool {
+        self.bind.is_some()
+    }
+}
