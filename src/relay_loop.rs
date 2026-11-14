@@ -53,3 +53,27 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
         dropped
     }
 }
+
+impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRelayLoop<S, C, F> {
+    fn try_reconnect(&mut self) {
+        let now = self.clock.now_ms();
+        if let Some(deadline) = self.reconnect_deadline_ms {
+            if now < deadline {
+                return;
+            }
+        }
+        self.metrics.add_reconnect();
+        match (self.factory)() {
+            Ok(new_sink) => {
+                self.sink = new_sink;
+                self.health = SendHealth::new(3);
+                self.backoff.reset();
+                self.reconnect_deadline_ms = None;
+            }
+            Err(_) => {
+                let delay = self.backoff.next_delay_ms();
+                self.reconnect_deadline_ms = Some(now.saturating_add(delay as i64));
+            }
+        }
+    }
+}
