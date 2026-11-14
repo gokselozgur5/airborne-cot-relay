@@ -13,6 +13,7 @@ impl From<std::io::Error> for RelayError {
     }
 }
 
+pub mod class;
 mod codec;
 mod cot;
 pub mod exit;
