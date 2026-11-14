@@ -2,7 +2,7 @@ use crate::config::RelayError;
 use crate::relay::{Backoff, CotSink};
 use std::io::Write;
 use std::net::{SocketAddr, TcpStream};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 /// Configuration options for the TCP client sink.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -46,6 +46,7 @@ pub struct TcpClientSink {
     config: TcpClientConfig,
     stream: Option<TcpStream>,
     backoff: Backoff,
+    next_connect_deadline: Option<Instant>,
 }
 
 impl TcpClientSink {
@@ -56,6 +57,7 @@ impl TcpClientSink {
             config,
             stream: None,
             backoff,
+            next_connect_deadline: None,
         }
     }
 
