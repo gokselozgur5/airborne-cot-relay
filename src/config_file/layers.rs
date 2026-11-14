@@ -19,3 +19,16 @@ impl std::fmt::Display for Provenance {
         }
     }
 }
+
+/// A value paired with its origin layer.
+#[derive(Debug, Clone, PartialEq)]
+pub struct LayeredValue<T> {
+    pub value: T,
+    pub provenance: Provenance,
+}
+
+impl<T> LayeredValue<T> {
+    pub fn new(value: T, provenance: Provenance) -> Self {
+        Self { value, provenance }
+    }
+}
