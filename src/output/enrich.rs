@@ -46,3 +46,20 @@ impl CotDetail {
         self
     }
 }
+
+impl CotDetail {
+    pub fn to_xml(&self) -> String {
+        let mut out = format!("<{}", self.tag);
+        for (k, v) in &self.attributes {
+            out.push_str(&format!(" {k}=\"{}\"", escape_xml_attr(v)));
+        }
+        if let Some(t) = &self.text {
+            out.push('>');
+            out.push_str(&escape_xml_attr(t));
+            out.push_str(&format!("</{}>", self.tag));
+        } else {
+            out.push_str("/>");
+        }
+        out
+    }
+}
