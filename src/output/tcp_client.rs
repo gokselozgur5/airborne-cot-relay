@@ -47,3 +47,31 @@ pub struct TcpClientSink {
     stream: Option<TcpStream>,
     backoff: Backoff,
 }
+
+impl TcpClientSink {
+    pub fn new(target_addr: SocketAddr, config: TcpClientConfig) -> Self {
+        let backoff = Backoff::new(config.backoff_base_ms, config.backoff_max_ms);
+        Self {
+            target_addr,
+            config,
+            stream: None,
+            backoff,
+        }
+    }
+
+    pub fn with_defaults(target_addr: SocketAddr) -> Self {
+        Self::new(target_addr, TcpClientConfig::default())
+    }
+
+    pub fn target_addr(&self) -> SocketAddr {
+        self.target_addr
+    }
+
+    pub fn is_connected(&self) -> bool {
+        self.stream.is_some()
+    }
+
+    pub fn backoff(&self) -> &Backoff {
+        &self.backoff
+    }
+}
