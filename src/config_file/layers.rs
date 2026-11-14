@@ -8,3 +8,14 @@ pub enum Provenance {
     Env,
     Cli,
 }
+
+impl std::fmt::Display for Provenance {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Default => write!(f, "default"),
+            Self::File => write!(f, "file"),
+            Self::Env => write!(f, "env"),
+            Self::Cli => write!(f, "cli"),
+        }
+    }
+}
