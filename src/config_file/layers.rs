@@ -46,3 +46,16 @@ pub struct CameraLayers {
     pub image_width: LayeredValue<u32>,
     pub image_height: LayeredValue<u32>,
 }
+
+impl Default for CameraLayers {
+    fn default() -> Self {
+        let def = CameraIntrinsics::default();
+        Self {
+            focal_length_px: LayeredValue::new(def.focal_length_px, Provenance::Default),
+            principal_u: LayeredValue::new(def.principal_u, Provenance::Default),
+            principal_v: LayeredValue::new(def.principal_v, Provenance::Default),
+            image_width: LayeredValue::new(def.image_width, Provenance::Default),
+            image_height: LayeredValue::new(def.image_height, Provenance::Default),
+        }
+    }
+}
