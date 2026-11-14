@@ -4,6 +4,7 @@ pub mod limit;
 pub mod reconnect;
 pub mod relay_loop;
 pub mod signal;
+pub mod sink_recovery;
 pub mod sleep;
 pub mod source;
 
