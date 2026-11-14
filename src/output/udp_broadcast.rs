@@ -20,3 +20,13 @@ impl UdpBroadcastSink {
         Ok(Self { socket, target_addr: target })
     }
 }
+
+impl UdpBroadcastSink {
+    pub fn target_addr(&self) -> SocketAddr {
+        self.target_addr
+    }
+
+    pub fn socket(&self) -> &UdpSocket {
+        &self.socket
+    }
+}
