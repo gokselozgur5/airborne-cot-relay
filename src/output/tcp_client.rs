@@ -46,3 +46,27 @@ impl TcpClientSink {
     }
 
     /// Closes the TCP stream.
+    pub async fn close(&mut self) -> Result<(), std::io::Error> {
+        if let Some(stream) = &self.stream {
+            stream.close().await?;
+            self.stream = None;
+            Ok(())
+        } else {
+            Err(std::io::Error::new(std::io::ErrorKind::ConnectionRefused, "No connection established"))
+        }
+    }
+}
+
+/// A builder for `TcpClientSink`.
+pub struct TcpClientSinkBuilder {
+    backoff: Backoff,
+}
+
+impl TcpClientSinkBuilder {
+    /// Sets the backoff schedule.
+    pub fn with_backoff(mut self, backoff: Backoff) -> Self {
+        self.backoff = backoff;
+        self
+    }
+
+    /// Builds a `TcpClientSink`.
