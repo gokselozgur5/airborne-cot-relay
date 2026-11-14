@@ -39,3 +39,19 @@ pub fn format_json(record: &Record<'_>) -> String {
     out.push('}');
     out
 }
+
+/// Structured logger writing newline-delimited JSON lines.
+pub struct JsonLogger<W: Write + Send + 'static> {
+    level: Level,
+    writer: Mutex<W>,
+}
+
+impl<W: Write + Send + 'static> JsonLogger<W> {
+    /// Creates a new JsonLogger.
+    pub fn new(level: Level, writer: W) -> Self {
+        Self {
+            level,
+            writer: Mutex::new(writer),
+        }
+    }
+}
