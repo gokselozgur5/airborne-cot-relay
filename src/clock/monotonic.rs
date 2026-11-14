@@ -32,6 +32,11 @@ impl<C> MonotonicClock<C> {
     pub fn inner(&self) -> &C {
         &self.inner
     }
+
+    /// Consumes the monotonic wrapper, returning the wrapped clock.
+    pub fn into_inner(self) -> C {
+        self.inner
+    }
 }
 
 impl<C: Clock> Clock for MonotonicClock<C> {
