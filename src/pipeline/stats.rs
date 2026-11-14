@@ -51,3 +51,14 @@ impl PipelineStatsTracker {
         }
     }
 }
+
+impl PipelineStatsTracker {
+    /// Computes packets per second throughput over the configured time window.
+    pub fn throughput_pps(&self) -> f64 {
+        if self.time_window_sec <= 0.0 {
+            0.0
+        } else {
+            self.total_received as f64 / self.time_window_sec
+        }
+    }
+}
