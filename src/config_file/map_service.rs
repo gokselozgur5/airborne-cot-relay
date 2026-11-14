@@ -22,3 +22,23 @@ impl LogFormat {
         }
     }
 }
+
+impl fmt::Display for LogFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl FromStr for LogFormat {
+    type Err = RelayError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().to_ascii_lowercase().as_str() {
+            "text" | "plain" => Ok(Self::Text),
+            "json" => Ok(Self::Json),
+            other => Err(RelayError::InvalidConfig(format!(
+                "invalid log format: '{other}'"
+            ))),
+        }
+    }
+}
