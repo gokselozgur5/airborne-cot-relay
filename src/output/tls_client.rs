@@ -30,4 +30,14 @@ impl TlsClientConfig {
         self
     }
 
+    pub fn with_client_identity(mut self, cert: impl Into<String>, key: impl Into<String>) -> Self {
+        self.client_cert_path = Some(cert.into());
+        self.client_key_path = Some(key.into());
+        self
+    }
+
+    pub fn with_verify_peer(mut self, verify: bool) -> Self {
+        self.verify_peer = verify;
+        self
+    }
 }
