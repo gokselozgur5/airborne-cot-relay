@@ -1,4 +1,3 @@
-
 /// Error classification for relay errors.
 #[derive(Debug)]
 pub enum ErrorClass {
