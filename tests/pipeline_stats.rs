@@ -10,3 +10,10 @@ fn test_pipeline_stats_tracker_throughput_and_drop_rate() {
     let drop_rate = tracker.drop_rate();
     assert!((drop_rate - 0.10).abs() < 1e-6);
 }
+
+#[test]
+fn test_pipeline_stats_tracker_throughput_and_window() {
+    let mut tracker = PipelineStatsTracker::new(2.0);
+    tracker.record_received(50);
+    assert!((tracker.throughput_pps() - 25.0).abs() < 1e-6);
+}
