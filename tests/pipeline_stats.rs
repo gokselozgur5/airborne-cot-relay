@@ -27,3 +27,9 @@ fn test_pipeline_stats_tracker_reset() {
     assert_eq!(tracker.total_received(), 0);
     assert_eq!(tracker.total_dropped(), 0);
 }
+
+#[test]
+fn test_pipeline_stats_tracker_window_accessor() {
+    let tracker = PipelineStatsTracker::new(5.0);
+    assert!((tracker.time_window_sec() - 5.0).abs() < 1e-6);
+}
