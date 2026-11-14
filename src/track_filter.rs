@@ -4,7 +4,7 @@ use std::cell::Cell;
 use std::collections::HashMap;
 
 /// Source of time in milliseconds, shared with the rest of the crate.
-pub use crate::clock::Clock;
+pub use crate::clock::{Clock, SystemClock};
 
 /// Manually advanced clock for deterministic tests.
 #[derive(Debug, Default)]
