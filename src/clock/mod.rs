@@ -25,6 +25,12 @@ impl<C: Clock + ?Sized> Clock for Arc<C> {
     }
 }
 
+impl<C: Clock + ?Sized> Clock for Box<C> {
+    fn now_ms(&self) -> u64 {
+        (**self).now_ms()
+    }
+}
+
 /// Wall clock that never returns less than a value it already returned.
 #[derive(Debug, Default)]
 pub struct SystemClock {
