@@ -40,4 +40,16 @@ impl TlsClientConfig {
         self.verify_peer = verify;
         self
     }
+
+    pub fn validate(&self) -> Result<(), RelayError> {
+        if self.server_name.is_empty() {
+            return Err(RelayError::InvalidConfig("empty TLS server name".into()));
+        }
+        if self.client_cert_path.is_some() != self.client_key_path.is_some() {
+            return Err(RelayError::InvalidConfig(
+                "client cert and key must be set together".into(),
+            ));
+        }
+        Ok(())
+    }
 }
