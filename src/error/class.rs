@@ -31,4 +31,9 @@ impl ErrorClass {
     pub fn is_retryable(self) -> bool {
         self == ErrorClass::Retryable
     }
+
+    /// True when the item should be dropped and processing continue.
+    pub fn is_droppable(self) -> bool {
+        self == ErrorClass::Droppable
+    }
 }
