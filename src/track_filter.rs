@@ -22,6 +22,14 @@ impl ManualClock {
     pub fn advance(&self, delta_ms: u64) {
         self.0.set(self.0.get() + delta_ms);
     }
+
+    pub fn advance_ms(&self, delta_ms: u64) {
+        self.advance(delta_ms);
+    }
+
+    pub fn set_ms(&self, now_ms: u64) {
+        self.set(now_ms);
+    }
 }
 
 impl Clock for ManualClock {
