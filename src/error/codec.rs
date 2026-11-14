@@ -12,6 +12,12 @@ impl From<ProtoError> for RelayError {
     }
 }
 
+impl From<&ProtoError> for RelayError {
+    fn from(err: &ProtoError) -> Self {
+        RelayError::DecodeError(format!("TAK protobuf: {err:?}"))
+    }
+}
+
 impl From<sightline_cot::mgrs::GridError> for RelayError {
     fn from(err: sightline_cot::mgrs::GridError) -> Self {
         RelayError::DecodeError(format!("MGRS grid: {err:?}"))
