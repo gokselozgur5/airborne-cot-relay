@@ -22,3 +22,4 @@ async fn test_breaker_sink() {
 
     // Check if the rejected count is reset to zero
     assert_eq!(mock_cot_sink.rejected_count(), 0);
+}
