@@ -45,3 +45,23 @@ fn test_reconnecting_relay_loop_enqueue_and_drain() {
     assert_eq!(snap.queue_depth, 0);
     assert_eq!(snap.sent, 2);
 }
+
+#[test]
+fn test_reconnecting_relay_loop_capacity_and_drop_policy() {
+    let clock = ManualClock::new(100);
+    let metrics = Arc::new(Metrics::new());
+    let mut loop_inst = ReconnectingRelayLoop::new(
+        MockSink,
+        || Ok(MockSink),
+        2,
+        DropPolicy::DropOldest,
+        clock,
+        Arc::clone(&metrics),
+    );
+    loop_inst.enqueue(b"a".to_vec());
+    loop_inst.enqueue(b"b".to_vec());
+    loop_inst.enqueue(b"c".to_vec());
+    let snap = metrics.snapshot(100);
+    assert_eq!(snap.queue_depth, 2);
+    assert_eq!(snap.dropped, 1);
+}
