@@ -8,6 +8,13 @@ use super::Clock;
 #[derive(Debug, Default, Clone, Copy)]
 pub struct RelayClockAdapter<C>(pub C);
 
+impl<C> RelayClockAdapter<C> {
+    /// Creates a new adapter wrapping `clock`.
+    pub fn new(clock: C) -> Self {
+        Self(clock)
+    }
+}
+
 impl<C: Clock> crate::relay::Clock for RelayClockAdapter<C> {
     fn now_ms(&self) -> i64 {
         i64::try_from(self.0.now_ms()).unwrap_or(i64::MAX)
