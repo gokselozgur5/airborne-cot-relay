@@ -2,6 +2,7 @@
 
 pub mod lexer;
 pub mod map_filter;
+pub mod map_inputs;
 pub mod map_relay;
 
 pub use lexer::{IniEntry, IniSection, LexerError, ParsedIni};
