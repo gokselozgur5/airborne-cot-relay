@@ -17,3 +17,13 @@ fn test_pipeline_stats_tracker_throughput_and_window() {
     tracker.record_received(50);
     assert!((tracker.throughput_pps() - 25.0).abs() < 1e-6);
 }
+
+#[test]
+fn test_pipeline_stats_tracker_reset() {
+    let mut tracker = PipelineStatsTracker::new(1.0);
+    tracker.record_received(100);
+    tracker.record_dropped(10);
+    tracker.reset();
+    assert_eq!(tracker.total_received(), 0);
+    assert_eq!(tracker.total_dropped(), 0);
+}
