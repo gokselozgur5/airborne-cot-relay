@@ -59,3 +59,23 @@ fn test_router_dispatch_405_method_not_allowed() {
     let res = String::from_utf8_lossy(&buf[..n]);
     assert!(res.contains("405 Method Not Allowed"));
 }
+
+#[test]
+fn test_router_dispatch_400_bad_request_oversized() {
+    let router = Router::new();
+    let mut server = HttpServer::bind("127.0.0.1:0", router).unwrap();
+    let addr = server.local_addr().unwrap();
+
+    let mut stream = TcpStream::connect(addr).unwrap();
+    let mut bad_payload = vec![b'A'; 8193];
+    bad_payload.extend_from_slice(b"\r\n\r\n");
+    stream.write_all(&bad_payload).unwrap();
+
+    let handled = server.poll_step().unwrap();
+    assert!(handled);
+
+    let mut buf = [0u8; 1024];
+    let n = stream.read(&mut buf).unwrap();
+    let res = String::from_utf8_lossy(&buf[..n]);
+    assert!(res.contains("400 Bad Request"));
+}
