@@ -62,9 +62,9 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
                 return;
             }
         }
-        self.metrics.add_reconnect();
         match (self.factory)() {
             Ok(new_sink) => {
+                self.metrics.add_reconnect();
                 self.sink = new_sink;
                 self.health = SendHealth::new(3);
                 self.backoff.reset();
