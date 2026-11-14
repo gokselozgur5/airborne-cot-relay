@@ -33,3 +33,10 @@ fn borrowed_io_error_keeps_kind_name() {
     assert!(err.to_string().contains("BrokenPipe"), "{err}");
     assert!(err.to_string().contains("pipe broken"), "{err}");
 }
+
+#[test]
+fn error_kind_preserves_name() {
+    let err = RelayError::from(ErrorKind::TimedOut);
+    assert!(matches!(err, RelayError::IoError(_)));
+    assert!(err.to_string().contains("TimedOut"), "{err}");
+}
