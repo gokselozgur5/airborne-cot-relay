@@ -46,3 +46,10 @@ fn as_str_returns_canonical_classifier_label() {
     assert_eq!(ErrorClass::Retryable.as_str(), "retryable");
     assert_eq!(ErrorClass::Droppable.as_str(), "droppable");
 }
+
+#[test]
+fn display_formats_error_class_using_as_str() {
+    assert_eq!(format!("{}", ErrorClass::Fatal), "fatal");
+    assert_eq!(format!("{}", ErrorClass::Retryable), "retryable");
+    assert_eq!(format!("{}", ErrorClass::Droppable), "droppable");
+}
