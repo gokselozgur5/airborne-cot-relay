@@ -76,3 +76,16 @@ impl HttpServer {
         Ok(())
     }
 }
+
+impl HttpServer {
+    pub fn poll_step(&mut self) -> io::Result<bool> {
+        match self.listener.accept() {
+            Ok((stream, _)) => {
+                self.handle_connection(stream)?;
+                Ok(true)
+            }
+            Err(e) if e.kind() == io::ErrorKind::WouldBlock => Ok(false),
+            Err(e) => Err(e),
+        }
+    }
+}
