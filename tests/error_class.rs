@@ -32,3 +32,10 @@ fn converted_io_error_is_retryable() {
     let err = RelayError::from(std::io::Error::from(std::io::ErrorKind::TimedOut));
     assert_eq!(classify(&err), ErrorClass::Retryable);
 }
+
+#[test]
+fn is_droppable_helper_returns_true_only_for_droppable() {
+    assert!(ErrorClass::Droppable.is_droppable());
+    assert!(!ErrorClass::Fatal.is_droppable());
+    assert!(!ErrorClass::Retryable.is_droppable());
+}
