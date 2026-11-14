@@ -54,3 +54,19 @@ impl HttpServiceConfig {
         self.bind.is_some()
     }
 }
+
+/// Configuration for the logging service.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LogServiceConfig {
+    pub level: Level,
+    pub format: LogFormat,
+}
+
+impl Default for LogServiceConfig {
+    fn default() -> Self {
+        Self {
+            level: Level::Info,
+            format: LogFormat::Text,
+        }
+    }
+}
