@@ -29,3 +29,11 @@ fn assert_send_sync<T: Send + Sync>() {}
 fn monotonic_clock_is_send_and_sync() {
     assert_send_sync::<MonotonicClock<ManualClock>>();
 }
+
+#[test]
+fn into_inner_returns_wrapped_clock() {
+    let clock = MonotonicClock::new(ManualClock::new(42_000));
+    assert_eq!(clock.now_ms(), 42_000);
+    let inner = clock.into_inner();
+    assert_eq!(inner.now_ms(), 42_000);
+}
