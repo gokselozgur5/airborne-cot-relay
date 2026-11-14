@@ -41,3 +41,15 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
         }
     }
 }
+
+impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRelayLoop<S, C, F> {
+    /// Enqueues a payload and updates queue metrics.
+    pub fn enqueue(&mut self, payload: Vec<u8>) -> Option<Vec<u8>> {
+        let dropped = self.queue.push(payload);
+        if dropped.is_some() {
+            self.metrics.add_dropped(1);
+        }
+        self.metrics.set_queue_depth(self.queue.len() as u64);
+        dropped
+    }
+}
