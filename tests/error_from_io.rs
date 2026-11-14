@@ -24,3 +24,12 @@ fn question_mark_converts_io_error() {
     }
     assert!(bind().unwrap_err().to_string().contains("PermissionDenied"));
 }
+
+#[test]
+fn borrowed_io_error_keeps_kind_name() {
+    let io_err = io::Error::new(ErrorKind::BrokenPipe, "pipe broken");
+    let err = RelayError::from(&io_err);
+    assert!(matches!(err, RelayError::IoError(_)));
+    assert!(err.to_string().contains("BrokenPipe"), "{err}");
+    assert!(err.to_string().contains("pipe broken"), "{err}");
+}
