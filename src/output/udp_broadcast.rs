@@ -17,7 +17,10 @@ impl UdpBroadcastSink {
         };
         let socket = UdpSocket::bind(bind_addr).map_err(RelayError::from)?;
         socket.set_broadcast(true).map_err(RelayError::from)?;
-        Ok(Self { socket, target_addr: target })
+        Ok(Self {
+            socket,
+            target_addr: target,
+        })
     }
 }
 
