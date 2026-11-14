@@ -13,3 +13,19 @@ impl std::io::Write for BufferWriter {
         Ok(())
     }
 }
+
+#[test]
+fn test_format_json_and_escaping() {
+    let rec = Record::new(
+        1234,
+        Level::Info,
+        "app\"core",
+        "hello\n\t\\world",
+        &[("key", "val\"quote")],
+    );
+    let s = format_json(&rec);
+    assert!(s.contains("\"ts\":1234"));
+    assert!(s.contains("\"target\":\"app\\\"core\""));
+    assert!(s.contains("\"message\":\"hello\\n\\t\\\\world\""));
+    assert!(s.contains("\"key\":\"val\\\"quote\""));
+}
