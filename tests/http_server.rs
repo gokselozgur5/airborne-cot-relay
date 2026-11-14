@@ -40,3 +40,22 @@ fn test_router_dispatch_404_not_found() {
     let res = String::from_utf8_lossy(&buf[..n]);
     assert!(res.contains("404 Not Found"));
 }
+
+#[test]
+fn test_router_dispatch_405_method_not_allowed() {
+    let mut router = Router::new();
+    router.add_route("/post", |_req| HttpResponse::ok("ok\n", "text/plain"));
+    let mut server = HttpServer::bind("127.0.0.1:0", router).unwrap();
+    let addr = server.local_addr().unwrap();
+
+    let mut stream = TcpStream::connect(addr).unwrap();
+    stream.write_all(b"POST /post HTTP/1.1\r\n\r\n").unwrap();
+
+    let handled = server.poll_step().unwrap();
+    assert!(handled);
+
+    let mut buf = [0u8; 1024];
+    let n = stream.read(&mut buf).unwrap();
+    let res = String::from_utf8_lossy(&buf[..n]);
+    assert!(res.contains("405 Method Not Allowed"));
+}
