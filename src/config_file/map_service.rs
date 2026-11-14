@@ -134,3 +134,15 @@ pub(crate) fn apply_log_section(
     }
     Ok(())
 }
+
+/// Maps `[log]` section from `ini` onto `base`.
+pub fn map_log_config(
+    ini: &ParsedIni,
+    base: &LogServiceConfig,
+) -> Result<LogServiceConfig, RelayError> {
+    let mut config = base.clone();
+    if let Some(sec) = ini.section("log") {
+        apply_log_section(&mut config, sec)?;
+    }
+    Ok(config)
+}
