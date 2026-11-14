@@ -45,3 +45,13 @@ fn system_clock_new_constructs_instance() {
     let clock = SystemClock::new();
     assert!(clock.now_ms() > 1_700_000_000_000);
 }
+
+fn takes_clock_ref<C: Clock>(clock: &C) -> u64 {
+    clock.now_ms()
+}
+
+#[test]
+fn boxed_clock_implements_clock_trait() {
+    let clock: Box<dyn Clock> = Box::new(ManualClock::new(42));
+    assert_eq!(takes_clock_ref(&clock), 42);
+}
