@@ -81,6 +81,12 @@ impl TcpClientSink {
 impl TcpClientSink {
     fn ensure_connected(&mut self) -> Result<&mut TcpStream, RelayError> {
         if self.stream.is_none() {
+            let now = Instant::now();
+            if let Some(deadline) = self.next_connect_deadline {
+                if now < deadline {
+                    return Err(RelayError::IoError("Reconnect backoff active".to_string()));
+                }
+            }
             let stream = match self.config.connect_timeout {
                 Some(timeout) => TcpStream::connect_timeout(&self.target_addr, timeout),
                 None => TcpStream::connect(self.target_addr),
@@ -88,10 +94,12 @@ impl TcpClientSink {
             match stream {
                 Ok(s) => {
                     self.backoff.reset();
+                    self.next_connect_deadline = None;
                     self.stream = Some(s);
                 }
                 Err(err) => {
-                    let _delay = self.backoff.next_delay_ms();
+                    let delay = self.backoff.next_delay_ms();
+                    self.next_connect_deadline = Some(now + Duration::from_millis(delay));
                     return Err(RelayError::from(err));
                 }
             }
