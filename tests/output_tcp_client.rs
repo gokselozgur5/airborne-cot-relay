@@ -22,3 +22,23 @@ async fn test_tcp_client_sink() {
 
     let mut sink = TcpClientSink::builder(Backoff::default())
         .with_backoff(Backoff::exponential(Duration::from_secs(1)))
+        .build()
+        .await
+        .unwrap();
+
+    sink.send(b"hello").await.unwrap();
+    sink.close().await.unwrap();
+
+    let mut stream = listener.accept().await.unwrap();
+    let mut buffer = [0; 1024];
+    match stream.read(&mut buffer).await {
+        Ok(n) => assert_eq!(n, 5), // "hello" is 5 bytes long
+        Err(e) => panic!("Failed to read from TCP stream: {:?}", e),
+    }
+
+    let mut stream = listener.accept().await.unwrap();
+    match stream.read(&mut buffer).await {
+        Ok(n) => assert_eq!(n, 0), // No more data expected
+        Err(e) => panic!("Failed to read from TCP stream: {:?}", e),
+    }
+}
