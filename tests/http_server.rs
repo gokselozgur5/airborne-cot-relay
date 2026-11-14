@@ -1,5 +1,5 @@
-use airborne_cot_relay::http::server::{HttpServer, RouteHandler, Router};
-use airborne_cot_relay::http::{HttpResponse, Method, StatusCode};
+use airborne_cot_relay::http::server::{HttpServer, Router};
+use airborne_cot_relay::http::HttpResponse;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
