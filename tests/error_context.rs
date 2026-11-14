@@ -16,3 +16,18 @@ fn test_context_preserves_ok_value() {
     let ok: Result<u32, RelayError> = Ok(42);
     assert_eq!(ok.context("should not prefix"), Ok(42));
 }
+
+#[test]
+fn test_all_variants_prefixed() {
+    let variants = [
+        RelayError::InvalidConfig("cfg".into()),
+        RelayError::DecodeError("dec".into()),
+        RelayError::TargetingError("tar".into()),
+        RelayError::IoError("io".into()),
+    ];
+    for var in variants {
+        let res: Result<(), RelayError> = Err(var);
+        let ctx = res.context("step").unwrap_err();
+        assert!(ctx.to_string().contains("step: "));
+    }
+}
