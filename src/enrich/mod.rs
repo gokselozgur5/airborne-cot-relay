@@ -26,3 +26,22 @@ impl DetailElement {
         self
     }
 }
+
+impl DetailElement {
+    pub fn tag(&self) -> &str {
+        &self.tag
+    }
+
+    pub fn attributes(&self) -> &[(String, String)] {
+        &self.attributes
+    }
+
+    pub fn to_xml(&self) -> String {
+        let mut out = format!("<{}", self.tag);
+        for (k, v) in &self.attributes {
+            out.push_str(&format!(" {k}=\"{}\"", escape_xml_attr(v)));
+        }
+        out.push_str("/>");
+        out
+    }
+}
