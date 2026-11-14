@@ -28,3 +28,13 @@ impl PipelineStats {
         }
     }
 }
+
+impl PipelineStats {
+    pub fn record_received(&mut self, count: u64) {
+        self.received = self.received.saturating_add(count);
+    }
+
+    pub fn record_dropped(&mut self, count: u64) {
+        self.dropped = self.dropped.saturating_add(count);
+    }
+}
