@@ -20,3 +20,13 @@ fn detection(u: f64, v: f64) -> TargetDetection {
         embedding: None,
     }
 }
+
+#[test]
+fn test_temporal_gating_stale_detection_ignored() {
+    let mut t = Targeter::new(&intrinsics(), 0.0);
+    let mut pose = PlatformPose::new(1000, 37.7749, -122.4194, 100.0, 0.0, 0.0, 0.0);
+    t.update(&pose, &[detection(500.0, 500.0)]).unwrap();
+    pose.timestamp_ms = 900;
+    let tracks = t.update(&pose, &[detection(500.0, 500.0)]).unwrap();
+    assert_eq!(tracks[0].hits, 1);
+}
