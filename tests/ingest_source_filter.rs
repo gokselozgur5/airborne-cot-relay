@@ -19,3 +19,11 @@ fn test_source_filter_allowlist_passes_and_disallowed_rejected() {
     assert!(filter.check(&allowed));
     assert_eq!(filter.rejected_count(), 2);
 }
+
+#[test]
+fn test_source_filter_empty_allowlist_rejects_all() {
+    let mut filter = SourceFilter::new(std::iter::empty());
+    let addr: IpAddr = "127.0.0.1".parse().unwrap();
+    assert!(!filter.check(&addr));
+    assert_eq!(filter.rejected_count(), 1);
+}
