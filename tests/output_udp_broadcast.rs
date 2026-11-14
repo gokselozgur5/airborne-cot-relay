@@ -22,3 +22,7 @@ impl CotSink for UdpBroadcastSink {
     fn send(&self, payload: &[u8]) -> Result<(), std::io::Error> {
         self.send(payload)
     }
+}
+
+impl CotSource for UdpBroadcastSink {
+    async fn receive(&self) -> Result<Vec<u8>, std::io::Error> {
