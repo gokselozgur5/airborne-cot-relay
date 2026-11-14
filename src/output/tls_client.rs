@@ -60,3 +60,28 @@ impl TlsClientConfig {
 pub trait TlsConnector {
     fn connect(&mut self, cfg: &TlsClientConfig) -> Result<Box<dyn Write + Send>, RelayError>;
 }
+
+/// TLS client sink that reconnects with exponential backoff.
+pub struct TlsClientSink<C: TlsConnector> {
+    cfg: TlsClientConfig,
+    connector: C,
+    stream: Option<Box<dyn Write + Send>>,
+    backoff: Backoff,
+    last_delay_ms: u64,
+}
+
+impl<C: TlsConnector> TlsClientSink<C> {
+    pub fn new(cfg: TlsClientConfig, connector: C, backoff: Backoff) -> Result<Self, RelayError> {
+        cfg.validate()?;
+        Ok(Self { cfg, connector, stream: None, backoff, last_delay_ms: 0 })
+    }
+
+    /// Delay the caller should wait before the next send after a failure.
+    pub fn retry_delay_ms(&self) -> u64 {
+        self.last_delay_ms
+    }
+
+    pub fn is_connected(&self) -> bool {
+        self.stream.is_some()
+    }
+}
