@@ -85,3 +85,28 @@ impl<C: TlsConnector> TlsClientSink<C> {
         self.stream.is_some()
     }
 }
+
+impl<C: TlsConnector> CotSink for TlsClientSink<C> {
+    fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
+        if self.stream.is_none() {
+            match self.connector.connect(&self.cfg) {
+                Ok(s) => self.stream = Some(s),
+                Err(e) => {
+                    self.last_delay_ms = self.backoff.next_delay_ms();
+                    return Err(e);
+                }
+            }
+            self.backoff.reset();
+            self.last_delay_ms = 0;
+        }
+        let stream = self.stream.as_mut().expect("connected");
+        match stream.write_all(payload).and_then(|_| stream.flush()) {
+            Ok(()) => Ok(payload.len()),
+            Err(e) => {
+                self.stream = None;
+                self.last_delay_ms = self.backoff.next_delay_ms();
+                Err(RelayError::from(e))
+            }
+        }
+    }
+}
