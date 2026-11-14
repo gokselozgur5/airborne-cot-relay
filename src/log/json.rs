@@ -55,3 +55,19 @@ impl<W: Write + Send + 'static> JsonLogger<W> {
         }
     }
 }
+
+impl<W: Write + Send + 'static> Logger for JsonLogger<W> {
+    fn level(&self) -> Level {
+        self.level
+    }
+
+    fn log(&self, record: &Record<'_>) {
+        if !self.enabled(record.level) {
+            return;
+        }
+        let line = format_json(record);
+        if let Ok(mut w) = self.writer.lock() {
+            let _ = writeln!(w, "{line}");
+        }
+    }
+}
