@@ -22,7 +22,9 @@ impl ErrorClass {
 
 impl From<std::io::Error> for ErrorClass {
     fn from(err: std::io::Error) -> Self {
-        if err.kind() == std::io::ErrorKind::ConnectionRefused || err.kind() == std::io::ErrorKind::TimedOut {
+        if err.kind() == std::io::ErrorKind::ConnectionRefused
+            || err.kind() == std::io::ErrorKind::TimedOut
+        {
             Self::Retryable
         } else {
             Self::Fatal
