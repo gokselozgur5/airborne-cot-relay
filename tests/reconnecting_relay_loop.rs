@@ -163,3 +163,10 @@ fn test_reconnect_metric_only_on_success() {
     let snap = metrics.snapshot(100);
     assert_eq!(snap.reconnects, 0);
 }
+
+fn make_healthy_sink() -> Result<TrackingSink, RelayError> {
+    Ok(TrackingSink {
+        fails: false,
+        partial: false,
+    })
+}
