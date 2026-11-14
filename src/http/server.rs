@@ -24,3 +24,15 @@ impl Router {
         self.routes.insert(path.into(), Box::new(handler));
     }
 }
+
+impl Router {
+    pub fn dispatch(&self, req: &RequestLine) -> HttpResponse {
+        if req.method != Method::Get {
+            return HttpResponse::method_not_allowed();
+        }
+        match self.routes.get(&req.path) {
+            Some(handler) => handler(req),
+            None => HttpResponse::not_found(),
+        }
+    }
+}
