@@ -1,4 +1,6 @@
 use crate::config::RelayError;
+use crate::relay::{Backoff, CotSink};
+use std::io::Write;
 
 /// Configuration for an outbound TLS client connection.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -52,4 +54,9 @@ impl TlsClientConfig {
         }
         Ok(())
     }
+}
+
+/// Establishes an encrypted stream from a validated configuration.
+pub trait TlsConnector {
+    fn connect(&mut self, cfg: &TlsClientConfig) -> Result<Box<dyn Write + Send>, RelayError>;
 }
