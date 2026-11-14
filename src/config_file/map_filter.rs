@@ -17,7 +17,11 @@ pub(crate) fn apply_filter_section(c: &mut FilterConfig, sec: &IniSection) -> Re
                     RelayError::InvalidConfig(format!("invalid float for filter.min_move_m: '{}'", e.value))
                 })?;
             }
-            "stale_after_ms" => {}
+            "stale_after_ms" => {
+                c.stale_after_ms = e.value.parse().map_err(|_| {
+                    RelayError::InvalidConfig(format!("invalid integer for filter.stale_after_ms: '{}'", e.value))
+                })?;
+            }
             k => return Err(RelayError::InvalidConfig(format!("unknown key '{k}' in section 'filter'"))),
         }
     }
