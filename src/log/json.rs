@@ -4,6 +4,19 @@ use super::{Level, Logger, Record};
 use std::io::{self, Write};
 use std::sync::Mutex;
 
+fn escape_json_into(s: &str, out: &mut String) {
+    for c in s.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c => out.push(c),
+        }
+    }
+}
+
 /// Formats a record into a single-line JSON string.
 pub fn format_json(record: &Record<'_>) -> String {
     let mut out = String::with_capacity(128);
