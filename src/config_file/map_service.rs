@@ -70,3 +70,13 @@ impl Default for LogServiceConfig {
         }
     }
 }
+
+fn parse_http_bind(value: &str) -> Result<Option<SocketAddr>, RelayError> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() || trimmed.eq_ignore_ascii_case("none") {
+        return Ok(None);
+    }
+    trimmed.parse().map(Some).map_err(|_| {
+        RelayError::InvalidConfig(format!("invalid socket address for http.bind: '{value}'"))
+    })
+}
