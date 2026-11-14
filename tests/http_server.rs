@@ -81,3 +81,14 @@ fn test_router_dispatch_400_bad_request_oversized() {
     let res = String::from_utf8_lossy(&buf[..n]);
     assert!(res.contains("400 Bad Request"));
 }
+
+#[test]
+fn test_poll_step_does_not_block_on_idle_stream() {
+    let router = Router::new();
+    let mut server = HttpServer::bind("127.0.0.1:0", router).unwrap();
+    let addr = server.local_addr().unwrap();
+
+    let _stream = TcpStream::connect(addr).unwrap();
+    let handled = server.poll_step().unwrap();
+    assert!(handled);
+}
