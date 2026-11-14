@@ -4,6 +4,6 @@ pub mod enrich;
 pub mod tls_client;
 pub mod udp_multicast;
 
-pub use enrich::build_remarks;
+pub use enrich::{build_remarks, CotDetail};
 pub use tls_client::{TlsClientConfig, TlsClientSink, TlsConnector};
 pub use udp_multicast::{UdpMulticastConfig, UdpMulticastSink};

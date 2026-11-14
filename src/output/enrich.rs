@@ -1,4 +1,4 @@
-//! Builds the CoT `<remarks>` element with MGRS, sensor id and confidence.
+//! Builds arbitrary CoT `<detail>` child elements and `<remarks>` with MGRS.
 
 use sightline_cot::cot::escape_xml_attr;
 use sightline_cot::{format_mgrs, GridError};
@@ -31,11 +31,13 @@ pub struct CotDetail {
 
 impl CotDetail {
     pub fn new(tag: impl Into<String>) -> Self {
-        Self { tag: tag.into(), attributes: Vec::new(), text: None }
+        Self {
+            tag: tag.into(),
+            attributes: Vec::new(),
+            text: None,
+        }
     }
-}
 
-impl CotDetail {
     pub fn with_attr(mut self, key: impl Into<String>, val: impl Into<String>) -> Self {
         self.attributes.push((key.into(), val.into()));
         self
@@ -45,9 +47,7 @@ impl CotDetail {
         self.text = Some(text.into());
         self
     }
-}
 
-impl CotDetail {
     pub fn to_xml(&self) -> String {
         let mut out = format!("<{}", self.tag);
         for (k, v) in &self.attributes {
