@@ -1,6 +1,8 @@
 //! Structured logging levels and logger traits.
 
+pub mod json;
 pub mod stdio;
+pub use json::{format_json, JsonLogger};
 pub use stdio::{format_record, StdioLogger};
 
 use std::fmt;
