@@ -37,3 +37,14 @@ fn into_inner_returns_wrapped_clock() {
     let inner = clock.into_inner();
     assert_eq!(inner.now_ms(), 42_000);
 }
+
+#[test]
+fn reset_backward_steps_clears_counter() {
+    let clock = MonotonicClock::new(ManualClock::new(60_000));
+    clock.now_ms();
+    clock.inner().set_ms(50_000);
+    clock.now_ms();
+    assert_eq!(clock.backward_steps(), 1);
+    assert_eq!(clock.reset_backward_steps(), 1);
+    assert_eq!(clock.backward_steps(), 0);
+}
