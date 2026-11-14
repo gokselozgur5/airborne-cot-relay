@@ -80,13 +80,20 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
 
 impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRelayLoop<S, C, F> {
     fn send_one(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
-        let res = self.sink.send(payload);
-        if let Ok(sent) = res {
+        let res = self.sink.send(payload).and_then(|sent| {
             if sent == payload.len() {
-                self.health.record(&Ok(sent));
-                self.metrics.record_sent(self.clock.now_ms() as u64);
-                return Ok(sent);
+                Ok(sent)
+            } else {
+                Err(RelayError::IoError(format!(
+                    "short write: {sent} of {} bytes",
+                    payload.len()
+                )))
             }
+        });
+        if let Ok(sent) = res {
+            self.health.record(&Ok(sent));
+            self.metrics.record_sent(self.clock.now_ms() as u64);
+            return Ok(sent);
         }
         self.health.record(&res);
         res
