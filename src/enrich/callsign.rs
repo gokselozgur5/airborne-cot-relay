@@ -40,4 +40,13 @@ impl CallsignTemplate {
     pub fn raw(&self) -> &str {
         &self.raw
     }
+
+    fn parse_token(name: &str) -> Result<TemplateToken, CallsignTemplateError> {
+        match name {
+            "prefix" => Ok(TemplateToken::Prefix),
+            "class" => Ok(TemplateToken::Class),
+            "id" => Ok(TemplateToken::Id),
+            _ => Err(CallsignTemplateError::UnknownPlaceholder(name.to_string())),
+        }
+    }
 }
