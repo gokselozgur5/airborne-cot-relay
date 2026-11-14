@@ -8,3 +8,15 @@ pub struct UdpBroadcastSink {
     socket: UdpSocket,
     target_addr: SocketAddr,
 }
+
+impl UdpBroadcastSink {
+    pub fn bind(target: SocketAddr) -> Result<Self, RelayError> {
+        let bind_addr = match target {
+            SocketAddr::V4(_) => SocketAddr::from(([0, 0, 0, 0], 0)),
+            SocketAddr::V6(_) => SocketAddr::from(([0; 16], 0)),
+        };
+        let socket = UdpSocket::bind(bind_addr).map_err(RelayError::from)?;
+        socket.set_broadcast(true).map_err(RelayError::from)?;
+        Ok(Self { socket, target_addr: target })
+    }
+}
