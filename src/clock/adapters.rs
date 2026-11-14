@@ -13,6 +13,16 @@ impl<C> RelayClockAdapter<C> {
     pub fn new(clock: C) -> Self {
         Self(clock)
     }
+
+    /// Returns a reference to the wrapped clock.
+    pub fn inner(&self) -> &C {
+        &self.0
+    }
+
+    /// Consumes the adapter, returning the wrapped clock.
+    pub fn into_inner(self) -> C {
+        self.0
+    }
 }
 
 impl<C: Clock> crate::relay::Clock for RelayClockAdapter<C> {
