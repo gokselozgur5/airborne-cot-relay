@@ -1,4 +1,4 @@
-use airborne_cot_relay::enrich::{CallsignTemplate, CallsignTemplateError, DetailElement};
+use airborne_cot_relay::enrich::{CallsignTemplate, CallsignTemplateError};
 
 #[test]
 fn test_callsign_template_default_formatting() {
