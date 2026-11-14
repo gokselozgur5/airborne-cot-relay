@@ -31,3 +31,13 @@ pub struct OutputSpec {
     pub url: String,
     pub format: OutputFormat,
 }
+
+impl OutputSpec {
+    pub fn new(name: impl Into<String>, url: impl Into<String>, format: OutputFormat) -> Self {
+        Self {
+            name: name.into(),
+            url: url.into(),
+            format,
+        }
+    }
+}
