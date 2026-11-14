@@ -1,6 +1,6 @@
 use std::io::{self, ErrorKind};
 
-use airborne_cot_relay::error::{ErrorClass};
+use airborne_cot_relay::error::ErrorClass;
 
 #[test]
 fn test_error_class() {
