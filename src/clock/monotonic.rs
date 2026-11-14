@@ -37,6 +37,11 @@ impl<C> MonotonicClock<C> {
     pub fn into_inner(self) -> C {
         self.inner
     }
+
+    /// Resets backward steps counter to zero, returning previous count.
+    pub fn reset_backward_steps(&self) -> u64 {
+        self.backward_steps.swap(0, Ordering::SeqCst)
+    }
 }
 
 impl<C: Clock> Clock for MonotonicClock<C> {
