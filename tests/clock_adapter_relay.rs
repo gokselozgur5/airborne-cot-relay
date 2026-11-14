@@ -50,3 +50,10 @@ fn adapter_inner_and_into_inner_accessors() {
     let unwrapped = adapter.into_inner();
     assert_eq!(unwrapped.now_ms(), 54321);
 }
+
+#[test]
+fn adapter_from_clock_conversion() {
+    let unified = ManualClock::new(999);
+    let adapter: RelayClockAdapter<_> = unified.into();
+    assert_eq!(adapter.into_inner().now_ms(), 999);
+}
