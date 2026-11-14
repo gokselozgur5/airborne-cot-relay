@@ -40,3 +40,9 @@ impl<C: Clock> crate::health::TimeSource for HealthTimeAdapter<C> {
         std::time::Duration::from_millis(self.0.now_ms())
     }
 }
+
+impl<C: Clock> Clock for HealthTimeAdapter<C> {
+    fn now_ms(&self) -> u64 {
+        self.0.now_ms()
+    }
+}
