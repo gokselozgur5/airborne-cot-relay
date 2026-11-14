@@ -48,3 +48,12 @@ fn borrowed_network_error_maps_to_io_error() {
         RelayError::IoError("network error: connection reset".into())
     );
 }
+
+#[test]
+fn borrowed_invalid_xml_maps_to_decode_error() {
+    let err = CotError::InvalidXml("missing closing tag".into());
+    assert_eq!(
+        RelayError::from(&err),
+        RelayError::DecodeError("invalid XML: missing closing tag".into())
+    );
+}
