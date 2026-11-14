@@ -85,3 +85,15 @@ impl CallsignTemplate {
         out
     }
 }
+
+impl CallsignTemplate {
+    pub fn build_contact(&self, prefix: &str, class: &str, id: u64) -> DetailElement {
+        DetailElement::new("contact").attr("callsign", self.format(prefix, class, id))
+    }
+}
+
+impl Default for CallsignTemplate {
+    fn default() -> Self {
+        Self::parse("{prefix}-{class}-{id}").expect("valid default template")
+    }
+}
