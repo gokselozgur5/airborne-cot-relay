@@ -224,6 +224,11 @@ impl Targeter {
         pose: &PlatformPose,
         detections: &[TargetDetection],
     ) -> Result<Vec<TrackedObject>, RelayError> {
+        if let Some(prev) = self.last_timestamp_ms {
+            if pose.timestamp_ms < prev {
+                return self.extract_tracked_objects(pose, &[]);
+            }
+        }
         let dt_s = self.compute_dt_s(pose.timestamp_ms);
         let mut tracker_dets = Vec::with_capacity(detections.len());
         for d in detections {
