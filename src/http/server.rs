@@ -36,3 +36,20 @@ impl Router {
         }
     }
 }
+
+pub struct HttpServer {
+    listener: TcpListener,
+    router: Router,
+}
+
+impl HttpServer {
+    pub fn bind<A: ToSocketAddrs>(addr: A, router: Router) -> io::Result<Self> {
+        let listener = TcpListener::bind(addr)?;
+        listener.set_nonblocking(true)?;
+        Ok(Self { listener, router })
+    }
+
+    pub fn local_addr(&self) -> io::Result<SocketAddr> {
+        self.listener.local_addr()
+    }
+}
