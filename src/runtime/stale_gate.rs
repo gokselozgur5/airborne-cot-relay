@@ -2,8 +2,6 @@
 
 use crate::telemetry::PlatformPose;
 
-
-
 /// State of the telemetry staleness gate.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StaleGateState {

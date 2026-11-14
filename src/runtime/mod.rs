@@ -5,9 +5,9 @@ pub mod reconnect;
 pub mod relay_loop;
 pub mod signal;
 pub mod sink_recovery;
-pub mod stale_gate;
 pub mod sleep;
 pub mod source;
+pub mod stale_gate;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
