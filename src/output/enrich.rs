@@ -34,3 +34,15 @@ impl CotDetail {
         Self { tag: tag.into(), attributes: Vec::new(), text: None }
     }
 }
+
+impl CotDetail {
+    pub fn with_attr(mut self, key: impl Into<String>, val: impl Into<String>) -> Self {
+        self.attributes.push((key.into(), val.into()));
+        self
+    }
+
+    pub fn with_text(mut self, text: impl Into<String>) -> Self {
+        self.text = Some(text.into());
+        self
+    }
+}
