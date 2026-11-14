@@ -39,3 +39,12 @@ fn out_of_bounds_maps_to_decode_error() {
     let err = RelayError::from(CotError::CoordinateOutOfBounds("lon"));
     assert_eq!(err, RelayError::DecodeError("out of bounds: lon".into()));
 }
+
+#[test]
+fn borrowed_network_error_maps_to_io_error() {
+    let err = CotError::NetworkError("connection reset".into());
+    assert_eq!(
+        RelayError::from(&err),
+        RelayError::IoError("network error: connection reset".into())
+    );
+}
