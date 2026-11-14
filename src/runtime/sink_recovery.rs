@@ -31,3 +31,24 @@ impl<S: Sleeper> SinkRecovery<S> {
         self.reconnects
     }
 }
+
+impl<S: Sleeper> SinkRecovery<S> {
+    /// Handles a pipeline event. If `SinkDegraded`, triggers ReconnectLoop.
+    pub fn on_event<T, F>(
+        &mut self,
+        event: &PipelineEvent,
+        connect: F,
+    ) -> Result<Option<T>, RelayError>
+    where
+        F: FnMut() -> Result<T, RelayError>,
+    {
+        match event {
+            PipelineEvent::SinkDegraded { .. } => {
+                let sink = self.reconnect_loop.run(connect)?;
+                self.reconnects = self.reconnects.saturating_add(1);
+                Ok(Some(sink))
+            }
+            _ => Ok(None),
+        }
+    }
+}
