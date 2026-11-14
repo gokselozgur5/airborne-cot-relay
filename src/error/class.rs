@@ -1,4 +1,3 @@
-use std::error::Error;
 
 /// Error classification for relay errors.
 #[derive(Debug)]
