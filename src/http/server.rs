@@ -53,3 +53,26 @@ impl HttpServer {
         self.listener.local_addr()
     }
 }
+
+impl HttpServer {
+    fn handle_connection(&self, mut stream: TcpStream) -> io::Result<()> {
+        stream.set_nonblocking(false)?;
+        let mut buf = [0u8; 8192];
+        let n = match stream.read(&mut buf) {
+            Ok(0) => return Ok(()),
+            Ok(n) => n,
+            Err(e) if e.kind() == io::ErrorKind::WouldBlock => return Ok(()),
+            Err(e) => return Err(e),
+        };
+        let response = match std::str::from_utf8(&buf[..n]) {
+            Ok(text) => match parse_request_line(text.lines().next().unwrap_or("")) {
+                Ok(req) => self.router.dispatch(&req),
+                Err(_) => HttpResponse::bad_request("Bad Request\n"),
+            },
+            Err(_) => HttpResponse::bad_request("Bad Request\n"),
+        };
+        let _ = stream.write_all(&response.to_bytes());
+        let _ = stream.flush();
+        Ok(())
+    }
+}
