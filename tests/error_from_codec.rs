@@ -53,3 +53,9 @@ fn borrowed_proto_error_keeps_variant_payload() {
     assert_eq!(msg, "TAK protobuf: UnsupportedWireType(7)");
 }
 
+#[test]
+fn borrowed_grid_error_keeps_variant_name() {
+    let err = GridError::InvalidZone;
+    let msg = decode_text((&err).into());
+    assert_eq!(msg, "MGRS grid: InvalidZone");
+}
