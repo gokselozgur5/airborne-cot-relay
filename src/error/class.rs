@@ -36,4 +36,13 @@ impl ErrorClass {
     pub fn is_droppable(self) -> bool {
         self == ErrorClass::Droppable
     }
+
+    /// Returns static string representation of error class.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            ErrorClass::Fatal => "fatal",
+            ErrorClass::Retryable => "retryable",
+            ErrorClass::Droppable => "droppable",
+        }
+    }
 }
