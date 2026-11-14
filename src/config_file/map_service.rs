@@ -109,3 +109,14 @@ pub fn map_http_config(
     }
     Ok(config)
 }
+
+fn parse_log_level(value: &str) -> Result<Level, RelayError> {
+    match value.trim().to_ascii_lowercase().as_str() {
+        "trace" => Ok(Level::Trace),
+        "debug" => Ok(Level::Debug),
+        "info" => Ok(Level::Info),
+        "warn" => Ok(Level::Warn),
+        "error" => Ok(Level::Error),
+        other => Err(RelayError::InvalidConfig(format!("invalid log level: '{other}'"))),
+    }
+}
