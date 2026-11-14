@@ -41,3 +41,15 @@ impl OutputSpec {
         }
     }
 }
+
+impl OutputSpec {
+    pub fn validate(&self) -> Result<(), RelayError> {
+        if self.name.trim().is_empty() {
+            return Err(RelayError::InvalidConfig("empty output name".into()));
+        }
+        if self.url.trim().is_empty() {
+            return Err(RelayError::InvalidConfig("empty output url".into()));
+        }
+        Ok(())
+    }
+}
