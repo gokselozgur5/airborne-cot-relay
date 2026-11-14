@@ -22,3 +22,18 @@ impl<S: Send + Sync + 'static> BreakerSink<S> {
             Err(Box::new(std::io::Error::from(std::io::ErrorKind::Other, "Breaker is open")))
         } else {
             self.inner.send(data).await
+        }
+    }
+
+    /// Checks if the breaker is open.
+    pub fn is_open(&self) -> bool {
+        // Implement logic to determine if the breaker is open based on some criteria
+        // For example, a threshold number of rejected sends
+        self.rejected_count >= 5
+    }
+
+    /// Resets the rejected count to zero.
+    pub fn reset_rejected_count(&mut self) {
+        self.rejected_count = 0;
+    }
+}
