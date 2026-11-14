@@ -20,3 +20,17 @@ pub fn build_remarks(
     }
     Ok(format!("<remarks>{}</remarks>", escape_xml_attr(&text)))
 }
+
+/// Builder for arbitrary CoT `<detail>` child elements with stable attribute ordering.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct CotDetail {
+    tag: String,
+    attributes: Vec<(String, String)>,
+    text: Option<String>,
+}
+
+impl CotDetail {
+    pub fn new(tag: impl Into<String>) -> Self {
+        Self { tag: tag.into(), attributes: Vec::new(), text: None }
+    }
+}
