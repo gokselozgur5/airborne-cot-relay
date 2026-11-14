@@ -60,14 +60,19 @@ impl CallsignTemplate {
                 tokens.push(TemplateToken::Literal(rest[..start].to_string()));
             }
             let after = &rest[start + 1..];
-            let end = after.find('}').ok_or(CallsignTemplateError::UnclosedBrace)?;
+            let end = after
+                .find('}')
+                .ok_or(CallsignTemplateError::UnclosedBrace)?;
             tokens.push(Self::parse_token(&after[..end])?);
             rest = &after[end + 1..];
         }
         if !rest.is_empty() {
             tokens.push(TemplateToken::Literal(rest.to_string()));
         }
-        Ok(Self { tokens, raw: template.to_string() })
+        Ok(Self {
+            tokens,
+            raw: template.to_string(),
+        })
     }
 }
 
