@@ -22,3 +22,13 @@ impl fmt::Display for RelayError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.kind {
             RelayErrorKind::IoError(ref e) => write!(f, "IO error: {}", e),
+            // Add other variants as needed
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum RelayErrorKind {
+    IoError(String),
+    // Add other variants as needed
+}
