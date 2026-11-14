@@ -1,6 +1,5 @@
 //! Telemetry freshness gate controlling outbound CoT sending.
 
-use crate::telemetry::PlatformPose;
 
 /// State of the telemetry staleness gate.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
