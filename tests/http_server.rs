@@ -6,7 +6,9 @@ use std::net::TcpStream;
 #[test]
 fn test_router_dispatch_get_success() {
     let mut router = Router::new();
-    router.add_route("/healthz", |_req| HttpResponse::ok("healthy\n", "text/plain"));
+    router.add_route("/healthz", |_req| {
+        HttpResponse::ok("healthy\n", "text/plain")
+    });
     let mut server = HttpServer::bind("127.0.0.1:0", router).unwrap();
     let addr = server.local_addr().unwrap();
 
