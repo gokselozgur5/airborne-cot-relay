@@ -80,3 +80,20 @@ fn parse_http_bind(value: &str) -> Result<Option<SocketAddr>, RelayError> {
         RelayError::InvalidConfig(format!("invalid socket address for http.bind: '{value}'"))
     })
 }
+
+pub(crate) fn apply_http_section(
+    c: &mut HttpServiceConfig,
+    sec: &IniSection,
+) -> Result<(), RelayError> {
+    for e in &sec.entries {
+        match e.key.as_str() {
+            "bind" => c.bind = parse_http_bind(&e.value)?,
+            k => {
+                return Err(RelayError::InvalidConfig(format!(
+                    "unknown key '{k}' in section 'http'"
+                )))
+            }
+        }
+    }
+    Ok(())
+}
