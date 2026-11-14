@@ -42,3 +42,11 @@ fn legacy_manual_clock_implements_unified_trait() {
     legacy.advance(10);
     assert_eq!(read_unified(&legacy), 15);
 }
+
+#[test]
+fn filter_accepts_reexported_system_clock() {
+    let clock = track_filter::SystemClock::new();
+    let mut filter = TrackFilter::new(config(), clock);
+    assert!(filter.accept("t1", 10.0, 20.0));
+}
+
