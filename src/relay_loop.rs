@@ -92,3 +92,27 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
         res
     }
 }
+
+impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRelayLoop<S, C, F> {
+    /// Polls the send loop to drain pending payloads or trigger reconnection.
+    pub fn poll(&mut self) -> Result<(), RelayError> {
+        if self.health.needs_reconnect() {
+            self.try_reconnect();
+            if self.health.needs_reconnect() {
+                return Ok(());
+            }
+        }
+        while let Some(payload) = self.queue.pop() {
+            match self.send_one(&payload) {
+                Ok(_) => continue,
+                Err(RelayError::IoError(ref m)) if m.contains("WouldBlock") => {
+                    self.queue.push(payload);
+                    break;
+                }
+                Err(_) => break,
+            }
+        }
+        self.metrics.set_queue_depth(self.queue.len() as u64);
+        Ok(())
+    }
+}
