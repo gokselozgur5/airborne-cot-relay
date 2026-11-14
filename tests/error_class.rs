@@ -39,3 +39,10 @@ fn is_droppable_helper_returns_true_only_for_droppable() {
     assert!(!ErrorClass::Fatal.is_droppable());
     assert!(!ErrorClass::Retryable.is_droppable());
 }
+
+#[test]
+fn as_str_returns_canonical_classifier_label() {
+    assert_eq!(ErrorClass::Fatal.as_str(), "fatal");
+    assert_eq!(ErrorClass::Retryable.as_str(), "retryable");
+    assert_eq!(ErrorClass::Droppable.as_str(), "droppable");
+}
