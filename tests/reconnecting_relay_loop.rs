@@ -82,3 +82,31 @@ impl CotSink for TrackingSink {
         Ok(payload.len())
     }
 }
+
+#[test]
+fn test_failed_send_drops_payload_counted() {
+    let clock = ManualClock::new(100);
+    let metrics = Arc::new(Metrics::new());
+    let make_sink = || {
+        Ok(TrackingSink {
+            fails: true,
+            partial: false,
+        })
+    };
+    let mut loop_inst = ReconnectingRelayLoop::new(
+        TrackingSink {
+            fails: true,
+            partial: false,
+        },
+        make_sink,
+        5,
+        DropPolicy::DropOldest,
+        clock,
+        Arc::clone(&metrics),
+    );
+    loop_inst.enqueue(b"test".to_vec());
+    let _ = loop_inst.poll();
+    let snap = metrics.snapshot(100);
+    assert_eq!(snap.dropped, 1);
+    assert_eq!(snap.queue_depth, 0);
+}
