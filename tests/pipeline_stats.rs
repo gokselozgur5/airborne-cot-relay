@@ -1,0 +1,12 @@
+use airborne_cot_relay::pipeline::stats::PipelineStatsTracker;
+
+#[test]
+fn test_pipeline_stats_tracker_throughput_and_drop_rate() {
+    let mut tracker = PipelineStatsTracker::new(1.0);
+    tracker.record_received(100);
+    tracker.record_dropped(10);
+    assert_eq!(tracker.total_received(), 100);
+    assert_eq!(tracker.total_dropped(), 10);
+    let drop_rate = tracker.drop_rate();
+    assert!((drop_rate - 0.10).abs() < 1e-6);
+}
