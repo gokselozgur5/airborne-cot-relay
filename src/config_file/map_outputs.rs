@@ -23,3 +23,11 @@ impl OutputFormat {
         }
     }
 }
+
+/// Specification of a configured output destination.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct OutputSpec {
+    pub name: String,
+    pub url: String,
+    pub format: OutputFormat,
+}
