@@ -13,3 +13,18 @@ fn test_callsign_template_default_formatting() {
     );
     assert_eq!(contact.to_xml(), "<contact callsign=\"HAWK-vehicle-42\"/>");
 }
+
+#[test]
+fn test_callsign_template_validation_errors() {
+    let err = CallsignTemplate::parse("{prefix}-{unknown}-{id}").unwrap_err();
+    assert_eq!(
+        err,
+        CallsignTemplateError::UnknownPlaceholder("unknown".to_string())
+    );
+
+    let unclosed = CallsignTemplate::parse("{prefix}-{class").unwrap_err();
+    assert_eq!(unclosed, CallsignTemplateError::UnclosedBrace);
+
+    let custom = CallsignTemplate::parse("VIPER_{class}_{id}").unwrap();
+    assert_eq!(custom.format("UNUSED", "air", 7), "VIPER_air_7");
+}
