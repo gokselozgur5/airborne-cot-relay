@@ -29,6 +29,12 @@ impl PipelineStatsTracker {
     pub fn record_dropped(&mut self, count: u64) {
         self.total_dropped = self.total_dropped.saturating_add(count);
     }
+
+    /// Resets all counters to zero.
+    pub fn reset(&mut self) {
+        self.total_received = 0;
+        self.total_dropped = 0;
+    }
 }
 
 impl PipelineStatsTracker {
