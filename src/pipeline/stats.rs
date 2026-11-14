@@ -18,3 +18,13 @@ impl PipelineStats {
         self.dropped
     }
 }
+
+impl PipelineStats {
+    pub fn drop_rate(&self) -> f64 {
+        if self.received == 0 {
+            0.0
+        } else {
+            self.dropped as f64 / self.received as f64
+        }
+    }
+}
