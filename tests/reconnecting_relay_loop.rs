@@ -138,3 +138,28 @@ fn test_short_write_fails_health() {
     assert_eq!(snap.sent, 0);
     assert_eq!(snap.dropped, 1);
 }
+
+#[test]
+fn test_reconnect_metric_only_on_success() {
+    let clock = ManualClock::new(100);
+    let metrics = Arc::new(Metrics::new());
+    let mut loop_inst = ReconnectingRelayLoop::new(
+        TrackingSink {
+            fails: true,
+            partial: false,
+        },
+        || Err(RelayError::IoError("reconnect failed".into())),
+        5,
+        DropPolicy::DropOldest,
+        clock,
+        Arc::clone(&metrics),
+    );
+    loop_inst.enqueue(b"m1".to_vec());
+    let _ = loop_inst.poll();
+    loop_inst.enqueue(b"m2".to_vec());
+    let _ = loop_inst.poll();
+    loop_inst.enqueue(b"m3".to_vec());
+    let _ = loop_inst.poll();
+    let snap = metrics.snapshot(100);
+    assert_eq!(snap.reconnects, 0);
+}
