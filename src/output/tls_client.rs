@@ -73,7 +73,13 @@ pub struct TlsClientSink<C: TlsConnector> {
 impl<C: TlsConnector> TlsClientSink<C> {
     pub fn new(cfg: TlsClientConfig, connector: C, backoff: Backoff) -> Result<Self, RelayError> {
         cfg.validate()?;
-        Ok(Self { cfg, connector, stream: None, backoff, last_delay_ms: 0 })
+        Ok(Self {
+            cfg,
+            connector,
+            stream: None,
+            backoff,
+            last_delay_ms: 0,
+        })
     }
 
     /// Delay the caller should wait before the next send after a failure.
