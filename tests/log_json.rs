@@ -29,3 +29,17 @@ fn test_format_json_and_escaping() {
     assert!(s.contains("\"message\":\"hello\\n\\t\\\\world\""));
     assert!(s.contains("\"key\":\"val\\\"quote\""));
 }
+
+#[test]
+fn test_json_logger_threshold() {
+    let buf = BufferWriter::default();
+    let logger = JsonLogger::new(Level::Warn, buf.clone());
+    let r_debug = Record::new(1, Level::Debug, "t", "msg", &[]);
+    logger.log(&r_debug);
+    assert!(buf.0.lock().unwrap().is_empty());
+    let r_err = Record::new(2, Level::Error, "t", "err", &[]);
+    logger.log(&r_err);
+    let out = String::from_utf8(buf.0.lock().unwrap().clone()).unwrap();
+    assert!(out.contains("\"level\":\"error\""));
+    assert!(out.ends_with('\n'));
+}
