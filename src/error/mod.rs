@@ -13,6 +13,13 @@ impl From<std::io::Error> for RelayError {
     }
 }
 
+impl From<&std::io::Error> for RelayError {
+    /// Maps a borrowed I/O failure to `IoError`, keeping the `ErrorKind` name.
+    fn from(err: &std::io::Error) -> Self {
+        RelayError::IoError(format!("{:?}: {err}", err.kind()))
+    }
+}
+
 pub mod class;
 mod codec;
 pub mod context;
