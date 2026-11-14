@@ -21,3 +21,11 @@ impl TlsConnector for Ok_ {
 fn config_rejects_half_identity() {
     let mut c = TlsClientConfig::new("tak");
     c.client_cert_path = Some("c.pem".into());
+    assert!(c.validate().is_err());
+    assert!(TlsClientConfig::new("").validate().is_err());
+}
+
+#[test]
+fn backoff_grows_on_failure() {
+    let mut s = TlsClientSink::new(TlsClientConfig::new("tak"), Failing, Backoff::new(100, 1000)).unwrap();
+    assert!(s.send(b"x").is_err());
