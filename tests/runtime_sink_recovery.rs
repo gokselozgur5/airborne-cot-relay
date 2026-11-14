@@ -62,3 +62,24 @@ fn non_degraded_events_do_not_reconnect() {
     assert!(!called);
     assert_eq!(recovery.reconnects(), 0);
 }
+
+use airborne_cot_relay::relay::{BoundedQueue, DropPolicy};
+
+#[test]
+fn queue_preserves_events_within_drop_policy() {
+    let reconnect_loop = ReconnectLoop::new(
+        Backoff::new(100, 1000),
+        ManualSleeper::new(),
+        ShutdownSignal::new(),
+    );
+    let mut recovery = SinkRecovery::new(reconnect_loop);
+    let mut queue = BoundedQueue::new(2, DropPolicy::DropOldest);
+    queue.push(10);
+    queue.push(20);
+    queue.push(30);
+    assert_eq!(queue.len(), 2);
+    let event = airborne_cot_relay::pipeline::events::PipelineEvent::SinkDegraded { failures: 3 };
+    let _ = recovery.on_event(&event, &mut || Ok(1));
+    assert_eq!(queue.pop(), Some(20));
+    assert_eq!(queue.pop(), Some(30));
+}
