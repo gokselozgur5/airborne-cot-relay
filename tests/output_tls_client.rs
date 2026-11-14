@@ -29,3 +29,15 @@ fn config_rejects_half_identity() {
 fn backoff_grows_on_failure() {
     let mut s = TlsClientSink::new(TlsClientConfig::new("tak"), Failing, Backoff::new(100, 1000)).unwrap();
     assert!(s.send(b"x").is_err());
+    assert_eq!(s.retry_delay_ms(), 100);
+    assert!(s.send(b"x").is_err());
+    assert_eq!(s.retry_delay_ms(), 200);
+}
+
+#[test]
+fn success_connects_and_resets() {
+    let mut s = TlsClientSink::new(TlsClientConfig::new("tak"), Ok_, Backoff::new(100, 1000)).unwrap();
+    assert_eq!(s.send(b"abc").unwrap(), 3);
+    assert!(s.is_connected());
+    assert_eq!(s.retry_delay_ms(), 0);
+}
