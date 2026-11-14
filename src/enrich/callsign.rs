@@ -70,3 +70,18 @@ impl CallsignTemplate {
         Ok(Self { tokens, raw: template.to_string() })
     }
 }
+
+impl CallsignTemplate {
+    pub fn format(&self, prefix: &str, class: &str, id: u64) -> String {
+        let mut out = String::new();
+        for token in &self.tokens {
+            match token {
+                TemplateToken::Literal(s) => out.push_str(s),
+                TemplateToken::Prefix => out.push_str(prefix),
+                TemplateToken::Class => out.push_str(class),
+                TemplateToken::Id => out.push_str(&id.to_string()),
+            }
+        }
+        out
+    }
+}
