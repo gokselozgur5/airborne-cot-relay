@@ -110,3 +110,31 @@ fn test_failed_send_drops_payload_counted() {
     assert_eq!(snap.dropped, 1);
     assert_eq!(snap.queue_depth, 0);
 }
+
+#[test]
+fn test_short_write_fails_health() {
+    let clock = ManualClock::new(100);
+    let metrics = Arc::new(Metrics::new());
+    let make_sink = || {
+        Ok(TrackingSink {
+            fails: false,
+            partial: true,
+        })
+    };
+    let mut loop_inst = ReconnectingRelayLoop::new(
+        TrackingSink {
+            fails: false,
+            partial: true,
+        },
+        make_sink,
+        5,
+        DropPolicy::DropOldest,
+        clock,
+        Arc::clone(&metrics),
+    );
+    loop_inst.enqueue(b"abc".to_vec());
+    let _ = loop_inst.poll();
+    let snap = metrics.snapshot(100);
+    assert_eq!(snap.sent, 0);
+    assert_eq!(snap.dropped, 1);
+}
