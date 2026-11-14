@@ -33,3 +33,10 @@ fn health_time_adapter_new_and_inner_accessors() {
     let inner = adapter.into_inner();
     assert_eq!(inner.now_ms(), 1_234);
 }
+
+#[test]
+fn health_time_adapter_implements_clock() {
+    let clock = ManualClock::new(9_876);
+    let adapter = HealthTimeAdapter::new(clock);
+    assert_eq!(adapter.now_ms(), 9_876);
+}
