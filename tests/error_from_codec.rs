@@ -45,3 +45,11 @@ fn question_mark_converts_codec_errors() {
         .to_string()
         .contains("InvalidMagic"));
 }
+
+#[test]
+fn borrowed_proto_error_keeps_variant_payload() {
+    let err = ProtoError::UnsupportedWireType(7);
+    let msg = decode_text((&err).into());
+    assert_eq!(msg, "TAK protobuf: UnsupportedWireType(7)");
+}
+
