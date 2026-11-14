@@ -36,3 +36,13 @@ impl<T> LayeredValue<T> {
 use crate::config::{CameraIntrinsics, RelayConfig, RelayError};
 use crate::config_file::lexer::ParsedIni;
 use crate::config_file::map_relay::map_relay_config;
+
+/// Provenance tracking for camera intrinsics fields.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CameraLayers {
+    pub focal_length_px: LayeredValue<f64>,
+    pub principal_u: LayeredValue<f64>,
+    pub principal_v: LayeredValue<f64>,
+    pub image_width: LayeredValue<u32>,
+    pub image_height: LayeredValue<u32>,
+}
