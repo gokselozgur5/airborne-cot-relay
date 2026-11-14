@@ -116,7 +116,10 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
                     self.queue.push(payload);
                     break;
                 }
-                Err(_) => break,
+                Err(_) => {
+                    self.metrics.add_dropped(1);
+                    break;
+                }
             }
         }
         self.metrics.set_queue_depth(self.queue.len() as u64);
