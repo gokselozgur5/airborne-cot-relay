@@ -17,7 +17,9 @@ fn test_default_service_configs() {
 
 #[test]
 fn test_parse_http_and_log_service_ini() {
-    let ini = ParsedIni::parse("[http]\nbind = 127.0.0.1:8080\n[log]\nlevel = debug\nformat = json").unwrap();
+    let ini =
+        ParsedIni::parse("[http]\nbind = 127.0.0.1:8080\n[log]\nlevel = debug\nformat = json")
+            .unwrap();
     let http = map_http_config(&ini, &HttpServiceConfig::default()).unwrap();
     assert!(http.is_enabled());
     assert_eq!(http.bind, Some("127.0.0.1:8080".parse().unwrap()));

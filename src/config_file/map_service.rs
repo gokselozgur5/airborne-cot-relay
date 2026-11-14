@@ -117,7 +117,9 @@ fn parse_log_level(value: &str) -> Result<Level, RelayError> {
         "info" => Ok(Level::Info),
         "warn" => Ok(Level::Warn),
         "error" => Ok(Level::Error),
-        other => Err(RelayError::InvalidConfig(format!("invalid log level: '{other}'"))),
+        other => Err(RelayError::InvalidConfig(format!(
+            "invalid log level: '{other}'"
+        ))),
     }
 }
 
@@ -129,7 +131,11 @@ pub(crate) fn apply_log_section(
         match e.key.as_str() {
             "level" => c.level = parse_log_level(&e.value)?,
             "format" => c.format = e.value.parse()?,
-            k => return Err(RelayError::InvalidConfig(format!("unknown key '{k}' in section 'log'"))),
+            k => {
+                return Err(RelayError::InvalidConfig(format!(
+                    "unknown key '{k}' in section 'log'"
+                )))
+            }
         }
     }
     Ok(())
