@@ -1,5 +1,5 @@
 use airborne_cot_relay::clock::adapters::HealthTimeAdapter;
-use airborne_cot_relay::clock::ManualClock;
+use airborne_cot_relay::clock::{Clock, ManualClock};
 use airborne_cot_relay::health::{HealthMonitor, HealthStatus, HealthThresholds};
 use std::sync::Arc;
 
@@ -23,4 +23,13 @@ fn monitor_goes_offline_with_shared_clock() {
     monitor.record_telemetry();
     clock.advance_ms(10_000);
     assert_eq!(monitor.status(), HealthStatus::Offline);
+}
+
+#[test]
+fn health_time_adapter_new_and_inner_accessors() {
+    let clock = ManualClock::new(1_234);
+    let adapter = HealthTimeAdapter::new(clock);
+    assert_eq!(adapter.inner().now_ms(), 1_234);
+    let inner = adapter.into_inner();
+    assert_eq!(inner.now_ms(), 1_234);
 }
