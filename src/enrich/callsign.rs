@@ -50,3 +50,23 @@ impl CallsignTemplate {
         }
     }
 }
+
+impl CallsignTemplate {
+    pub fn parse(template: &str) -> Result<Self, CallsignTemplateError> {
+        let mut tokens = Vec::new();
+        let mut rest = template;
+        while let Some(start) = rest.find('{') {
+            if start > 0 {
+                tokens.push(TemplateToken::Literal(rest[..start].to_string()));
+            }
+            let after = &rest[start + 1..];
+            let end = after.find('}').ok_or(CallsignTemplateError::UnclosedBrace)?;
+            tokens.push(Self::parse_token(&after[..end])?);
+            rest = &after[end + 1..];
+        }
+        if !rest.is_empty() {
+            tokens.push(TemplateToken::Literal(rest.to_string()));
+        }
+        Ok(Self { tokens, raw: template.to_string() })
+    }
+}
