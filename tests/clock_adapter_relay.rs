@@ -34,3 +34,10 @@ fn adapter_saturates_above_i64_max() {
     unified.set_ms(42);
     assert_eq!(RelayClockAdapter(&unified).now_ms(), 42);
 }
+
+#[test]
+fn adapter_new_constructs_instance() {
+    let unified = ManualClock::new(12345);
+    let adapter = RelayClockAdapter::new(&unified);
+    assert_eq!(adapter.now_ms(), 12345);
+}
