@@ -1,5 +1,5 @@
 use airborne_cot_relay::clock::adapters::RelayClockAdapter;
-use airborne_cot_relay::clock::ManualClock;
+use airborne_cot_relay::clock::{Clock as _, ManualClock};
 use airborne_cot_relay::relay::{self, Clock as _, CotStreamer, TrackSummary};
 
 fn track() -> TrackSummary {
@@ -40,4 +40,13 @@ fn adapter_new_constructs_instance() {
     let unified = ManualClock::new(12345);
     let adapter = RelayClockAdapter::new(&unified);
     assert_eq!(adapter.now_ms(), 12345);
+}
+
+#[test]
+fn adapter_inner_and_into_inner_accessors() {
+    let unified = ManualClock::new(54321);
+    let adapter = RelayClockAdapter::new(unified);
+    assert_eq!(adapter.inner().now_ms(), 54321);
+    let unwrapped = adapter.into_inner();
+    assert_eq!(unwrapped.now_ms(), 54321);
 }
