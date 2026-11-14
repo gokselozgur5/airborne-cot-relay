@@ -20,3 +20,24 @@ impl fmt::Display for CallsignTemplateError {
 }
 
 impl std::error::Error for CallsignTemplateError {}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum TemplateToken {
+    Literal(String),
+    Prefix,
+    Class,
+    Id,
+}
+
+/// Callsign template supporting {prefix}, {class}, and {id} placeholders.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CallsignTemplate {
+    pub(crate) tokens: Vec<TemplateToken>,
+    pub(crate) raw: String,
+}
+
+impl CallsignTemplate {
+    pub fn raw(&self) -> &str {
+        &self.raw
+    }
+}
