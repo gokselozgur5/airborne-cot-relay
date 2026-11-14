@@ -70,3 +70,8 @@ impl TcpClientSinkBuilder {
     }
 
     /// Builds a `TcpClientSink`.
+    pub async fn build(self) -> Result<TcpClientSink, std::io::Error> {
+        let addr = "example.com:80".to_socket_addrs()?;
+        TcpClientSink::connect(&addr).await
+    }
+}
