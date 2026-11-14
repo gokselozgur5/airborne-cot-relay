@@ -39,6 +39,11 @@ impl PipelineStatsTracker {
         self.total_received = 0;
         self.total_dropped = 0;
     }
+
+    /// Returns the configured time window in seconds.
+    pub fn time_window_sec(&self) -> f64 {
+        self.time_window_sec
+    }
 }
 
 impl PipelineStatsTracker {
