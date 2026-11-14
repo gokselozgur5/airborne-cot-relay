@@ -20,6 +20,13 @@ impl From<&std::io::Error> for RelayError {
     }
 }
 
+impl From<std::io::ErrorKind> for RelayError {
+    /// Maps an `ErrorKind` directly to `IoError`, keeping the `ErrorKind` name.
+    fn from(kind: std::io::ErrorKind) -> Self {
+        RelayError::from(std::io::Error::from(kind))
+    }
+}
+
 pub mod class;
 mod codec;
 pub mod context;
