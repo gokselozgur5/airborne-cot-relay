@@ -170,3 +170,32 @@ fn make_healthy_sink() -> Result<TrackingSink, RelayError> {
         partial: false,
     })
 }
+
+#[test]
+fn test_reconnect_metric_incremented_on_healthy_sink() {
+    let clock = ManualClock::new(100);
+    let metrics = Arc::new(Metrics::new());
+    let mut loop_inst = ReconnectingRelayLoop::new(
+        TrackingSink {
+            fails: true,
+            partial: false,
+        },
+        make_healthy_sink,
+        5,
+        DropPolicy::DropOldest,
+        clock,
+        Arc::clone(&metrics),
+    );
+    loop_inst.enqueue(b"m1".to_vec());
+    let _ = loop_inst.poll();
+    loop_inst.enqueue(b"m2".to_vec());
+    let _ = loop_inst.poll();
+    loop_inst.enqueue(b"m3".to_vec());
+    let _ = loop_inst.poll();
+    let snap = metrics.snapshot(100);
+    assert_eq!(snap.reconnects, 0);
+    loop_inst.enqueue(b"m4".to_vec());
+    let _ = loop_inst.poll();
+    let snap2 = metrics.snapshot(100);
+    assert_eq!(snap2.reconnects, 1);
+}
