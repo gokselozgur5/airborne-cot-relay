@@ -1,7 +1,7 @@
 //! JSON structured logger emitting newline-delimited JSON.
 
 use super::{Level, Logger, Record};
-use std::io::{self, Write};
+use std::io::Write;
 use std::sync::Mutex;
 
 fn escape_json_into(s: &str, out: &mut String) {
@@ -28,7 +28,7 @@ pub fn format_json(record: &Record<'_>) -> String {
     escape_json_into(record.target, &mut out);
     out.push_str("\",\"message\":\"");
     escape_json_into(record.message, &mut out);
-    out.push_str("\"");
+    out.push('"');
     for (k, v) in record.fields {
         out.push_str(",\"");
         escape_json_into(k, &mut out);
