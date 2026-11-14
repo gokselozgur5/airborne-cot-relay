@@ -8,6 +8,8 @@
 //! | 4 | `DecodeError` |
 //! | 5 | `TargetingError` |
 
+/// Exit status for a clean exit without error.
+pub const EXIT_CLEAN: i32 = 0;
 /// Exit status for an invalid configuration.
 pub const EXIT_CONFIG: i32 = 2;
 /// Exit status for a socket or file failure.
@@ -27,3 +29,11 @@ pub fn exit_code(err: &crate::config::RelayError) -> i32 {
         RelayError::TargetingError(_) => EXIT_TARGETING,
     }
 }
+
+impl crate::config::RelayError {
+    /// Returns the process exit status for this error.
+    pub fn exit_code(&self) -> i32 {
+        exit_code(self)
+    }
+}
+
