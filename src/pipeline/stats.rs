@@ -18,3 +18,15 @@ impl PipelineStatsTracker {
         }
     }
 }
+
+impl PipelineStatsTracker {
+    /// Records received packets count.
+    pub fn record_received(&mut self, count: u64) {
+        self.total_received = self.total_received.saturating_add(count);
+    }
+
+    /// Records dropped packets count.
+    pub fn record_dropped(&mut self, count: u64) {
+        self.total_dropped = self.total_dropped.saturating_add(count);
+    }
+}
