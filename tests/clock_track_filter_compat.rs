@@ -50,3 +50,11 @@ fn filter_accepts_reexported_system_clock() {
     assert!(filter.accept("t1", 10.0, 20.0));
 }
 
+#[test]
+fn legacy_manual_clock_supports_unified_methods() {
+    let clock = track_filter::ManualClock::new(10);
+    clock.advance_ms(20);
+    assert_eq!(clock.now_ms(), 30);
+    clock.set_ms(50);
+    assert_eq!(clock.now_ms(), 50);
+}
