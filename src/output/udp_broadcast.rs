@@ -30,3 +30,11 @@ impl UdpBroadcastSink {
         &self.socket
     }
 }
+
+impl CotSink for UdpBroadcastSink {
+    fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
+        self.socket
+            .send_to(payload, self.target_addr)
+            .map_err(RelayError::from)
+    }
+}
