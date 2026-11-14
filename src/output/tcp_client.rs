@@ -117,7 +117,8 @@ impl CotSink for TcpClientSink {
             Ok(()) => Ok(payload.len()),
             Err(err) => {
                 self.stream = None;
-                let _delay = self.backoff.next_delay_ms();
+                let delay = self.backoff.next_delay_ms();
+                self.next_connect_deadline = Some(Instant::now() + Duration::from_millis(delay));
                 Err(RelayError::from(err))
             }
         }
