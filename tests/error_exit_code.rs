@@ -24,3 +24,11 @@ fn codes_are_distinct_and_non_zero() {
     assert_eq!(codes.len(), 4);
     assert!(codes.iter().all(|c| *c != 0));
 }
+
+#[test]
+fn error_method_and_clean_exit_code() {
+    assert_eq!(airborne_cot_relay::error::exit::EXIT_CLEAN, 0);
+    let err = RelayError::InvalidConfig("test".into());
+    assert_eq!(err.exit_code(), 2);
+}
+
