@@ -67,6 +67,15 @@ fn emit(s: &CotStreamer, o: &TrackedObject, now_ms: i64) {
 
 fn recv(rx: &UdpSocket) -> String {
     let mut buf = [0u8; 2048];
+    for _ in 0..10 {
+        match rx.recv(&mut buf) {
+            Ok(n) => return String::from_utf8_lossy(&buf[..n]).into_owned(),
+            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                std::thread::sleep(Duration::from_millis(5));
+            }
+            Err(e) => panic!("recv: {e}"),
+        }
+    }
     let n = rx.recv(&mut buf).unwrap();
     String::from_utf8_lossy(&buf[..n]).into_owned()
 }
@@ -80,12 +89,10 @@ fn datagram_count_matches_confirmed_tracks() {
         for o in objs.iter().filter(|o| o.is_confirmed) {
             emit(&s, o, T0_MS + (i as i64) * 100);
             sent += 1;
+            recv(&rx);
         }
     }
     assert_eq!(sent, 59 * 4);
-    for _ in 0..sent {
-        recv(&rx);
-    }
     assert!(rx.recv(&mut [0u8; 8]).is_err());
 }
 
@@ -99,17 +106,15 @@ fn attr(xml: &str, name: &str) -> String {
 #[test]
 fn burst_event_times_never_decrease() {
     let (mut t, rx, s) = rig();
+    let mut prev = String::new();
     for i in 0..60u64 {
         let objs = t.update(&pose(1000 + i * 100), &burst_dets()).unwrap();
         for o in objs.iter().filter(|o| o.is_confirmed) {
             emit(&s, o, T0_MS + (i as i64) * 100);
+            let time = attr(&recv(&rx), "time");
+            assert!(time >= prev);
+            prev = time;
         }
-    }
-    let mut prev = String::new();
-    for _ in 0..59 * 4 {
-        let time = attr(&recv(&rx), "time");
-        assert!(time >= prev);
-        prev = time;
     }
 }
 
