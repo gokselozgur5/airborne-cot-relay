@@ -3,6 +3,7 @@ pub mod bearing;
 pub mod clock;
 pub mod config;
 pub mod config_file;
+pub mod enrich;
 pub mod error;
 pub mod ingest;
 pub mod relay;
