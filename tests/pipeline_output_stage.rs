@@ -91,5 +91,12 @@ fn output_stage_mutable_accessors() {
     s.filter_mut().evict_stale();
 }
 
+#[test]
+fn output_stage_evict_stale_delegates_to_filter() {
+    let mut s = stage();
+    assert_eq!(s.evict_stale(), 0);
+}
+
+
 
 
