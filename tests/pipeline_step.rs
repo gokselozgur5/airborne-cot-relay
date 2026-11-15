@@ -1,7 +1,7 @@
 use airborne_cot_relay::metrics::Metrics;
 use airborne_cot_relay::pipeline::step::{OutboundStep, StepReport};
 use airborne_cot_relay::relay::{BoundedQueue, CotSink, DropPolicy, SendHealth};
-use airborne_cot_relay::track_filter::{FilterConfig, ManualClock, TrackFilter};
+use airborne_cot_relay::track_filter::{Clock, FilterConfig, ManualClock, TrackFilter};
 use airborne_cot_relay::{RelayError, TrackSummary};
 
 #[derive(Default)]
@@ -118,4 +118,15 @@ fn step_report_add_and_add_assign() {
     assert_eq!(sum.evicted, 44);
     sum += r1;
     assert_eq!(sum.sent, 12);
+}
+
+#[test]
+fn outbound_step_mut_accessors_and_into_parts() {
+    let mut step = stepper(false);
+    step.filter_mut().clock().set(6_000);
+    assert_eq!(step.filter().clock().now_ms(), 6_000);
+    let (filter, sink, health) = step.into_parts();
+    assert_eq!(filter.clock().now_ms(), 6_000);
+    assert_eq!(sink.payloads.len(), 0);
+    assert_eq!(health.failures(), (0, 0));
 }
