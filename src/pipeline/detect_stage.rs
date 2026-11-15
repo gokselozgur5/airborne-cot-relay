@@ -47,4 +47,12 @@ impl Pipeline {
         let pose = crate::telemetry::interpolate_pose(a, b, now_ms);
         self.fuse_detections(Some(&pose), detections, now_ms)
     }
+
+    /// Returns `true` when the pipeline holds a pose fresher than `target_stale_timeout_ms`.
+    pub fn has_fresh_pose(&self, now_ms: u64) -> bool {
+        let max_age_ms = self.config.target_stale_timeout_ms;
+        self.ingest
+            .latest_pose()
+            .map_or(false, |p| !p.is_stale(now_ms, max_age_ms))
+    }
 }
