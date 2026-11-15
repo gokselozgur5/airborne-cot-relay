@@ -54,3 +54,12 @@ fn fresh_pose_reaches_the_targeter_without_drops() {
     assert!(tracks.is_ok());
     assert_eq!(p.metrics().snapshot(0).dropped, 0);
 }
+
+#[test]
+fn fuse_interpolated_uses_interpolated_pose_attitude() {
+    let mut p = pipeline();
+    let (a, b) = (pose(1000), pose(2000));
+    let tracks = p.fuse_interpolated(&a, &b, &detections(1), 1500);
+    assert!(tracks.is_ok());
+    assert_eq!(p.metrics().snapshot(0).dropped, 0);
+}
