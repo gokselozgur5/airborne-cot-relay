@@ -88,6 +88,18 @@ fn drain_returns_all_items_and_resets_gauge() {
     assert_eq!(metrics.snapshot(0).queue_depth, 0);
 }
 
+#[test]
+fn push_batch_enqueues_and_returns_discarded() {
+    let metrics = Metrics::new();
+    let mut stage = QueueStage::new(2, DropPolicy::DropOldest);
+    let discarded = stage.push_batch(vec![10, 20, 30], &metrics);
+    assert_eq!(discarded, vec![10]);
+    assert_eq!(stage.len(), 2);
+    assert_eq!(metrics.snapshot(0).dropped, 1);
+    assert_eq!(stage.drain(&metrics), vec![20, 30]);
+}
+
+
 
 
 
