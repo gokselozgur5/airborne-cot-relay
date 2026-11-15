@@ -25,3 +25,10 @@ fn with_origin_keeps_config_and_clears_pose() {
     assert_eq!(pipeline.config().target_stale_timeout_ms, 5000);
     assert!(pipeline.latest_pose().is_none());
 }
+
+#[test]
+fn crate_root_exports_pipeline() {
+    let res = airborne_cot_relay::Pipeline::from_config(&RelayConfig::default());
+    assert!(res.is_ok());
+}
+
