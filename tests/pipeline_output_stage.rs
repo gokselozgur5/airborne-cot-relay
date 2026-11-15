@@ -82,3 +82,14 @@ fn output_stage_implements_debug() {
     assert!(dbg.contains("OutputStage"));
 }
 
+#[test]
+fn output_stage_mutable_accessors() {
+    let mut s = stage();
+    let err = Err(RelayError::IoError("simulated".into()));
+    s.health_mut().record::<()>(&err);
+    assert_eq!(s.health().failures(), (1, 1));
+    s.filter_mut().evict_stale();
+}
+
+
+
