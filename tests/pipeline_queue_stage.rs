@@ -65,4 +65,17 @@ fn backpressure_full_and_remaining_capacity() {
     assert!(stage.is_full());
 }
 
+#[test]
+fn clear_empties_stage_and_resets_depth_gauge() {
+    let metrics = Metrics::new();
+    let mut stage = QueueStage::new(3, DropPolicy::DropOldest);
+    fill(&mut stage, &metrics, 2);
+    assert_eq!(metrics.snapshot(0).queue_depth, 2);
+    stage.clear(&metrics);
+    assert!(stage.is_empty());
+    assert_eq!(stage.len(), 0);
+    assert_eq!(metrics.snapshot(0).queue_depth, 0);
+}
+
+
 
