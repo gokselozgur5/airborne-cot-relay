@@ -65,3 +65,20 @@ fn pipeline_event_display_formats_all_variants() {
     let decode = PipelineEvent::DecodeError { message: "corrupt".into() };
     assert_eq!(decode.to_string(), "decode error: corrupt");
 }
+
+#[test]
+fn event_tracker_state_accessors_reflect_conditions() {
+    let mut tracker = EventTracker::new(2);
+    assert_eq!(tracker.degrade_after(), 2);
+    assert_eq!(tracker.consecutive_failures(), 0);
+    assert!(!tracker.is_degraded());
+    assert!(!tracker.is_telemetry_stale());
+    tracker.record_send(false);
+    assert_eq!(tracker.consecutive_failures(), 1);
+    assert!(!tracker.is_degraded());
+    tracker.record_send(false);
+    assert_eq!(tracker.consecutive_failures(), 2);
+    assert!(tracker.is_degraded());
+    tracker.record_telemetry_age(3000, 1000);
+    assert!(tracker.is_telemetry_stale());
+}
