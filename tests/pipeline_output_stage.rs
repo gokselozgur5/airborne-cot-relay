@@ -74,3 +74,11 @@ fn send_failures_feed_send_health() {
     assert!(stage.health().needs_reconnect());
     assert_eq!(metrics.snapshot(5_000).sent, 0);
 }
+
+#[test]
+fn output_stage_implements_debug() {
+    let s = stage();
+    let dbg = format!("{s:?}");
+    assert!(dbg.contains("OutputStage"));
+}
+
