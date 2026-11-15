@@ -81,6 +81,26 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
     pub fn health(&self) -> &SendHealth {
         &self.health
     }
+
+    /// Mutable reference to the rate and movement filter.
+    pub fn filter_mut(&mut self) -> &mut TrackFilter<C> {
+        &mut self.filter
+    }
+
+    /// Mutable reference to the sink tracks are sent to.
+    pub fn sink_mut(&mut self) -> &mut S {
+        &mut self.sink
+    }
+
+    /// Mutable reference to send health tracker.
+    pub fn health_mut(&mut self) -> &mut SendHealth {
+        &mut self.health
+    }
+
+    /// Decomposes the step into filter, sink, and health tracker.
+    pub fn into_parts(self) -> (TrackFilter<C>, S, SendHealth) {
+        (self.filter, self.sink, self.health)
+    }
 }
 
 use crate::metrics::Metrics;
