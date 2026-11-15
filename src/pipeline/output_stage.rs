@@ -26,6 +26,15 @@ impl<C: Clock> OutputStage<C> {
     }
 }
 
+impl<C: Clock + std::fmt::Debug> std::fmt::Debug for OutputStage<C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("OutputStage")
+            .field("filter", &self.filter)
+            .field("health", &self.health)
+            .finish()
+    }
+}
+
 impl<C: Clock> OutputStage<C> {
     /// Send health fed by every send result.
     pub fn health(&self) -> &SendHealth {
