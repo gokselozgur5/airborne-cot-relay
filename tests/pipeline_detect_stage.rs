@@ -63,3 +63,9 @@ fn fuse_interpolated_uses_interpolated_pose_attitude() {
     assert!(tracks.is_ok());
     assert_eq!(p.metrics().snapshot(0).dropped, 0);
 }
+
+#[test]
+fn has_fresh_pose_reflects_freshness_boundary() {
+    let p = pipeline();
+    assert!(!p.has_fresh_pose(1000));
+}
