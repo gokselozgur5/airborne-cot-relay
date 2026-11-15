@@ -115,3 +115,11 @@ fn event_tracker_default_and_pipeline_event_predicates() {
     let decode = PipelineEvent::DecodeError { message: "err".into() };
     assert!(decode.is_decode_error());
 }
+
+#[test]
+fn pipeline_module_reexports_event_tracker_and_pipeline_event() {
+    use airborne_cot_relay::pipeline::{EventTracker as ET, PipelineEvent as PE};
+    let mut tracker = ET::new(1);
+    tracker.record_send(false);
+    assert_eq!(tracker.drain(), [PE::SinkDegraded { failures: 1 }]);
+}
