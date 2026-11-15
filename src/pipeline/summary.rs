@@ -31,7 +31,25 @@ impl From<(&TrackedObject, f64)> for TrackSummary {
     }
 }
 
+impl From<(&TrackedObject, &GroundIntersection)> for TrackSummary {
+    fn from((track, proj): (&TrackedObject, &GroundIntersection)) -> Self {
+        track_summary(track, proj)
+    }
+}
+
 impl super::Pipeline {
+    /// Summarizes a single `track` with LE90 from the boresight projection at `pose`.
+    pub fn summarize_track(
+        &self,
+        track: &TrackedObject,
+        pose: &crate::PlatformPose,
+    ) -> Result<TrackSummary, crate::RelayError> {
+        let cam = &self.config.camera;
+        let boresight = self
+            .targeter
+            .project_pixel(cam.principal_u, cam.principal_v, pose)?;
+        Ok(track_summary(track, &boresight))
+    }
     /// Summarizes `tracks` with LE90 from the boresight projection at `pose`.
     pub fn summarize_tracks(
         &self,
