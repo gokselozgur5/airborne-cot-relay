@@ -77,5 +77,17 @@ fn clear_empties_stage_and_resets_depth_gauge() {
     assert_eq!(metrics.snapshot(0).queue_depth, 0);
 }
 
+#[test]
+fn drain_returns_all_items_and_resets_gauge() {
+    let metrics = Metrics::new();
+    let mut stage = QueueStage::new(3, DropPolicy::DropOldest);
+    fill(&mut stage, &metrics, 2);
+    let items = stage.drain(&metrics);
+    assert_eq!(items, vec![0, 1]);
+    assert!(stage.is_empty());
+    assert_eq!(metrics.snapshot(0).queue_depth, 0);
+}
+
+
 
 
