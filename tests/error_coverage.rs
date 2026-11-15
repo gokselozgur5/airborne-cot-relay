@@ -78,3 +78,20 @@ fn classifier_covers_every_variant() {
         }
     }
 }
+
+#[test]
+fn exit_code_covers_every_variant() {
+    use airborne_cot_relay::error::exit::{
+        exit_code, EXIT_CONFIG, EXIT_DECODE, EXIT_IO, EXIT_TARGETING,
+    };
+    for (err, _) in all_variants("code") {
+        let expected = match err {
+            RelayError::InvalidConfig(_) => EXIT_CONFIG,
+            RelayError::IoError(_) => EXIT_IO,
+            RelayError::DecodeError(_) => EXIT_DECODE,
+            RelayError::TargetingError(_) => EXIT_TARGETING,
+        };
+        assert_eq!(err.exit_code(), expected);
+        assert_eq!(exit_code(&err), expected);
+    }
+}
