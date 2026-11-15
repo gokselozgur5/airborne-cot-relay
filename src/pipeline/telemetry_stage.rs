@@ -16,4 +16,9 @@ impl Pipeline {
         self.metrics.add_dropped(failed);
         poses
     }
+
+    /// Reference to the underlying telemetry ingest.
+    pub fn telemetry_ingest(&self) -> &crate::TelemetryIngest {
+        &self.ingest
+    }
 }
