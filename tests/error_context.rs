@@ -31,3 +31,13 @@ fn test_all_variants_prefixed() {
         assert!(ctx.to_string().contains("step: "));
     }
 }
+
+#[test]
+fn test_relay_error_direct_context() {
+    let err = RelayError::DecodeError("corrupt header".into());
+    let prefixed = err.context("parse frame");
+    assert_eq!(
+        prefixed,
+        RelayError::DecodeError("parse frame: corrupt header".into())
+    );
+}
