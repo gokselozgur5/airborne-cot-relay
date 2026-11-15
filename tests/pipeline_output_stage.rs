@@ -97,6 +97,16 @@ fn output_stage_evict_stale_delegates_to_filter() {
     assert_eq!(s.evict_stale(), 0);
 }
 
+#[test]
+fn output_stage_send_one_sends_single_track() {
+    let (mut stage, mut sink, metrics) = (stage(), ScriptedSink::default(), Metrics::new());
+    assert!(stage.send_one(&mut sink, &metrics, &track(42)));
+    assert_eq!(sink.payloads, vec!["42@5000"]);
+    assert_eq!(metrics.snapshot(5_000).sent, 1);
+    assert!(!stage.send_one(&mut sink, &metrics, &track(42)));
+}
+
+
 
 
 
