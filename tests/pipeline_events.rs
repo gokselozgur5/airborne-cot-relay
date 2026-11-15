@@ -82,3 +82,20 @@ fn event_tracker_state_accessors_reflect_conditions() {
     tracker.record_telemetry_age(3000, 1000);
     assert!(tracker.is_telemetry_stale());
 }
+
+#[test]
+fn event_tracker_pending_inspection_and_reset() {
+    let mut tracker = EventTracker::new(1);
+    assert!(tracker.is_empty());
+    assert_eq!(tracker.pending_count(), 0);
+    assert!(tracker.pending().is_empty());
+    tracker.record_send(false);
+    assert!(!tracker.is_empty());
+    assert_eq!(tracker.pending_count(), 1);
+    assert_eq!(tracker.pending()[0], PipelineEvent::SinkDegraded { failures: 1 });
+    tracker.reset();
+    assert!(tracker.is_empty());
+    assert_eq!(tracker.pending_count(), 0);
+    assert_eq!(tracker.consecutive_failures(), 0);
+    assert!(!tracker.is_degraded());
+}
