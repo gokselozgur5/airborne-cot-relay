@@ -1,5 +1,5 @@
 use airborne_cot_relay::metrics::Metrics;
-use airborne_cot_relay::pipeline::step::OutboundStep;
+use airborne_cot_relay::pipeline::step::{OutboundStep, StepReport};
 use airborne_cot_relay::relay::{BoundedQueue, CotSink, DropPolicy, SendHealth};
 use airborne_cot_relay::track_filter::{FilterConfig, ManualClock, TrackFilter};
 use airborne_cot_relay::{RelayError, TrackSummary};
@@ -93,4 +93,16 @@ fn failed_send_is_dropped_and_recorded_in_health() {
     assert_eq!(report.failed, 2);
     assert_eq!(metrics.snapshot(5_000).dropped, 2);
     assert_eq!(step.health().failures(), (2, 2));
+}
+
+#[test]
+fn step_report_total_processed_and_is_empty() {
+    let mut report = StepReport::default();
+    assert!(report.is_empty());
+    assert_eq!(report.total_processed(), 0);
+    report.sent = 2;
+    report.failed = 1;
+    report.filtered = 3;
+    assert!(!report.is_empty());
+    assert_eq!(report.total_processed(), 6);
 }
