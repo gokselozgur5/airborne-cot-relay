@@ -62,3 +62,13 @@ fn pipeline_le90_follows_boresight_projection() {
     assert_eq!(low[0].le90_m, expected.unwrap().le90_m);
     assert_ne!(low[0].le90_m, high[0].le90_m);
 }
+
+#[test]
+fn summary_with_explicit_le90_and_from_tuple() {
+    let t = track();
+    let s = airborne_cot_relay::pipeline::summary::track_summary_with_le90(&t, 14.5);
+    assert_eq!(s.le90_m, 14.5);
+    assert_eq!(s.id, t.id);
+    let s2 = airborne_cot_relay::TrackSummary::from((&t, 8.0));
+    assert_eq!(s2.le90_m, 8.0);
+}
