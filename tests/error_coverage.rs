@@ -54,3 +54,12 @@ fn equality_depends_on_variant_and_payload() {
         }
     }
 }
+
+#[test]
+fn debug_formatting_contains_variant_name() {
+    let names = ["InvalidConfig", "DecodeError", "TargetingError", "IoError"];
+    for ((err, _), expected) in all_variants("dbg_val").into_iter().zip(names) {
+        let dbg = format!("{err:?}");
+        assert!(dbg.contains(expected) && dbg.contains("dbg_val"));
+    }
+}
