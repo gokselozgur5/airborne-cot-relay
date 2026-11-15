@@ -106,3 +106,16 @@ fn step_report_total_processed_and_is_empty() {
     assert!(!report.is_empty());
     assert_eq!(report.total_processed(), 6);
 }
+
+#[test]
+fn step_report_add_and_add_assign() {
+    let r1 = StepReport { sent: 1, failed: 2, filtered: 3, evicted: 4 };
+    let r2 = StepReport { sent: 10, failed: 20, filtered: 30, evicted: 40 };
+    let mut sum = r1 + r2;
+    assert_eq!(sum.sent, 11);
+    assert_eq!(sum.failed, 22);
+    assert_eq!(sum.filtered, 33);
+    assert_eq!(sum.evicted, 44);
+    sum += r1;
+    assert_eq!(sum.sent, 12);
+}
