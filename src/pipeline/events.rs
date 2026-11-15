@@ -72,6 +72,29 @@ impl EventTracker {
     pub fn is_telemetry_stale(&self) -> bool {
         self.telemetry_stale
     }
+
+    /// Returns a slice of events currently queued.
+    pub fn pending(&self) -> &[PipelineEvent] {
+        &self.pending
+    }
+
+    /// Number of events currently queued.
+    pub fn pending_count(&self) -> usize {
+        self.pending.len()
+    }
+
+    /// True if there are no pending events.
+    pub fn is_empty(&self) -> bool {
+        self.pending.is_empty()
+    }
+
+    /// Clears all pending events and resets failure counters and state.
+    pub fn reset(&mut self) {
+        self.failures = 0;
+        self.degraded = false;
+        self.telemetry_stale = false;
+        self.pending.clear();
+    }
 }
 
 impl EventTracker {
