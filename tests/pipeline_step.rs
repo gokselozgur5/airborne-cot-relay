@@ -143,3 +143,18 @@ fn pipeline_step_drains_queue_and_updates_gauge() {
     assert_eq!(pipeline.metrics().snapshot(5_000).queue_depth, 0);
     assert_eq!(report.sent, 1);
 }
+
+#[test]
+fn outbound_step_stage_drains_queue_stage() {
+    let metrics = Metrics::new();
+    let mut stage = airborne_cot_relay::pipeline::queue_stage::QueueStage::new(
+        8,
+        DropPolicy::DropOldest,
+    );
+    stage.push(track(1, 35.0), &metrics);
+    let mut step = stepper(false);
+    let report = step.step_stage(5_000, &mut stage, &metrics, render);
+    assert!(stage.is_empty());
+    assert_eq!(metrics.snapshot(5_000).queue_depth, 0);
+    assert_eq!(report.sent, 1);
+}
