@@ -49,3 +49,12 @@ fn telemetry_ingest_accessor_provides_ingest_state() {
     assert_eq!(p.telemetry_ingest().buffered_len(), 0);
     assert_eq!(p.telemetry_ingest().decode_errors(), 0);
 }
+
+#[test]
+fn telemetry_ingest_mut_and_clear_buffer() {
+    let mut p = pipeline();
+    p.telemetry_ingest_mut().clear_buffer();
+    assert_eq!(p.telemetry_ingest().buffered_len(), 0);
+    p.clear_telemetry_buffer();
+    assert_eq!(p.telemetry_ingest().buffered_len(), 0);
+}
