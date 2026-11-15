@@ -49,6 +49,15 @@ impl TryFrom<RelayConfig> for Pipeline {
     }
 }
 
+impl std::fmt::Debug for Pipeline {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Pipeline")
+            .field("config", &self.config)
+            .field("metrics", &self.metrics)
+            .finish()
+    }
+}
+
 impl Pipeline {
     /// Configuration the pipeline was built from.
     pub fn config(&self) -> &RelayConfig {
