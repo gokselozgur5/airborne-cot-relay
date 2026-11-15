@@ -41,9 +41,19 @@ impl<C: Clock> OutputStage<C> {
         &self.health
     }
 
+    /// Mutable send health fed by every send result.
+    pub fn health_mut(&mut self) -> &mut SendHealth {
+        &mut self.health
+    }
+
     /// Track filter deciding which tracks are sent.
     pub fn filter(&self) -> &TrackFilter<C> {
         &self.filter
+    }
+
+    /// Mutable track filter deciding which tracks are sent.
+    pub fn filter_mut(&mut self) -> &mut TrackFilter<C> {
+        &mut self.filter
     }
 }
 
