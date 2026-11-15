@@ -95,3 +95,13 @@ fn exit_code_covers_every_variant() {
         assert_eq!(exit_code(&err), expected);
     }
 }
+
+#[test]
+fn context_helper_covers_every_variant() {
+    use airborne_cot_relay::error::context::ResultExt;
+    for (err, prefix) in all_variants("inner") {
+        let res: Result<(), RelayError> = Err(err);
+        let wrapped = res.context("step").unwrap_err();
+        assert_eq!(wrapped.to_string(), format!("{prefix}step: inner"));
+    }
+}
