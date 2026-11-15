@@ -21,4 +21,14 @@ impl Pipeline {
     pub fn telemetry_ingest(&self) -> &crate::TelemetryIngest {
         &self.ingest
     }
+
+    /// Mutable reference to the underlying telemetry ingest.
+    pub fn telemetry_ingest_mut(&mut self) -> &mut crate::TelemetryIngest {
+        &mut self.ingest
+    }
+
+    /// Clears unparsed bytes from the telemetry ingest buffer.
+    pub fn clear_telemetry_buffer(&mut self) {
+        self.ingest.clear_buffer();
+    }
 }
