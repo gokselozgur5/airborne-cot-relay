@@ -13,6 +13,19 @@ pub enum PipelineEvent {
     DecodeError { message: String },
 }
 
+impl std::fmt::Display for PipelineEvent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SinkDegraded { failures } => {
+                write!(f, "sink degraded after {} consecutive failures", failures)
+            }
+            Self::SinkRecovered => write!(f, "sink recovered"),
+            Self::TelemetryStale { age_ms } => write!(f, "telemetry stale: age {} ms", age_ms),
+            Self::DecodeError { message } => write!(f, "decode error: {}", message),
+        }
+    }
+}
+
 /// Turns per-call observations into edge-triggered `PipelineEvent`s.
 #[derive(Debug)]
 pub struct EventTracker {
