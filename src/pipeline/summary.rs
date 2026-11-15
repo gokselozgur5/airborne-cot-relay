@@ -37,6 +37,18 @@ impl From<(&TrackedObject, &GroundIntersection)> for TrackSummary {
     }
 }
 
+impl TrackedObject {
+    /// Converts this track into a wire summary DTO given a ground projection.
+    pub fn to_summary(&self, projection: &GroundIntersection) -> TrackSummary {
+        track_summary(self, projection)
+    }
+
+    /// Converts this track into a wire summary DTO given an explicit LE90 error.
+    pub fn to_summary_with_le90(&self, le90_m: f64) -> TrackSummary {
+        track_summary_with_le90(self, le90_m)
+    }
+}
+
 impl super::Pipeline {
     /// Summarizes a single `track` with LE90 from the boresight projection at `pose`.
     pub fn summarize_track(
