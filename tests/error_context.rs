@@ -41,3 +41,17 @@ fn test_relay_error_direct_context() {
         RelayError::DecodeError("parse frame: corrupt header".into())
     );
 }
+
+#[test]
+fn test_with_context_evaluates_lazily() {
+    let ok: Result<i32, RelayError> = Ok(10);
+    let res = ok.with_context(|| -> &str { panic!("closure must not run") });
+    assert_eq!(res, Ok(10));
+
+    let err: Result<(), RelayError> = Err(RelayError::IoError("timeout".into()));
+    let with_ctx = err.with_context(|| format!("port {}", 8080));
+    assert_eq!(
+        with_ctx.unwrap_err().to_string(),
+        "IO error: port 8080: timeout"
+    );
+}
