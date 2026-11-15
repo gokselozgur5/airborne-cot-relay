@@ -91,3 +91,12 @@ fn summary_from_projection_and_single_summarize_track() {
     };
     assert_eq!(p.summarize_track(&t, &pose).unwrap().id, t.id);
 }
+
+#[test]
+fn tracked_object_to_summary_helpers() {
+    let t = track();
+    let s1 = t.to_summary(&projection(11.0));
+    assert_eq!((s1.id, s1.le90_m), (t.id, 11.0));
+    let s2 = t.to_summary_with_le90(9.25);
+    assert_eq!((s2.id, s2.le90_m), (t.id, 9.25));
+}
