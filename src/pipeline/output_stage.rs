@@ -64,7 +64,7 @@ impl<C: Clock> OutputStage<C> {
 
 impl<C: Clock> OutputStage<C> {
     /// Filters, encodes and sends one track; true when it was sent.
-    fn send_one<S: CotSink>(
+    pub fn send_one<S: CotSink>(
         &mut self,
         sink: &mut S,
         metrics: &Metrics,
