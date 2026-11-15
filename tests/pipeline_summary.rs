@@ -72,3 +72,22 @@ fn summary_with_explicit_le90_and_from_tuple() {
     let s2 = airborne_cot_relay::TrackSummary::from((&t, 8.0));
     assert_eq!(s2.le90_m, 8.0);
 }
+
+#[test]
+fn summary_from_projection_and_single_summarize_track() {
+    let t = track();
+    let s = airborne_cot_relay::TrackSummary::from((&t, &projection(6.5)));
+    assert_eq!(s.le90_m, 6.5);
+    use airborne_cot_relay::{pipeline::Pipeline, PlatformPose, RelayConfig};
+    let p = Pipeline::from_config(&RelayConfig::default()).unwrap();
+    let pose = PlatformPose {
+        timestamp_ms: 0,
+        lat_deg: 35.0,
+        lon_deg: 139.0,
+        hae_m: 200.0,
+        roll_rad: 0.0,
+        pitch_rad: 0.0,
+        yaw_rad: 0.0,
+    };
+    assert_eq!(p.summarize_track(&t, &pose).unwrap().id, t.id);
+}
