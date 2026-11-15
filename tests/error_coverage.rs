@@ -105,3 +105,24 @@ fn context_helper_covers_every_variant() {
         assert_eq!(wrapped.to_string(), format!("{prefix}step: inner"));
     }
 }
+
+#[test]
+fn error_conversions_cover_all_source_paths() {
+    use sightline_cot::cot::CotError;
+    use sightline_cot::mgrs::GridError;
+    use sightline_cot::proto::ProtoError;
+    use stm32_navcore::protocol::ProtocolError;
+
+    let io_err: RelayError = std::io::Error::from(std::io::ErrorKind::TimedOut).into();
+    assert!(matches!(io_err, RelayError::IoError(_)));
+    let cot_net: RelayError = CotError::NetworkError("net".into()).into();
+    assert!(matches!(cot_net, RelayError::IoError(_)));
+    let cot_dec: RelayError = CotError::InvalidXml("xml".into()).into();
+    assert!(matches!(cot_dec, RelayError::DecodeError(_)));
+    let proto_err: RelayError = ProtoError::InvalidMagic.into();
+    assert!(matches!(proto_err, RelayError::DecodeError(_)));
+    let grid_err: RelayError = GridError::InvalidZone.into();
+    assert!(matches!(grid_err, RelayError::DecodeError(_)));
+    let nav_err: RelayError = ProtocolError::CrcMismatch.into();
+    assert!(matches!(nav_err, RelayError::DecodeError(_)));
+}
