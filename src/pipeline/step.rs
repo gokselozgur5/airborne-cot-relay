@@ -159,3 +159,21 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
         report
     }
 }
+
+use super::Pipeline;
+
+impl Pipeline {
+    /// Steps `outbound`, draining `queue` with pipeline metrics and `render`.
+    pub fn step<C: Clock, S: CotSink, F>(
+        &self,
+        outbound: &mut OutboundStep<C, S>,
+        now_ms: u64,
+        queue: &mut BoundedQueue<TrackSummary>,
+        render: F,
+    ) -> StepReport
+    where
+        F: FnMut(&TrackSummary, u64) -> String,
+    {
+        outbound.step(now_ms, queue, &self.metrics, render)
+    }
+}
