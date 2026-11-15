@@ -25,6 +25,25 @@ impl StepReport {
     }
 }
 
+impl std::ops::Add for StepReport {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        Self {
+            sent: self.sent + rhs.sent,
+            failed: self.failed + rhs.failed,
+            filtered: self.filtered + rhs.filtered,
+            evicted: self.evicted + rhs.evicted,
+        }
+    }
+}
+
+impl std::ops::AddAssign for StepReport {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
+    }
+}
+
 use crate::relay::{CotSink, SendHealth};
 use crate::track_filter::{Clock, TrackFilter};
 
