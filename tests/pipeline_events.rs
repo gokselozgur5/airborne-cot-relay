@@ -99,3 +99,19 @@ fn event_tracker_pending_inspection_and_reset() {
     assert_eq!(tracker.consecutive_failures(), 0);
     assert!(!tracker.is_degraded());
 }
+
+#[test]
+fn event_tracker_default_and_pipeline_event_predicates() {
+    let tracker = EventTracker::default();
+    assert_eq!(tracker.degrade_after(), 3);
+    assert!(tracker.is_empty());
+    let degraded = PipelineEvent::SinkDegraded { failures: 3 };
+    assert!(degraded.is_sink_degraded());
+    assert!(!degraded.is_sink_recovered());
+    let recovered = PipelineEvent::SinkRecovered;
+    assert!(recovered.is_sink_recovered());
+    let stale = PipelineEvent::TelemetryStale { age_ms: 500 };
+    assert!(stale.is_telemetry_stale());
+    let decode = PipelineEvent::DecodeError { message: "err".into() };
+    assert!(decode.is_decode_error());
+}
