@@ -58,3 +58,18 @@ fn telemetry_ingest_mut_and_clear_buffer() {
     p.clear_telemetry_buffer();
     assert_eq!(p.telemetry_ingest().buffered_len(), 0);
 }
+
+#[test]
+fn split_frame_across_chunks_updates_metrics_on_completion() {
+    let mut p = pipeline();
+    let bytes = frame(1000);
+    let (chunk1, chunk2) = bytes.split_at(bytes.len() / 2);
+    let poses1 = p.ingest_telemetry(chunk1);
+    assert!(poses1.is_empty());
+    assert_eq!(p.metrics().snapshot(0).packets_in, 0);
+
+    let poses2 = p.ingest_telemetry(chunk2);
+    assert_eq!(poses2.len(), 1);
+    assert_eq!(p.metrics().snapshot(0).packets_in, 1);
+    assert_eq!(p.metrics().snapshot(0).dropped, 0);
+}
