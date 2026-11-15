@@ -26,6 +26,24 @@ impl std::fmt::Display for PipelineEvent {
     }
 }
 
+impl PipelineEvent {
+    pub fn is_sink_degraded(&self) -> bool {
+        matches!(self, Self::SinkDegraded { .. })
+    }
+
+    pub fn is_sink_recovered(&self) -> bool {
+        matches!(self, Self::SinkRecovered)
+    }
+
+    pub fn is_telemetry_stale(&self) -> bool {
+        matches!(self, Self::TelemetryStale { .. })
+    }
+
+    pub fn is_decode_error(&self) -> bool {
+        matches!(self, Self::DecodeError { .. })
+    }
+}
+
 /// Turns per-call observations into edge-triggered `PipelineEvent`s.
 #[derive(Debug)]
 pub struct EventTracker {
@@ -34,6 +52,12 @@ pub struct EventTracker {
     degraded: bool,
     telemetry_stale: bool,
     pending: Vec<PipelineEvent>,
+}
+
+impl Default for EventTracker {
+    fn default() -> Self {
+        Self::new(3)
+    }
 }
 
 impl EventTracker {
