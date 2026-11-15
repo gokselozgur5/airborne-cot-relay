@@ -33,6 +33,22 @@ impl Pipeline {
     }
 }
 
+impl TryFrom<&RelayConfig> for Pipeline {
+    type Error = RelayError;
+
+    fn try_from(config: &RelayConfig) -> Result<Self, Self::Error> {
+        Self::from_config(config)
+    }
+}
+
+impl TryFrom<RelayConfig> for Pipeline {
+    type Error = RelayError;
+
+    fn try_from(config: RelayConfig) -> Result<Self, Self::Error> {
+        Self::from_config(&config)
+    }
+}
+
 impl Pipeline {
     /// Configuration the pipeline was built from.
     pub fn config(&self) -> &RelayConfig {
