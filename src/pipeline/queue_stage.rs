@@ -31,6 +31,16 @@ impl<T> QueueStage<T> {
     pub fn policy(&self) -> DropPolicy {
         self.policy
     }
+
+    /// True when the stage is at capacity and backpressure drops will occur.
+    pub fn is_full(&self) -> bool {
+        self.len() >= self.capacity
+    }
+
+    /// Remaining slots available before backpressure drops occur.
+    pub fn remaining_capacity(&self) -> usize {
+        self.capacity.saturating_sub(self.len())
+    }
 }
 
 impl<T> QueueStage<T> {
