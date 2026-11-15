@@ -158,6 +158,29 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
         metrics.set_queue_depth(queue.len() as u64);
         report
     }
+
+    /// Drains `stage` through `render` to the sink, evicts stale entries, updates gauge.
+    pub fn step_stage<F>(
+        &mut self,
+        now_ms: u64,
+        stage: &mut crate::pipeline::queue_stage::QueueStage<TrackSummary>,
+        metrics: &Metrics,
+        mut render: F,
+    ) -> StepReport
+    where
+        F: FnMut(&TrackSummary, u64) -> String,
+    {
+        let mut report = StepReport::default();
+        while let Some(track) = stage.pop(metrics) {
+            match self.send_one(&track, now_ms, metrics, &mut render) {
+                None => report.filtered += 1,
+                Some(true) => report.sent += 1,
+                Some(false) => report.failed += 1,
+            }
+        }
+        report.evicted = self.filter.evict_stale();
+        report
+    }
 }
 
 use super::Pipeline;
