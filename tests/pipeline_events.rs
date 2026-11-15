@@ -53,3 +53,15 @@ fn decode_error_carries_the_error_text() {
         matches!(&events[..], [PipelineEvent::DecodeError { message }] if message.contains("bad crc"))
     );
 }
+
+#[test]
+fn pipeline_event_display_formats_all_variants() {
+    let degraded = PipelineEvent::SinkDegraded { failures: 5 };
+    assert_eq!(degraded.to_string(), "sink degraded after 5 consecutive failures");
+    let recovered = PipelineEvent::SinkRecovered;
+    assert_eq!(recovered.to_string(), "sink recovered");
+    let stale = PipelineEvent::TelemetryStale { age_ms: 1200 };
+    assert_eq!(stale.to_string(), "telemetry stale: age 1200 ms");
+    let decode = PipelineEvent::DecodeError { message: "corrupt".into() };
+    assert_eq!(decode.to_string(), "decode error: corrupt");
+}
