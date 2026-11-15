@@ -73,3 +73,13 @@ fn split_frame_across_chunks_updates_metrics_on_completion() {
     assert_eq!(p.metrics().snapshot(0).packets_in, 1);
     assert_eq!(p.metrics().snapshot(0).dropped, 0);
 }
+
+#[test]
+fn stale_and_duplicate_frames_do_not_increment_packets_in() {
+    let mut p = pipeline();
+    assert_eq!(p.ingest_telemetry(&frame(2000)).len(), 1);
+    assert!(p.ingest_telemetry(&frame(1000)).is_empty());
+    assert!(p.ingest_telemetry(&frame(2000)).is_empty());
+    assert_eq!(p.metrics().snapshot(0).packets_in, 1);
+    assert_eq!(p.latest_pose().unwrap().timestamp_ms, 2000);
+}
