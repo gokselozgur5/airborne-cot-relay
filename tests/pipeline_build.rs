@@ -41,4 +41,13 @@ fn pipeline_implements_try_from_config() {
     assert!(p2.is_ok());
 }
 
+#[test]
+fn pipeline_implements_debug() {
+    let pipeline = Pipeline::from_config(&RelayConfig::default()).unwrap();
+    let dbg = format!("{:?}", pipeline);
+    assert!(dbg.contains("Pipeline"));
+}
+
+
+
 
