@@ -43,3 +43,11 @@ fn depth_gauge_follows_push_and_pop() {
     assert!(stage.is_empty());
     assert_eq!(metrics.snapshot(0).queue_depth, 0);
 }
+
+#[test]
+fn capacity_and_policy_accessors() {
+    let stage = QueueStage::<u32>::new(5, DropPolicy::DropOldest);
+    assert_eq!(stage.capacity(), 5);
+    assert_eq!(stage.policy(), DropPolicy::DropOldest);
+}
+
