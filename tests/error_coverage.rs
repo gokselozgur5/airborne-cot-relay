@@ -63,3 +63,18 @@ fn debug_formatting_contains_variant_name() {
         assert!(dbg.contains(expected) && dbg.contains("dbg_val"));
     }
 }
+
+#[test]
+fn classifier_covers_every_variant() {
+    use airborne_cot_relay::error::class::{classify, ErrorClass};
+    for (err, _) in all_variants("cls") {
+        let class = classify(&err);
+        match err {
+            RelayError::InvalidConfig(_) => assert_eq!(class, ErrorClass::Fatal),
+            RelayError::IoError(_) => assert_eq!(class, ErrorClass::Retryable),
+            RelayError::DecodeError(_) | RelayError::TargetingError(_) => {
+                assert_eq!(class, ErrorClass::Droppable);
+            }
+        }
+    }
+}
