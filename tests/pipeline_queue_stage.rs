@@ -51,3 +51,18 @@ fn capacity_and_policy_accessors() {
     assert_eq!(stage.policy(), DropPolicy::DropOldest);
 }
 
+#[test]
+fn backpressure_full_and_remaining_capacity() {
+    let metrics = Metrics::new();
+    let mut stage = QueueStage::new(3, DropPolicy::DropOldest);
+    assert_eq!(stage.remaining_capacity(), 3);
+    assert!(!stage.is_full());
+    stage.push(10, &metrics);
+    assert_eq!(stage.remaining_capacity(), 2);
+    stage.push(20, &metrics);
+    stage.push(30, &metrics);
+    assert_eq!(stage.remaining_capacity(), 0);
+    assert!(stage.is_full());
+}
+
+
