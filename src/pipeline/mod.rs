@@ -98,4 +98,5 @@ pub mod queue_stage;
 pub mod step;
 
 pub mod events;
+pub use events::{EventTracker, PipelineEvent};
 pub mod stats;
