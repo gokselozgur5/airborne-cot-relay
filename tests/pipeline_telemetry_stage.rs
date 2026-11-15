@@ -42,3 +42,10 @@ fn corrupt_frame_increments_dropped_only() {
     assert_eq!(snap.packets_in, 1);
     assert_eq!(snap.dropped, 1);
 }
+
+#[test]
+fn telemetry_ingest_accessor_provides_ingest_state() {
+    let p = pipeline();
+    assert_eq!(p.telemetry_ingest().buffered_len(), 0);
+    assert_eq!(p.telemetry_ingest().decode_errors(), 0);
+}
