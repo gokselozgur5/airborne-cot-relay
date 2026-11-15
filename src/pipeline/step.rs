@@ -13,6 +13,18 @@ pub struct StepReport {
     pub evicted: usize,
 }
 
+impl StepReport {
+    /// Returns the sum of sent, failed, and filtered tracks.
+    pub fn total_processed(&self) -> usize {
+        self.sent + self.failed + self.filtered
+    }
+
+    /// Returns true if no tracks were processed or evicted.
+    pub fn is_empty(&self) -> bool {
+        self.total_processed() == 0 && self.evicted == 0
+    }
+}
+
 use crate::relay::{CotSink, SendHealth};
 use crate::track_filter::{Clock, TrackFilter};
 
