@@ -55,6 +55,11 @@ impl<C: Clock> OutputStage<C> {
     pub fn filter_mut(&mut self) -> &mut TrackFilter<C> {
         &mut self.filter
     }
+
+    /// Evicts stale entries from the filter and returns the count.
+    pub fn evict_stale(&mut self) -> usize {
+        self.filter.evict_stale()
+    }
 }
 
 impl<C: Clock> OutputStage<C> {
