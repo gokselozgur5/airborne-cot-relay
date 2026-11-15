@@ -68,6 +68,16 @@ impl<T> QueueStage<T> {
         self.publish_depth(metrics);
     }
 
+    /// Drains all events from the stage and resets the queue depth gauge to zero.
+    pub fn drain(&mut self, metrics: &Metrics) -> Vec<T> {
+        let mut items = Vec::with_capacity(self.queue.len());
+        while let Some(item) = self.queue.pop() {
+            items.push(item);
+        }
+        self.publish_depth(metrics);
+        items
+    }
+
     fn publish_depth(&self, metrics: &Metrics) {
         metrics.set_queue_depth(self.queue.len() as u64);
     }
