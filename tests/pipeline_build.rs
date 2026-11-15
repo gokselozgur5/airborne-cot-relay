@@ -32,3 +32,13 @@ fn crate_root_exports_pipeline() {
     assert!(res.is_ok());
 }
 
+#[test]
+fn pipeline_implements_try_from_config() {
+    let cfg = RelayConfig::default();
+    let p1 = Pipeline::try_from(&cfg);
+    assert!(p1.is_ok());
+    let p2 = Pipeline::try_from(cfg);
+    assert!(p2.is_ok());
+}
+
+
