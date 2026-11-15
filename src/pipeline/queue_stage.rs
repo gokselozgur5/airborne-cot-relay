@@ -55,6 +55,17 @@ impl<T> QueueStage<T> {
         discarded
     }
 
+    /// Enqueues multiple items, returning all items discarded on overflow.
+    pub fn push_batch<I>(&mut self, items: I, metrics: &Metrics) -> Vec<T>
+    where
+        I: IntoIterator<Item = T>,
+    {
+        items
+            .into_iter()
+            .filter_map(|item| self.push(item, metrics))
+            .collect()
+    }
+
     /// Dequeues the oldest event and updates the depth gauge.
     pub fn pop(&mut self, metrics: &Metrics) -> Option<T> {
         let item = self.queue.pop();
