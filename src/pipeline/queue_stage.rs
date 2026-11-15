@@ -7,14 +7,29 @@ use crate::relay::{BoundedQueue, DropPolicy};
 #[derive(Debug)]
 pub struct QueueStage<T> {
     queue: BoundedQueue<T>,
+    capacity: usize,
+    policy: DropPolicy,
 }
 
 impl<T> QueueStage<T> {
     /// Creates a stage holding at most `capacity` events.
     pub fn new(capacity: usize, policy: DropPolicy) -> Self {
+        let capacity = capacity.max(1);
         Self {
             queue: BoundedQueue::new(capacity, policy),
+            capacity,
+            policy,
         }
+    }
+
+    /// Maximum capacity of the stage.
+    pub fn capacity(&self) -> usize {
+        self.capacity
+    }
+
+    /// Drop policy applied when the stage is full.
+    pub fn policy(&self) -> DropPolicy {
+        self.policy
     }
 }
 
