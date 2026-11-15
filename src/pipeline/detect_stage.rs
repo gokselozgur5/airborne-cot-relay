@@ -35,4 +35,16 @@ impl Pipeline {
         let pose = self.ingest.latest_pose();
         self.fuse_detections(pose.as_ref(), detections, now_ms)
     }
+
+    /// Fuses `detections` with a pose interpolated between `a` and `b` at `now_ms`.
+    pub fn fuse_interpolated(
+        &mut self,
+        a: &PlatformPose,
+        b: &PlatformPose,
+        detections: &[TargetDetection],
+        now_ms: u64,
+    ) -> Result<Vec<TrackedObject>, RelayError> {
+        let pose = crate::telemetry::interpolate_pose(a, b, now_ms);
+        self.fuse_detections(Some(&pose), detections, now_ms)
+    }
 }
