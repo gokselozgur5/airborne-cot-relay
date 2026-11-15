@@ -52,6 +52,26 @@ impl EventTracker {
     pub fn drain(&mut self) -> Vec<PipelineEvent> {
         std::mem::take(&mut self.pending)
     }
+
+    /// Configured failure count required to mark sink degraded.
+    pub fn degrade_after(&self) -> u32 {
+        self.degrade_after
+    }
+
+    /// Number of consecutive send failures observed so far.
+    pub fn consecutive_failures(&self) -> u32 {
+        self.failures
+    }
+
+    /// True if the sink is currently marked degraded.
+    pub fn is_degraded(&self) -> bool {
+        self.degraded
+    }
+
+    /// True if the latest telemetry observation was stale.
+    pub fn is_telemetry_stale(&self) -> bool {
+        self.telemetry_stale
+    }
 }
 
 impl EventTracker {
