@@ -130,3 +130,16 @@ fn outbound_step_mut_accessors_and_into_parts() {
     assert_eq!(sink.payloads.len(), 0);
     assert_eq!(health.failures(), (0, 0));
 }
+
+#[test]
+fn pipeline_step_drains_queue_and_updates_gauge() {
+    let cfg = airborne_cot_relay::RelayConfig::default();
+    let pipeline = airborne_cot_relay::pipeline::Pipeline::from_config(&cfg).unwrap();
+    pipeline.metrics().set_queue_depth(1);
+    let mut queue = queue_of(vec![track(1, 35.0)]);
+    let mut step = stepper(false);
+    let report = pipeline.step(&mut step, 5_000, &mut queue, render);
+    assert!(queue.is_empty());
+    assert_eq!(pipeline.metrics().snapshot(5_000).queue_depth, 0);
+    assert_eq!(report.sent, 1);
+}
