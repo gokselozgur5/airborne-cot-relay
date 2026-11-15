@@ -62,6 +62,12 @@ impl<T> QueueStage<T> {
         item
     }
 
+    /// Removes all events from the stage and resets the queue depth gauge to zero.
+    pub fn clear(&mut self, metrics: &Metrics) {
+        while self.queue.pop().is_some() {}
+        self.publish_depth(metrics);
+    }
+
     fn publish_depth(&self, metrics: &Metrics) {
         metrics.set_queue_depth(self.queue.len() as u64);
     }
