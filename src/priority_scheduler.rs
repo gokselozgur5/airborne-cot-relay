@@ -255,4 +255,15 @@ mod tests {
         assert!(CotPriority::High > CotPriority::Normal);
         assert!(CotPriority::Normal > CotPriority::Low);
     }
+
+    #[test]
+    fn test_from_cot_type_and_xml() {
+        assert_eq!(CotPriority::from_cot_type("b-a-o-tbl"), CotPriority::Emergency);
+        assert_eq!(CotPriority::from_cot_type("a-h-G"), CotPriority::Critical);
+        assert_eq!(CotPriority::from_cot_type("a-f-G-E-V"), CotPriority::High);
+        assert_eq!(CotPriority::from_cot_type("a-u-G"), CotPriority::Normal);
+
+        let xml_emerg = r#"<event version="2.0" type="b-a-o-tbl"/>"#;
+        assert_eq!(CotPriority::from_xml_str(xml_emerg), CotPriority::Emergency);
+    }
 }
