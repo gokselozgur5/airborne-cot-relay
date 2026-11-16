@@ -150,4 +150,31 @@ mod tests {
         let snap2 = sampler.sample();
         assert_eq!(snap2.pose, p2);
     }
+
+    #[test]
+    fn test_concurrent_writes_and_reads() {
+        use std::sync::Arc;
+        use std::thread;
+        let p0 = PlatformPose::new(1000, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let sampler = Arc::new(DualBufferSampler::new(p0, 0));
+        let sw = Arc::clone(&sampler);
+        let w = thread::spawn(move || {
+            for i in 1..=200 {
+                let p = PlatformPose::new(1000 + i, i as f64, 0.0, 0.0, 0.0, 0.0, 0.0);
+                sw.update(p, i * 1000);
+            }
+        });
+        let sr = Arc::clone(&sampler);
+        let r = thread::spawn(move || {
+            for _ in 0..500 {
+                let snap = sr.sample();
+                assert!(snap.is_valid);
+            }
+        });
+        w.join().unwrap();
+        r.join().unwrap();
+        let stats = sampler.stats();
+        assert_eq!(stats.writes_total, 200);
+        assert!(stats.reads_total >= 500);
+    }
 }
