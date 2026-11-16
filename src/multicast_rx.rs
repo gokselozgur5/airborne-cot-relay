@@ -98,3 +98,16 @@ impl MulticastReceiver {
         Ok(socket)
     }
 }
+
+impl MulticastReceiver {
+    pub fn bind(config: MulticastRxConfig) -> Result<Self, MulticastRxError> {
+        config.validate()?;
+        let socket = Self::bind_socket(&config)?;
+        socket.join_multicast_v4(&config.multicast_addr, &config.interface_addr)?;
+        Ok(Self {
+            socket,
+            config,
+            joined: true,
+        })
+    }
+}
