@@ -76,3 +76,23 @@ impl Default for ReconnectPolicy {
         }
     }
 }
+
+impl ReconnectPolicy {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn with_initial_backoff(mut self, backoff: Duration) -> Self {
+        self.initial_backoff = backoff;
+        self
+    }
+
+    pub fn with_max_backoff(mut self, backoff: Duration) -> Self {
+        self.max_backoff = backoff;
+        self
+    }
+
+    pub fn with_multiplier(mut self, multiplier: f64) -> Self {
+        self.backoff_multiplier = multiplier.max(1.0);
+        self
+    }
