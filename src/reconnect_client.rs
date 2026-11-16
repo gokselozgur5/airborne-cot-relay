@@ -34,3 +34,17 @@ impl std::fmt::Display for ReconnectClientError {
         }
     }
 }
+
+impl std::error::Error for ReconnectClientError {}
+
+impl From<io::Error> for ReconnectClientError {
+    fn from(err: io::Error) -> Self {
+        Self::Io(err)
+    }
+}
+
+impl From<ReconnectClientError> for RelayError {
+    fn from(err: ReconnectClientError) -> Self {
+        RelayError::IoError(err.to_string())
+    }
+}
