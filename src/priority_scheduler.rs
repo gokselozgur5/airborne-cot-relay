@@ -315,4 +315,22 @@ mod tests {
         let err = sched.push(b"low3".to_vec(), CotPriority::Low, 3);
         assert_eq!(err, Err(SchedulerError::QueueFull));
     }
+
+    #[test]
+    fn test_prune_expired() {
+        let mut sched = PriorityPacketScheduler::new(5);
+        let pkt_expired =
+            PrioritizedPacket::new(CotPriority::High, 1, 100, b"old".to_vec()).with_ttl(50);
+        let pkt_alive =
+            PrioritizedPacket::new(CotPriority::Normal, 2, 120, b"fresh".to_vec()).with_ttl(50);
+
+        sched.push_packet(pkt_expired).unwrap();
+        sched.push_packet(pkt_alive).unwrap();
+        assert_eq!(sched.len(), 2);
+
+        let pruned = sched.prune_expired(160);
+        assert_eq!(pruned, 1);
+        assert_eq!(sched.len(), 1);
+        assert_eq!(sched.pop().unwrap().payload, b"fresh");
+    }
 }
