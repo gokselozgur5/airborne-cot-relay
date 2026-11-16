@@ -76,3 +76,24 @@ impl BloomFilter {
         self.bits.iter().all(|&word| word == 0)
     }
 }
+
+/// Deduplicator for Cursor-on-Target telemetry events using a Bloom filter.
+#[derive(Debug, Clone)]
+pub struct CotBloomDeduplicator {
+    filter: BloomFilter,
+    total_checked: u64,
+    duplicates_dropped: u64,
+    unique_passed: u64,
+}
+
+impl CotBloomDeduplicator {
+    /// Creates a deduplicator with specified filter capacity and hash function count.
+    pub fn new(capacity_bits: usize, hash_count: usize) -> Self {
+        Self {
+            filter: BloomFilter::new(capacity_bits, hash_count),
+            total_checked: 0,
+            duplicates_dropped: 0,
+            unique_passed: 0,
+        }
+    }
+}
