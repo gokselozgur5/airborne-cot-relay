@@ -116,3 +116,22 @@ pub struct PriorityPacketScheduler {
     pub(crate) next_sequence: u64,
     pub(crate) stats: SchedulerStats,
 }
+
+impl PriorityPacketScheduler {
+    /// Creates a new priority queue scheduler with the specified packet capacity.
+    pub fn new(max_capacity: usize) -> Self {
+        Self {
+            queues: [
+                VecDeque::new(),
+                VecDeque::new(),
+                VecDeque::new(),
+                VecDeque::new(),
+                VecDeque::new(),
+            ],
+            max_capacity: max_capacity.max(1),
+            current_count: 0,
+            next_sequence: 1,
+            stats: SchedulerStats::default(),
+        }
+    }
+}
