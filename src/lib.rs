@@ -25,5 +25,6 @@ pub mod resilience;
 pub mod runtime;
 pub mod track_filter;
 pub mod ttl_cache;
+pub use ttl_cache::{CacheEntry, CacheStats, PacketTtlCache, TtlCache, TtlConfig};
 
 pub mod relay_loop;

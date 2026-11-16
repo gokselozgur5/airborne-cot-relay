@@ -216,3 +216,6 @@ where
         reaped
     }
 }
+
+/// Convenience alias for byte packet caching by packet UID or sequence ID.
+pub type PacketTtlCache = TtlCache<String, Vec<u8>>;
