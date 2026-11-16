@@ -52,3 +52,5 @@ pub mod multicast_rx;
 pub mod bloom_dedup;
 pub mod rate_limiter;
 pub use rate_limiter::{RateLimiterConfig, RateLimiterStats, TokenBucket};
+pub mod telemetry_snapshot;
+pub use telemetry_snapshot::{DualBufferSampler, SamplerStats, TelemetrySnapshot};
