@@ -354,17 +354,14 @@ mod tests {
     #[test]
     fn test_reassembler_out_of_order_and_duplicates() {
         let mut reassembler = FragmentReassembler::new(5, 500);
-        let frags = fragment_payload(77, b"telemetry-feed", 12).unwrap();
-        assert!(frags.len() >= 3);
+        let frags = fragment_payload(77, b"telemetry!", 12).unwrap();
+        assert_eq!(frags.len(), 3);
         assert_eq!(reassembler.process_fragment(frags[2].clone(), 100).unwrap(), None);
         assert_eq!(reassembler.process_fragment(frags[0].clone(), 110).unwrap(), None);
         assert_eq!(reassembler.process_fragment(frags[0].clone(), 120).unwrap(), None);
         assert_eq!(reassembler.stats().duplicate_fragments, 1);
-        let mut res = None;
-        for frag in frags.into_iter().skip(1).take(1) {
-            res = reassembler.process_fragment(frag, 130).unwrap();
-        }
-        assert_eq!(res, Some(b"telemetry-feed".to_vec()));
+        let res = reassembler.process_fragment(frags[1].clone(), 130).unwrap();
+        assert_eq!(res, Some(b"telemetry!".to_vec()));
     }
 
     #[test]
