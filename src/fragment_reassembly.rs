@@ -305,4 +305,17 @@ mod tests {
         let decoded = FragmentHeader::decode(&encoded).unwrap();
         assert_eq!(header, decoded);
     }
+
+    #[test]
+    fn test_fragment_codec_and_validation() {
+        let header = FragmentHeader::new(42, 0, 1).unwrap();
+        let frag = Fragment::new(header, b"<event/>".to_vec());
+        assert_eq!(frag.wire_size(), HEADER_SIZE + 8);
+        let encoded = frag.encode();
+        let decoded = Fragment::decode(&encoded).unwrap();
+        assert_eq!(frag, decoded);
+        assert_eq!(FragmentHeader::new(1, 0, 0), Err(ReassemblyError::InvalidTotalFragments));
+        assert_eq!(FragmentHeader::new(1, 3, 2), Err(ReassemblyError::IndexOutOfBounds));
+        assert_eq!(FragmentHeader::decode(&[0; 4]), Err(ReassemblyError::PacketTooShort));
+    }
 }
