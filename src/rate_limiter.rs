@@ -103,4 +103,15 @@ mod tests {
         assert!((bucket.tokens() - 10.0).abs() < 1e-4);
         assert_eq!(bucket.stats(), RateLimiterStats::default());
     }
+
+    #[test]
+    fn test_token_bucket_exhaustion() {
+        let mut bucket = TokenBucket::new(2.0, 1.0);
+        assert!(bucket.try_acquire(1.0));
+        assert!(bucket.try_acquire(1.0));
+        assert!(!bucket.try_acquire(1.0));
+        let stats = bucket.stats();
+        assert_eq!(stats.allowed, 2);
+        assert_eq!(stats.dropped, 1);
+    }
 }
