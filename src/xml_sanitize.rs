@@ -56,3 +56,19 @@ pub fn escape_xml_text(input: &str) -> String {
 pub fn has_xml_entities(input: &str) -> bool {
     input.chars().any(|c| escape_xml_entity(c).is_some())
 }
+
+/// Sanitizes invalid XML characters and escapes attribute entities in a single pass.
+pub fn sanitize_and_escape_attr(input: &str) -> String {
+    let mut out = String::with_capacity(input.len());
+    for c in input.chars() {
+        if !is_xml_valid_char(c) {
+            continue;
+        }
+        if let Some(entity) = escape_xml_entity(c) {
+            out.push_str(entity);
+        } else {
+            out.push(c);
+        }
+    }
+    out
+}
