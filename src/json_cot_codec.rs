@@ -73,3 +73,11 @@ impl CotEventDto {
         }
     }
 }
+
+fn extract_xml_attr<'a>(tag_content: &'a str, attr_name: &str) -> Option<&'a str> {
+    let pattern = format!("{attr_name}=\"");
+    let start = tag_content.find(&pattern)? + pattern.len();
+    let rest = &tag_content[start..];
+    let end = rest.find('"')?;
+    Some(&rest[..end])
+}
