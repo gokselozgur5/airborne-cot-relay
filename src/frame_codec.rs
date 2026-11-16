@@ -163,3 +163,31 @@ impl FrameDecoder {
         Ok(frames)
     }
 }
+
+impl FrameDecoder {
+    /// Encodes a payload with the specified prefix configuration.
+    pub fn encode(payload: &[u8], field: LengthField, endian: Endianness) -> Result<Vec<u8>, FrameCodecError> {
+        let len = payload.len();
+        let mut out = Vec::with_capacity(field.byte_len() + len);
+        match (field, endian) {
+            (LengthField::U16, Endianness::BigEndian) => {
+                let val = u16::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge { frame_len: len, max_len: u16::MAX as usize })?;
+                out.extend_from_slice(&val.to_be_bytes());
+            }
+            (LengthField::U16, Endianness::LittleEndian) => {
+                let val = u16::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge { frame_len: len, max_len: u16::MAX as usize })?;
+                out.extend_from_slice(&val.to_le_bytes());
+            }
+            (LengthField::U32, Endianness::BigEndian) => {
+                let val = u32::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge { frame_len: len, max_len: u32::MAX as usize })?;
+                out.extend_from_slice(&val.to_be_bytes());
+            }
+            (LengthField::U32, Endianness::LittleEndian) => {
+                let val = u32::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge { frame_len: len, max_len: u32::MAX as usize })?;
+                out.extend_from_slice(&val.to_le_bytes());
+            }
+        }
+        out.extend_from_slice(payload);
+        Ok(out)
+    }
+}
