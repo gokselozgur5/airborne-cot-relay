@@ -288,3 +288,26 @@ impl ReconnectClient {
         }
     }
 }
+
+impl ReconnectClient {
+    /// Enqueues a payload for delivery, dropping oldest if configured on capacity.
+    pub fn enqueue(&mut self, payload: Vec<u8>) -> Result<(), ReconnectClientError> {
+        let msg_len = payload.len();
+        while self.queue.len() >= self.policy.max_queue_messages
+            || (self.queued_bytes + msg_len > self.policy.max_queue_bytes && !self.queue.is_empty())
+        {
+            if self.policy.drop_oldest_on_full {
+                self.drop_oldest_message();
+            } else {
+                return Err(ReconnectClientError::QueueFull {
+                    current: self.queue.len(),
+                    max: self.policy.max_queue_messages,
+                });
+            }
+        }
+        self.queued_bytes += msg_len;
+        self.queue.push_back(payload);
+        self.stats.messages_enqueued += 1;
+        Ok(())
+    }
+}
