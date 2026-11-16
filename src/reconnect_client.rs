@@ -221,3 +221,22 @@ impl ReconnectClient {
         }
     }
 }
+
+impl ReconnectClient {
+    fn check_can_connect(&self, now: Instant) -> Result<(), ReconnectClientError> {
+        if let Some(max) = self.policy.max_retries {
+            if self.consecutive_failures >= max {
+                return Err(ReconnectClientError::MaxRetriesExceeded {
+                    attempts: self.consecutive_failures,
+                });
+            }
+        }
+        if let Some(deadline) = self.next_connect_deadline {
+            if now < deadline {
+                let ms = deadline.saturating_duration_since(now).as_millis() as u64;
+                return Err(ReconnectClientError::BackoffActive { remaining_ms: ms });
+            }
+        }
+        Ok(())
+    }
+}
