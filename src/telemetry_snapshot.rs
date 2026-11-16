@@ -27,5 +27,12 @@ impl TelemetrySnapshot {
     }
 }
 
-pub struct SamplerStats;
+/// Sampler operational metrics and contention stats.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct SamplerStats {
+    pub writes_total: u64,
+    pub reads_total: u64,
+    pub retries_total: u64,
+}
+
 pub struct DualBufferSampler;
