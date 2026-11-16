@@ -18,6 +18,7 @@ pub mod health;
 pub mod http;
 pub mod log;
 pub mod metrics;
+pub mod metrics_exporter;
 pub mod output;
 pub mod pipeline;
 pub use pipeline::Pipeline;
