@@ -134,3 +134,9 @@ impl<T> AtomicRingBuffer<T> {
         while self.pop().is_some() {}
     }
 }
+
+impl<T> Drop for AtomicRingBuffer<T> {
+    fn drop(&mut self) {
+        while self.pop().is_some() {}
+    }
+}
