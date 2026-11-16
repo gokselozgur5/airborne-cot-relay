@@ -63,4 +63,19 @@ impl DualBufferSampler {
             retries_total: AtomicU64::new(0),
         }
     }
+
+    /// Update the telemetry pose via lock-free back-buffer publication.
+    pub fn update(&self, pose: PlatformPose, timestamp_ns: u64) -> u64 {
+        let read_idx = self.active_idx.load(Ordering::Acquire);
+        let write_idx = 1 - read_idx;
+        let v = self.versions[write_idx].load(Ordering::Relaxed);
+        self.versions[write_idx].store(v.wrapping_add(1), Ordering::Release);
+        let seq = self.writes_total.fetch_add(1, Ordering::Relaxed) + 1;
+        unsafe {
+            *self.buffers[write_idx].get() = TelemetrySnapshot::new(pose, seq, timestamp_ns);
+        }
+        self.versions[write_idx].store(v.wrapping_add(2), Ordering::Release);
+        self.active_idx.store(write_idx, Ordering::Release);
+        seq
+    }
 }
