@@ -51,3 +51,24 @@ pub enum Endianness {
     /// Little-endian host byte order.
     LittleEndian,
 }
+
+/// Streaming length-delimited frame decoder.
+#[derive(Debug, Clone)]
+pub struct FrameDecoder {
+    max_frame_len: usize,
+    length_field: LengthField,
+    endianness: Endianness,
+    buffer: Vec<u8>,
+}
+
+impl FrameDecoder {
+    /// Constructs a new `FrameDecoder` with default 4-byte big-endian prefix.
+    pub fn new(max_frame_len: usize) -> Self {
+        Self {
+            max_frame_len,
+            length_field: LengthField::default(),
+            endianness: Endianness::default(),
+            buffer: Vec::new(),
+        }
+    }
+}
