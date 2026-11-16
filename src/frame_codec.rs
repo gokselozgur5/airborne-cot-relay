@@ -151,3 +151,15 @@ impl FrameDecoder {
         Ok(Some(payload))
     }
 }
+
+impl FrameDecoder {
+    /// Feeds a chunk and drains all fully available frames.
+    pub fn decode_all(&mut self, data: &[u8]) -> Result<Vec<Vec<u8>>, FrameCodecError> {
+        self.feed(data);
+        let mut frames = Vec::new();
+        while let Some(frame) = self.decode_next()? {
+            frames.push(frame);
+        }
+        Ok(frames)
+    }
+}
