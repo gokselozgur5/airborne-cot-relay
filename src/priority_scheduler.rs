@@ -207,4 +207,26 @@ impl PriorityPacketScheduler {
         let priority = CotPriority::from_xml_str(cot_xml);
         self.push(cot_xml.as_bytes().to_vec(), priority, timestamp_ms)
     }
+
+    /// Pops the highest-priority packet available, with FIFO order within tiers.
+    pub fn pop(&mut self) -> Option<PrioritizedPacket> {
+        for tier in (0..=4).rev() {
+            if let Some(pkt) = self.queues[tier].pop_front() {
+                self.current_count = self.current_count.saturating_sub(1);
+                self.stats.dequeued[tier] = self.stats.dequeued[tier].saturating_add(1);
+                return Some(pkt);
+            }
+        }
+        None
+    }
+
+    /// Peeks at highest-priority packet without dequeuing.
+    pub fn peek(&self) -> Option<&PrioritizedPacket> {
+        for tier in (0..=4).rev() {
+            if let Some(pkt) = self.queues[tier].front() {
+                return Some(pkt);
+            }
+        }
+        None
+    }
 }
