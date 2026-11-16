@@ -43,3 +43,14 @@ pub struct CacheStats {
     /// Number of entries dropped due to TTL expiry.
     pub expirations: u64,
 }
+
+/// An entry stored in the cache with timing metadata.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CacheEntry<V> {
+    /// Cached value payload.
+    pub value: V,
+    /// Millisecond timestamp when entry was inserted.
+    pub inserted_at_ms: u64,
+    /// Millisecond timestamp when entry expires.
+    pub expires_at_ms: u64,
+}
