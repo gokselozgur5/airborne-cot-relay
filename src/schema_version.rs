@@ -147,3 +147,19 @@ impl SchemaNegotiator {
         }
     }
 }
+
+impl SchemaNegotiator {
+    /// Negotiates the highest mutually supported version from client capabilities.
+    pub fn negotiate_best(
+        &self,
+        client_caps: &[CotSchemaVersion],
+    ) -> Result<CotSchemaVersion, SchemaVersionError> {
+        let mut supported: Vec<CotSchemaVersion> = client_caps
+            .iter()
+            .copied()
+            .filter_map(|ver| self.negotiate(ver).ok())
+            .collect();
+        supported.sort();
+        supported.pop().ok_or(SchemaVersionError::NegotiationFailed)
+    }
+
