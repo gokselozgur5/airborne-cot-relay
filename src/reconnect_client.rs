@@ -157,3 +157,24 @@ pub struct ReconnectClient {
     queued_bytes: usize,
     stats: StreamClientStats,
 }
+
+impl ReconnectClient {
+    /// Creates a new ReconnectClient targeting given address with custom policy.
+    pub fn new(target_addr: SocketAddr, policy: ReconnectPolicy) -> Self {
+        Self {
+            target_addr,
+            policy,
+            stream: None,
+            consecutive_failures: 0,
+            next_connect_deadline: None,
+            queue: VecDeque::new(),
+            queued_bytes: 0,
+            stats: StreamClientStats::default(),
+        }
+    }
+
+    /// Creates a new ReconnectClient targeting given address with default policy.
+    pub fn with_defaults(target_addr: SocketAddr) -> Self {
+        Self::new(target_addr, ReconnectPolicy::default())
+    }
+}
