@@ -228,4 +228,19 @@ mod tests {
         assert_eq!(buf.pop(), None);
         assert!(buf.is_empty());
     }
+
+    #[test]
+    fn test_atomic_ring_buffer_full_and_drain() {
+        let buf = AtomicRingBuffer::new(2);
+        assert_eq!(buf.push(1), Ok(()));
+        assert_eq!(buf.push(2), Ok(()));
+        assert!(buf.is_full());
+        assert_eq!(buf.push(3), Err(3));
+        let drained = buf.drain();
+        assert_eq!(drained, vec![1, 2]);
+        assert!(buf.is_empty());
+        assert_eq!(buf.push(4), Ok(()));
+        buf.clear();
+        assert!(buf.is_empty());
+    }
 }
