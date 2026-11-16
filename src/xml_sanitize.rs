@@ -99,3 +99,13 @@ pub fn sanitize_cot_uid(uid: &str) -> String {
 pub fn sanitize_cot_callsign(callsign: &str) -> String {
     sanitize_and_escape_attr(callsign.trim())
 }
+
+/// Restores predefined XML entity references back into original characters.
+pub fn unescape_xml(input: &str) -> String {
+    input
+        .replace("&quot;", "\"")
+        .replace("&apos;", "'")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&amp;", "&")
+}
