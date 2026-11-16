@@ -22,3 +22,12 @@ impl RateLimiterConfig {
         }
     }
 }
+
+/// Token bucket filter for smoothing bursty network traffic.
+#[derive(Debug, Clone)]
+pub struct TokenBucket {
+    config: RateLimiterConfig,
+    tokens: f64,
+    last_refill: Instant,
+    stats: RateLimiterStats,
+}
