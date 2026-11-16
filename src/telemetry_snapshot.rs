@@ -99,4 +99,18 @@ impl DualBufferSampler {
             std::hint::spin_loop();
         }
     }
+
+    /// Return current operational statistics.
+    pub fn stats(&self) -> SamplerStats {
+        SamplerStats {
+            writes_total: self.writes_total.load(Ordering::Relaxed),
+            reads_total: self.reads_total.load(Ordering::Relaxed),
+            retries_total: self.retries_total.load(Ordering::Relaxed),
+        }
+    }
+
+    /// Return current active read buffer index.
+    pub fn active_index(&self) -> usize {
+        self.active_idx.load(Ordering::Acquire)
+    }
 }
