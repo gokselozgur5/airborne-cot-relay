@@ -124,3 +124,23 @@ impl MulticastReceiver {
         Ok((buf, src))
     }
 }
+
+impl MulticastReceiver {
+    pub fn leave_group(&mut self) -> Result<(), MulticastRxError> {
+        if self.joined {
+            self.socket
+                .leave_multicast_v4(&self.config.multicast_addr, &self.config.interface_addr)?;
+            self.joined = false;
+        }
+        Ok(())
+    }
+
+    pub fn rejoin_group(&mut self) -> Result<(), MulticastRxError> {
+        if !self.joined {
+            self.socket
+                .join_multicast_v4(&self.config.multicast_addr, &self.config.interface_addr)?;
+            self.joined = true;
+        }
+        Ok(())
+    }
+}
