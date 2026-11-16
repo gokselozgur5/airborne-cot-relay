@@ -128,4 +128,26 @@ mod tests {
         assert_eq!(snap.sequence, 0);
         assert!(snap.is_valid);
     }
+
+    #[test]
+    fn test_buffer_alternation_and_update() {
+        let p0 = PlatformPose::new(1000, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0);
+        let sampler = DualBufferSampler::new(p0, 1000);
+        assert_eq!(sampler.active_index(), 0);
+
+        let p1 = PlatformPose::new(1010, 1.0, 1.0, 110.0, 0.0, 0.0, 0.1);
+        let seq1 = sampler.update(p1, 2000);
+        assert_eq!(seq1, 1);
+        assert_eq!(sampler.active_index(), 1);
+        let snap1 = sampler.sample();
+        assert_eq!(snap1.pose, p1);
+        assert_eq!(snap1.sequence, 1);
+
+        let p2 = PlatformPose::new(1020, 2.0, 2.0, 120.0, 0.0, 0.0, 0.2);
+        let seq2 = sampler.update(p2, 3000);
+        assert_eq!(seq2, 2);
+        assert_eq!(sampler.active_index(), 0);
+        let snap2 = sampler.sample();
+        assert_eq!(snap2.pose, p2);
+    }
 }
