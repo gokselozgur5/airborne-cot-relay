@@ -155,3 +155,28 @@ impl UdpBatchQueue {
         Ok(total)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_enqueue_and_len() {
+        let mut queue = UdpBatchQueue::new(BatchPolicy::default());
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        assert!(queue.is_empty());
+        queue.enqueue(UdpPacket::new(addr, vec![1, 2, 3])).unwrap();
+        assert_eq!(queue.len(), 1);
+        assert_eq!(queue.queued_bytes(), 3);
+        assert!(!queue.is_empty());
+    }
+
+    #[test]
+    fn test_clear_resets_queue() {
+        let mut queue = UdpBatchQueue::new(BatchPolicy::default());
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        queue.enqueue(UdpPacket::new(addr, vec![1, 2, 3])).unwrap();
+        queue.clear();
+        assert_eq!(queue.len(), 0);
+        assert_eq!(queue.queued_bytes(), 0);
+    }
