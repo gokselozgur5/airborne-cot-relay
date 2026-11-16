@@ -197,4 +197,22 @@ where
     pub fn clear(&mut self) {
         self.entries.clear();
     }
+
+    /// Reaps and returns all expired (key, value) pairs as of now_ms.
+    pub fn drain_expired(&mut self, now_ms: u64) -> Vec<(K, V)> {
+        let mut expired_keys = Vec::new();
+        for (k, entry) in &self.entries {
+            if entry.is_expired(now_ms) {
+                expired_keys.push(k.clone());
+            }
+        }
+        let mut reaped = Vec::with_capacity(expired_keys.len());
+        for k in expired_keys {
+            if let Some(entry) = self.entries.remove(&k) {
+                reaped.push((k, entry.value));
+            }
+        }
+        self.stats.expirations = self.stats.expirations.saturating_add(reaped.len() as u64);
+        reaped
+    }
 }
