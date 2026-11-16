@@ -24,4 +24,20 @@ impl CotPriority {
     pub fn as_tier(&self) -> usize {
         *self as usize
     }
+
+    /// Infers priority tier from a CoT type string.
+    pub fn from_cot_type(cot_type: &str) -> Self {
+        let t = cot_type.trim();
+        if t.starts_with("b-a-o-tbl") || t.starts_with("b-a-o-pan") || t.starts_with("b-d") {
+            CotPriority::Emergency
+        } else if t.starts_with("a-h") || t.starts_with("b-r") {
+            CotPriority::Critical
+        } else if t.starts_with("a-f") || t.starts_with("a-n") {
+            CotPriority::High
+        } else if t.starts_with("a-u") {
+            CotPriority::Normal
+        } else {
+            CotPriority::Normal
+        }
+    }
 }
