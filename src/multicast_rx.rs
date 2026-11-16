@@ -80,3 +80,10 @@ impl MulticastRxConfig {
         Ok(())
     }
 }
+
+#[derive(Debug)]
+pub struct MulticastReceiver {
+    socket: UdpSocket,
+    config: MulticastRxConfig,
+    joined: bool,
+}
