@@ -291,4 +291,18 @@ mod tests {
         assert_eq!(sched.pop().unwrap().payload, b"high_track");
         assert_eq!(sched.pop().unwrap().payload, b"normal_pos");
     }
+
+    #[test]
+    fn test_buffer_full_eviction() {
+        let mut sched = PriorityPacketScheduler::new(2);
+        sched.push(b"low1".to_vec(), CotPriority::Low, 1).unwrap();
+        sched.push(b"norm2".to_vec(), CotPriority::Normal, 2).unwrap();
+
+        sched.push(b"emerg3".to_vec(), CotPriority::Emergency, 3).unwrap();
+        assert_eq!(sched.len(), 2);
+        assert_eq!(sched.stats().dropped[CotPriority::Low.as_tier()], 1);
+
+        assert_eq!(sched.pop().unwrap().payload, b"emerg3");
+        assert_eq!(sched.pop().unwrap().payload, b"norm2");
+    }
 }
