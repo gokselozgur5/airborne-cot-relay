@@ -64,3 +64,6 @@ pub use schema_version::{
     SchemaVersionError,
 };
 pub mod priority_scheduler;
+pub use priority_scheduler::{
+    CotPriority, PrioritizedPacket, PriorityPacketScheduler, SchedulerError, SchedulerStats,
+};
