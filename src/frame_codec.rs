@@ -72,3 +72,17 @@ impl FrameDecoder {
         }
     }
 }
+
+impl FrameDecoder {
+    /// Configures the length prefix field width.
+    pub fn with_length_field(mut self, length_field: LengthField) -> Self {
+        self.length_field = length_field;
+        self
+    }
+
+    /// Configures the byte order for length parsing.
+    pub fn with_endianness(mut self, endianness: Endianness) -> Self {
+        self.endianness = endianness;
+        self
+    }
+}
