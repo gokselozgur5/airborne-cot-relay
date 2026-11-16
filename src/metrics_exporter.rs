@@ -295,4 +295,24 @@ mod tests {
         assert!(rendered.contains("http_requests{host=\"node-1\",method=\"GET\"} 10\n"));
         assert!(rendered.contains("cpu_load{host=\"node-1\"} 0.75\n"));
     }
+
+    #[test]
+    fn test_export_snapshot_full() {
+        let exp = PrometheusExporter::default();
+        let snap = Snapshot {
+            packets_in: 120,
+            dropped: 5,
+            sent: 115,
+            reconnects: 2,
+            queue_depth: 3,
+            last_send_age_ms: Some(2500),
+        };
+        let body = exp.export_snapshot(&snap);
+        assert!(body.contains("airborne_cot_relay_packets_in_total 120\n"));
+        assert!(body.contains("airborne_cot_relay_packets_dropped_total 5\n"));
+        assert!(body.contains("airborne_cot_relay_packets_sent_total 115\n"));
+        assert!(body.contains("airborne_cot_relay_reconnects_total 2\n"));
+        assert!(body.contains("airborne_cot_relay_queue_depth 3\n"));
+        assert!(body.contains("airborne_cot_relay_last_send_age_seconds 2.5\n"));
+    }
 }
