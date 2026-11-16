@@ -103,3 +103,27 @@ impl FrameDecoder {
     /// Clears any unparsed buffered bytes.
     pub fn clear(&mut self) { self.buffer.clear(); }
 }
+
+impl FrameDecoder {
+    /// Appends incoming streaming bytes to the internal decode buffer.
+    pub fn feed(&mut self, data: &[u8]) {
+        self.buffer.extend_from_slice(data);
+    }
+
+    fn parse_length(bytes: &[u8], field: LengthField, endian: Endianness) -> usize {
+        match (field, endian) {
+            (LengthField::U16, Endianness::BigEndian) => {
+                u16::from_be_bytes([bytes[0], bytes[1]]) as usize
+            }
+            (LengthField::U16, Endianness::LittleEndian) => {
+                u16::from_le_bytes([bytes[0], bytes[1]]) as usize
+            }
+            (LengthField::U32, Endianness::BigEndian) => {
+                u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as usize
+            }
+            (LengthField::U32, Endianness::LittleEndian) => {
+                u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as usize
+            }
+        }
+    }
+}
