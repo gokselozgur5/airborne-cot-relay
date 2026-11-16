@@ -122,4 +122,14 @@ impl PrometheusExporter {
             custom_families: Vec::new(),
         }
     }
+
+    /// Creates an exporter with specified namespace and no subsystem.
+    pub fn with_namespace(namespace: impl Into<String>) -> Self {
+        Self::new(ExporterConfig::with_namespace(namespace))
+    }
+
+    /// Appends a static common label applied to all exported metrics.
+    pub fn add_common_label(&mut self, key: impl Into<String>, value: impl Into<String>) {
+        self.config.common_labels.push((key.into(), value.into()));
+    }
 }
