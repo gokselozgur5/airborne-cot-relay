@@ -191,3 +191,16 @@ impl FrameDecoder {
         Ok(out)
     }
 }
+
+impl FrameDecoder {
+    /// Encodes a payload using this decoder instance settings.
+    pub fn encode_frame(&self, payload: &[u8]) -> Result<Vec<u8>, FrameCodecError> {
+        if payload.len() > self.max_frame_len {
+            return Err(FrameCodecError::FrameTooLarge {
+                frame_len: payload.len(),
+                max_len: self.max_frame_len,
+            });
+        }
+        Self::encode(payload, self.length_field, self.endianness)
+    }
+}
