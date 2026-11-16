@@ -49,4 +49,26 @@ impl<T> AtomicRingBuffer<T> {
             dequeue_pos: AtomicUsize::new(0),
         }
     }
+
+    /// Returns the buffer capacity.
+    pub fn capacity(&self) -> usize {
+        self.capacity
+    }
+
+    /// Returns the approximate number of items currently in the buffer.
+    pub fn len(&self) -> usize {
+        let head = self.dequeue_pos.load(Ordering::Relaxed);
+        let tail = self.enqueue_pos.load(Ordering::Relaxed);
+        tail.saturating_sub(head).min(self.capacity)
+    }
+
+    /// Returns true if the buffer has no queued items.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Returns true if the buffer is currently at full capacity.
+    pub fn is_full(&self) -> bool {
+        self.len() >= self.capacity
+    }
 }
