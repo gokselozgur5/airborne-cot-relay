@@ -16,3 +16,21 @@ pub enum ReconnectClientError {
     QueueFull { current: usize, max: usize },
     NotConnected,
 }
+
+impl std::fmt::Display for ReconnectClientError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Io(e) => write!(f, "TCP client I/O error: {}", e),
+            Self::BackoffActive { remaining_ms } => {
+                write!(f, "reconnect backoff active ({}ms remaining)", remaining_ms)
+            }
+            Self::MaxRetriesExceeded { attempts } => {
+                write!(f, "max reconnection retries exceeded: {}", attempts)
+            }
+            Self::QueueFull { current, max } => {
+                write!(f, "send queue full ({}/{})", current, max)
+            }
+            Self::NotConnected => write!(f, "TCP client is not connected"),
+        }
+    }
+}
