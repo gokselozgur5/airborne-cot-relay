@@ -266,3 +266,19 @@ pub fn downgrade_cot_xml(
     DowngradeTransformer::new(target_version).transform(xml)
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_version_parsing_and_detection() {
+        assert_eq!(
+            CotSchemaVersion::from_version_str("1.0"),
+            Ok(CotSchemaVersion::V1_0)
+        );
+        assert_eq!(
+            CotSchemaVersion::from_version_str("2.0"),
+            Ok(CotSchemaVersion::V2_0)
+        );
+        assert!(CotSchemaVersion::from_version_str("3.0").is_err());
+
