@@ -256,3 +256,25 @@ impl ReconnectClient {
         self.stats.successful_connects += 1;
     }
 }
+
+impl ReconnectClient {
+    /// Attempts to connect to target address if not already connected.
+    pub fn try_connect(&mut self) -> Result<bool, ReconnectClientError> {
+        if self.stream.is_some() {
+            return Ok(true);
+        }
+        let now = Instant::now();
+        self.check_can_connect(now)?;
+        self.stats.connect_attempts += 1;
+        match TcpStream::connect_timeout(&self.target_addr, self.policy.connect_timeout) {
+            Ok(s) => {
+                self.handle_connect_success(s);
+                Ok(true)
+            }
+            Err(e) => {
+                self.handle_connect_failure(now);
+                Err(ReconnectClientError::Io(e))
+            }
+        }
+    }
+}
