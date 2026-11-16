@@ -173,3 +173,17 @@ impl CotEventDto {
         )
     }
 }
+
+fn extract_json_str<'a>(json: &'a str, key: &str) -> Option<&'a str> {
+    let key_pat = format!("\"{key}\"");
+    let key_idx = json.find(&key_pat)?;
+    let rest = &json[key_idx + key_pat.len()..];
+    let colon_idx = rest.find(':')?;
+    let val_part = rest[colon_idx + 1..].trim_start();
+    if !val_part.starts_with('"') {
+        return None;
+    }
+    let after_quote = &val_part[1..];
+    let end_quote = after_quote.find('"')?;
+    Some(&after_quote[..end_quote])
+}
