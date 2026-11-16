@@ -73,3 +73,17 @@ impl CotSchemaVersion {
             .find('>')
             .ok_or(SchemaVersionError::MalformedXml("unclosed event tag"))?;
         let tag = &rest[..e];
+        let pattern = "version=\"";
+        if let Some(pos) = tag.find(pattern) {
+            let start = pos + pattern.len();
+            let r = &tag[start..];
+            let end = r
+                .find('"')
+                .ok_or(SchemaVersionError::MalformedXml("unclosed version attr"))?;
+            Self::from_version_str(&r[..end])
+        } else {
+            Ok(Self::V1_0)
+        }
+    }
+}
+
