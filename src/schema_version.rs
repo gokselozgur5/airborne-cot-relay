@@ -13,3 +13,15 @@ pub enum SchemaVersionError {
     NegotiationFailed,
 }
 
+impl fmt::Display for SchemaVersionError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::UnsupportedVersion(v) => write!(f, "unsupported schema version: {v}"),
+            Self::MalformedXml(msg) => write!(f, "malformed xml: {msg}"),
+            Self::NegotiationFailed => write!(f, "schema version negotiation failed"),
+        }
+    }
+}
+
+impl std::error::Error for SchemaVersionError {}
+
