@@ -35,3 +35,6 @@ pub mod frame_codec;
 pub use frame_codec::{Endianness, FrameCodecError, FrameDecoder, LengthField};
 pub mod udp_batch;
 pub mod json_cot_codec;
+pub use json_cot_codec::{
+    cot_xml_to_json, json_to_cot_xml, CotEventDto, CotToJsonStream, JsonCotError, JsonToCotStream,
+};
