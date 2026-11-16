@@ -413,3 +413,18 @@ mod tests {
         assert_eq!(p.compute_backoff(4), Duration::from_millis(1000));
         assert_eq!(p.compute_backoff(10), Duration::from_millis(1000));
     }
+
+    #[test]
+    fn test_max_retries_exceeded_error() {
+        let addr = "127.0.0.1:9".parse().unwrap();
+        let p = ReconnectPolicy::new().with_max_retries(Some(2));
+        let mut client = ReconnectClient::new(addr, p);
+        client.consecutive_failures = 2;
+        let err = client.try_connect().unwrap_err();
+        match err {
+            ReconnectClientError::MaxRetriesExceeded { attempts } => {
+                assert_eq!(attempts, 2);
+            }
+            other => panic!("expected MaxRetriesExceeded, got {:?}", other),
+        }
+    }
