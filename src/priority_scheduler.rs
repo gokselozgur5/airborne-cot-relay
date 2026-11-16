@@ -243,3 +243,16 @@ impl PriorityPacketScheduler {
         pruned
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_priority_ordering() {
+        assert!(CotPriority::Emergency > CotPriority::Critical);
+        assert!(CotPriority::Critical > CotPriority::High);
+        assert!(CotPriority::High > CotPriority::Normal);
+        assert!(CotPriority::Normal > CotPriority::Low);
+    }
+}
