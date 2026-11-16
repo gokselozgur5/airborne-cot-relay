@@ -131,4 +131,18 @@ mod tests {
         let escaped = escape_xml_attr(raw);
         assert_eq!(escaped, "&lt;a &amp; b &apos;c&apos; &quot;d&quot;&gt;");
     }
+
+    #[test]
+    fn test_sanitize_and_escape_attr() {
+        let dirty = "CALLSIGN\x00\x1b <VIP&FAST> \"#1\"";
+        let clean = sanitize_and_escape_attr(dirty);
+        assert_eq!(clean, "CALLSIGN &lt;VIP&amp;FAST&gt; &quot;#1&quot;");
+    }
+
+    #[test]
+    fn test_unescape_and_roundtrip() {
+        let original = "A & B < C > D 'E' \"F\"";
+        let escaped = escape_xml_attr(original);
+        assert_eq!(unescape_xml(&escaped), original);
+    }
 }
