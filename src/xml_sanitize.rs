@@ -19,3 +19,21 @@ pub fn escape_xml_entity(c: char) -> Option<&'static str> {
         _ => None,
     }
 }
+
+/// Strips characters that are not valid under XML 1.0.
+pub fn sanitize_xml_chars(input: &str) -> String {
+    input.chars().filter(|&c| is_xml_valid_char(c)).collect()
+}
+
+/// Escapes XML attribute special characters (&, <, >, ", ').
+pub fn escape_xml_attr(input: &str) -> String {
+    let mut out = String::with_capacity(input.len());
+    for c in input.chars() {
+        if let Some(entity) = escape_xml_entity(c) {
+            out.push_str(entity);
+        } else {
+            out.push(c);
+        }
+    }
+    out
+}
