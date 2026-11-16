@@ -142,3 +142,25 @@ impl ReassemblyStats {
         *self = Self::default();
     }
 }
+
+/// In-flight message entry storing received fragment slots.
+#[derive(Debug, Clone)]
+struct InFlightMessage {
+    total_fragments: u16,
+    received_count: u16,
+    slots: Vec<Option<Vec<u8>>>,
+    created_at_ms: u64,
+    last_updated_ms: u64,
+}
+
+impl InFlightMessage {
+    fn new(total: u16, now_ms: u64) -> Self {
+        Self {
+            total_fragments: total,
+            received_count: 0,
+            slots: vec![None; total as usize],
+            created_at_ms: now_ms,
+            last_updated_ms: now_ms,
+        }
+    }
+}
