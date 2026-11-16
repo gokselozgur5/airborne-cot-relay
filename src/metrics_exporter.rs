@@ -315,4 +315,20 @@ mod tests {
         assert!(body.contains("airborne_cot_relay_queue_depth 3\n"));
         assert!(body.contains("airborne_cot_relay_last_send_age_seconds 2.5\n"));
     }
+
+    #[test]
+    fn test_export_live_metrics_and_content_type() {
+        assert_eq!(
+            PROMETHEUS_CONTENT_TYPE,
+            "text/plain; version=0.0.4; charset=utf-8"
+        );
+        let m = Metrics::new();
+        m.add_packets_in(10);
+        m.set_queue_depth(2);
+        let exp = PrometheusExporter::default();
+        let rendered = exp.export_metrics(&m, 1_000);
+        assert!(rendered.contains("airborne_cot_relay_packets_in_total 10\n"));
+        assert!(rendered.contains("airborne_cot_relay_queue_depth 2\n"));
+        assert!(!rendered.contains("last_send_age_seconds"));
+    }
 }
