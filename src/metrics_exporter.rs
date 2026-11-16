@@ -148,4 +148,24 @@ impl PrometheusExporter {
     fn escape_help(text: &str) -> String {
         text.replace('\\', "\\\\").replace('\n', "\\n")
     }
+
+    fn escape_label_value(val: &str) -> String {
+        val.replace('\\', "\\\\")
+            .replace('"', "\\\"")
+            .replace('\n', "\\n")
+    }
+
+    fn format_labels(
+        common: &[(String, String)],
+        sample: &[(String, String)],
+    ) -> String {
+        if common.is_empty() && sample.is_empty() {
+            return String::new();
+        }
+        let mut parts = Vec::with_capacity(common.len() + sample.len());
+        for (k, v) in common.iter().chain(sample.iter()) {
+            parts.push(format!("{}=\"{}\"", k, Self::escape_label_value(v)));
+        }
+        format!("{{{}}}", parts.join(","))
+    }
 }
