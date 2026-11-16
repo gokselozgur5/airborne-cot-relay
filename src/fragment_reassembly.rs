@@ -278,4 +278,16 @@ impl FragmentReassembler {
             Ok(None)
         }
     }
+
+    /// Ingests raw packet bytes directly, decoding header and payload.
+    pub fn process_packet(&mut self, packet_bytes: &[u8], now_ms: u64) -> Result<Option<Vec<u8>>, ReassemblyError> {
+        let frag = Fragment::decode(packet_bytes)?;
+        self.process_fragment(frag, now_ms)
+    }
+
+    /// Clears all in-flight buffers and resets statistics.
+    pub fn clear(&mut self) {
+        self.in_flight.clear();
+        self.stats.reset();
+    }
 }
