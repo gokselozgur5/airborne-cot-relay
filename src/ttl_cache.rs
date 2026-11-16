@@ -259,4 +259,19 @@ mod tests {
         assert_eq!(cache.get(&"c", 320), Some(&3));
         assert_eq!(cache.stats().expirations, 2);
     }
+
+    #[test]
+    fn test_capacity_eviction_oldest() {
+        let config = TtlConfig::new(10_000, 2);
+        let mut cache = TtlCache::new(config);
+        cache.insert("first", 1, 100);
+        cache.insert("second", 2, 200);
+        assert_eq!(cache.len(), 2);
+        cache.insert("third", 3, 300);
+        assert_eq!(cache.len(), 2);
+        assert_eq!(cache.stats().evictions, 1);
+        assert_eq!(cache.peek(&"first", 300), None);
+        assert_eq!(cache.peek(&"second", 300), Some(&2));
+        assert_eq!(cache.peek(&"third", 300), Some(&3));
+    }
 }
