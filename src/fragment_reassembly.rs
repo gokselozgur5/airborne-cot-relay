@@ -190,3 +190,25 @@ impl Default for FragmentReassembler {
         Self::new(256, 5000)
     }
 }
+
+impl FragmentReassembler {
+    /// Creates a reassembler with max concurrent in-flight messages and TTL in ms.
+    pub fn new(max_in_flight: usize, ttl_ms: u64) -> Self {
+        Self {
+            in_flight: HashMap::new(),
+            max_in_flight: max_in_flight.max(1),
+            ttl_ms: ttl_ms.max(1),
+            stats: ReassemblyStats::default(),
+        }
+    }
+
+    /// Returns the current number of in-flight incomplete messages.
+    pub fn in_flight_count(&self) -> usize {
+        self.in_flight.len()
+    }
+
+    /// Returns a copy of the current reassembly statistics.
+    pub fn stats(&self) -> ReassemblyStats {
+        self.stats
+    }
+}
