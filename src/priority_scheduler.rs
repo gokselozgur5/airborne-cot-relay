@@ -77,4 +77,16 @@ impl PrioritizedPacket {
             ttl_ms: None,
         }
     }
+
+    pub fn with_ttl(mut self, ttl_ms: u64) -> Self {
+        self.ttl_ms = Some(ttl_ms);
+        self
+    }
+
+    pub fn is_expired(&self, current_time_ms: u64) -> bool {
+        match self.ttl_ms {
+            Some(ttl) => current_time_ms.saturating_sub(self.timestamp_ms) >= ttl,
+            None => false,
+        }
+    }
 }
