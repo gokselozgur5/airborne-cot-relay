@@ -144,3 +144,16 @@ pub struct StreamClientStats {
     pub messages_dropped: usize,
     pub bytes_dropped: usize,
 }
+
+/// Resilient TCP client stream sender with automatic backoff reconnection.
+#[derive(Debug)]
+pub struct ReconnectClient {
+    target_addr: SocketAddr,
+    policy: ReconnectPolicy,
+    stream: Option<TcpStream>,
+    consecutive_failures: usize,
+    next_connect_deadline: Option<Instant>,
+    queue: VecDeque<Vec<u8>>,
+    queued_bytes: usize,
+    stats: StreamClientStats,
+}
