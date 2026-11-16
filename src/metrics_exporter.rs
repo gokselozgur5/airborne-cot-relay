@@ -192,4 +192,17 @@ impl PrometheusExporter {
             out.push_str(&format!("{}{} {}\n", full_name, label_str, sample.value));
         }
     }
+
+    /// Appends a pre-built metric family.
+    pub fn add_metric_family(&mut self, family: MetricFamily) {
+        self.custom_families.push(family);
+    }
+
+    /// Registers a custom counter metric with given name, description, and value.
+    pub fn add_counter(&mut self, name: &str, help: &str, val: f64, labels: &[(&str, &str)]) {
+        let mut fam = MetricFamily::new(name, help, MetricType::Counter);
+        let lbls = labels.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect();
+        fam.samples.push(MetricSample::new(lbls, val));
+        self.add_metric_family(fam);
+    }
 }
