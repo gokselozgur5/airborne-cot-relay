@@ -34,3 +34,12 @@ impl Default for BatchPolicy {
         }
     }
 }
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct BatchQueueStats {
+    pub enqueued: usize,
+    pub sent_packets: usize,
+    pub sent_bytes: usize,
+    pub dropped_packets: usize,
+    pub batches_sent: usize,
+}
