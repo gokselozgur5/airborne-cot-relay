@@ -1,6 +1,8 @@
 //! Dual-buffer lock-free telemetry snapshot sampler.
 
 use crate::PlatformPose;
+use std::cell::UnsafeCell;
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 
 /// Snapshot of platform telemetry at a specific sequence.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -35,4 +37,15 @@ pub struct SamplerStats {
     pub retries_total: u64,
 }
 
-pub struct DualBufferSampler;
+/// Lock-free dual-buffer telemetry snapshot sampler.
+pub struct DualBufferSampler {
+    buffers: [UnsafeCell<TelemetrySnapshot>; 2],
+    versions: [AtomicU64; 2],
+    active_idx: AtomicUsize,
+    writes_total: AtomicU64,
+    reads_total: AtomicU64,
+    retries_total: AtomicU64,
+}
+
+unsafe impl Sync for DualBufferSampler {}
+unsafe impl Send for DualBufferSampler {}
