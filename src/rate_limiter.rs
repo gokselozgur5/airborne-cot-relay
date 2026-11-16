@@ -69,3 +69,18 @@ impl TokenBucket {
         }
     }
 }
+
+impl TokenBucket {
+    pub fn config(&self) -> RateLimiterConfig {
+        self.config
+    }
+
+    pub fn stats(&self) -> RateLimiterStats {
+        self.stats
+    }
+
+    pub fn tokens(&mut self) -> f64 {
+        self.refill();
+        self.tokens
+    }
+}
