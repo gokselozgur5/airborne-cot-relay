@@ -200,3 +200,24 @@ impl ReconnectClient {
         &self.stats
     }
 }
+
+impl ReconnectClient {
+    pub fn queued_messages(&self) -> usize {
+        self.queue.len()
+    }
+
+    pub fn queued_bytes(&self) -> usize {
+        self.queued_bytes
+    }
+
+    pub fn reset_backoff(&mut self) {
+        self.consecutive_failures = 0;
+        self.next_connect_deadline = None;
+    }
+
+    pub fn disconnect(&mut self) {
+        if self.stream.take().is_some() {
+            self.stats.disconnections += 1;
+        }
+    }
+}
