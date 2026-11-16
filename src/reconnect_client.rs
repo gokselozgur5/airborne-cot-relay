@@ -447,3 +447,21 @@ mod tests {
         assert_eq!(client.stats().messages_dropped, 1);
         assert_eq!(client.stats().bytes_dropped, 3);
     }
+
+    #[test]
+    fn test_loopback_tcp_connect_and_immediate_send() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+        let mut client = ReconnectClient::with_defaults(addr);
+
+        let sent = client.send_immediate(b"test cot payload").unwrap();
+        assert_eq!(sent, 16);
+        assert!(client.is_connected());
+        assert_eq!(client.stats().messages_sent, 1);
+        assert_eq!(client.stats().bytes_sent, 16);
+
+        let (mut socket, _) = listener.accept().unwrap();
+        let mut buf = [0u8; 16];
+        socket.read_exact(&mut buf).unwrap();
+        assert_eq!(&buf, b"test cot payload");
+    }
