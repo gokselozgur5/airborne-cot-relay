@@ -43,3 +43,30 @@ pub struct BatchQueueStats {
     pub dropped_packets: usize,
     pub batches_sent: usize,
 }
+
+#[derive(Debug)]
+pub struct UdpBatchQueue {
+    queue: VecDeque<UdpPacket>,
+    policy: BatchPolicy,
+    stats: BatchQueueStats,
+    queued_bytes: usize,
+}
+
+impl UdpBatchQueue {
+    pub fn new(policy: BatchPolicy) -> Self {
+        Self {
+            queue: VecDeque::new(),
+            policy,
+            stats: BatchQueueStats::default(),
+            queued_bytes: 0,
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.queue.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.queue.is_empty()
+    }
+}
