@@ -56,3 +56,25 @@ impl CotPriority {
         }
     }
 }
+
+/// A scheduled packet with metadata and priority tier.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrioritizedPacket {
+    pub priority: CotPriority,
+    pub sequence: u64,
+    pub timestamp_ms: u64,
+    pub payload: Vec<u8>,
+    pub ttl_ms: Option<u64>,
+}
+
+impl PrioritizedPacket {
+    pub fn new(priority: CotPriority, sequence: u64, timestamp_ms: u64, payload: Vec<u8>) -> Self {
+        Self {
+            priority,
+            sequence,
+            timestamp_ms,
+            payload,
+            ttl_ms: None,
+        }
+    }
+}
