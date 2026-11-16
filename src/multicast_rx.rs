@@ -196,3 +196,18 @@ mod tests {
         let cfg = MulticastRxConfig::new(group, 8080).with_buffer_size(0);
         assert!(matches!(cfg.validate(), Err(MulticastRxError::InvalidBufferSize)));
     }
+
+    #[test]
+    fn test_multicast_rx_bind_and_accessors() {
+        let group: Ipv4Addr = "239.255.0.1".parse().unwrap();
+        let temp = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let port = temp.local_addr().unwrap().port();
+        drop(temp);
+
+        let cfg = MulticastRxConfig::new(group, port).with_buffer_size(1024);
+        let rx = MulticastReceiver::bind(cfg.clone()).unwrap();
+        assert_eq!(rx.config().multicast_addr, group);
+        assert_eq!(rx.config().buffer_size, 1024);
+        assert!(rx.is_joined());
+        assert!(rx.local_addr().is_ok());
+    }
