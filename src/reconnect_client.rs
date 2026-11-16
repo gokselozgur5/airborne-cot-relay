@@ -278,3 +278,13 @@ impl ReconnectClient {
         }
     }
 }
+
+impl ReconnectClient {
+    fn drop_oldest_message(&mut self) {
+        if let Some(dropped) = self.queue.pop_front() {
+            self.queued_bytes = self.queued_bytes.saturating_sub(dropped.len());
+            self.stats.messages_dropped += 1;
+            self.stats.bytes_dropped += dropped.len();
+        }
+    }
+}
