@@ -255,3 +255,28 @@ pub fn json_to_cot_xml(json: &str) -> Result<String, JsonCotError> {
 pub fn cot_xml_to_json(xml: &str) -> Result<String, JsonCotError> {
     CotEventDto::from_xml(xml).map(|dto| dto.to_json())
 }
+
+/// Streaming converter from newline-delimited JSON into Cursor-on-Target XML events.
+#[derive(Debug, Default)]
+pub struct JsonToCotStream {
+    buf: String,
+}
+
+impl JsonToCotStream {
+    /// Constructs a new empty `JsonToCotStream`.
+    pub fn new() -> Self { Self::default() }
+
+    /// Feeds incremental chunk of text/bytes into the stream buffer.
+    pub fn feed(&mut self, chunk: &str) { self.buf.push_str(chunk); }
+
+    /// Decodes the next available CoT XML event if a complete JSON line is buffered.
+    pub fn decode_next(&mut self) -> Result<Option<String>, JsonCotError> {
+        if let Some(pos) = self.buf.find('\n') {
+            let line = self.buf[..pos].trim().to_string();
+            self.buf.drain(..=pos);
+            if line.is_empty() { return Ok(None); }
+            return json_to_cot_xml(&line).map(Some);
+        }
+        Ok(None)
+    }
+}
