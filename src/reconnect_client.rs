@@ -398,3 +398,18 @@ mod tests {
         assert_eq!(p.max_queue_bytes, 100);
         assert!(!p.drop_oldest_on_full);
     }
+
+    #[test]
+    fn test_backoff_exponential_growth_and_cap() {
+        let p = ReconnectPolicy::new()
+            .with_initial_backoff(Duration::from_millis(100))
+            .with_max_backoff(Duration::from_millis(1000))
+            .with_multiplier(2.0);
+
+        assert_eq!(p.compute_backoff(0), Duration::from_millis(100));
+        assert_eq!(p.compute_backoff(1), Duration::from_millis(200));
+        assert_eq!(p.compute_backoff(2), Duration::from_millis(400));
+        assert_eq!(p.compute_backoff(3), Duration::from_millis(800));
+        assert_eq!(p.compute_backoff(4), Duration::from_millis(1000));
+        assert_eq!(p.compute_backoff(10), Duration::from_millis(1000));
+    }
