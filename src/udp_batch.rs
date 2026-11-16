@@ -274,4 +274,19 @@ mod tests {
         let (n2, _) = receiver.recv_from(&mut buf).unwrap();
         assert_eq!(&buf[..n2], &[30, 40]);
     }
+
+    #[test]
+    fn test_flush_all_multiple_batches() {
+        let receiver = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let target = receiver.local_addr().unwrap();
+        let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let policy = BatchPolicy { max_batch_packets: 2, ..Default::default() };
+        let mut queue = UdpBatchQueue::new(policy);
+        for i in 0..5 {
+            queue.enqueue(UdpPacket::new(target, vec![i])).unwrap();
+        }
+        let total = queue.flush_all(&sender).unwrap();
+        assert_eq!(total, 5);
+        assert_eq!(queue.stats().batches_sent, 3);
+    }
 }
