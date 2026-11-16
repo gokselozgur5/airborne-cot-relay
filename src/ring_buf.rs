@@ -210,3 +210,22 @@ impl CotRingBuffer {
         self.inner.clear();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_atomic_ring_buffer_basic_push_pop() {
+        let buf = AtomicRingBuffer::new(4);
+        assert_eq!(buf.capacity(), 4);
+        assert!(buf.is_empty());
+        assert_eq!(buf.push(10), Ok(()));
+        assert_eq!(buf.push(20), Ok(()));
+        assert_eq!(buf.len(), 2);
+        assert_eq!(buf.pop(), Some(10));
+        assert_eq!(buf.pop(), Some(20));
+        assert_eq!(buf.pop(), None);
+        assert!(buf.is_empty());
+    }
+}
