@@ -87,3 +87,22 @@ impl CotSchemaVersion {
     }
 }
 
+/// Negotiates CoT schema version between client preferences and server limits.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SchemaNegotiator {
+    server_version: CotSchemaVersion,
+    min_supported: CotSchemaVersion,
+    allow_downgrade: bool,
+}
+
+impl SchemaNegotiator {
+    /// Creates a negotiator with default modern server version and downgrade enabled.
+    pub fn new(server_version: CotSchemaVersion) -> Self {
+        Self {
+            server_version,
+            min_supported: CotSchemaVersion::V1_0,
+            allow_downgrade: true,
+        }
+    }
+}
+
