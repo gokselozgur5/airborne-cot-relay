@@ -114,3 +114,18 @@ impl DualBufferSampler {
         self.active_idx.load(Ordering::Acquire)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_initial_pose_and_sample() {
+        let pose = PlatformPose::new(1000, 36.5, 32.2, 1500.0, 0.0, 0.0, 1.57);
+        let sampler = DualBufferSampler::new(pose, 1_000_000);
+        let snap = sampler.sample();
+        assert_eq!(snap.pose, pose);
+        assert_eq!(snap.sequence, 0);
+        assert!(snap.is_valid);
+    }
+}
