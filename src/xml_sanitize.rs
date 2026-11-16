@@ -37,3 +37,22 @@ pub fn escape_xml_attr(input: &str) -> String {
     }
     out
 }
+
+/// Escapes XML element text special characters (&, <, >).
+pub fn escape_xml_text(input: &str) -> String {
+    let mut out = String::with_capacity(input.len());
+    for c in input.chars() {
+        match c {
+            '&' => out.push_str("&amp;"),
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            _ => out.push(c),
+        }
+    }
+    out
+}
+
+/// Returns true if the string contains any characters requiring XML escaping.
+pub fn has_xml_entities(input: &str) -> bool {
+    input.chars().any(|c| escape_xml_entity(c).is_some())
+}
