@@ -81,3 +81,25 @@ pub struct TtlCache<K, V> {
     config: TtlConfig,
     stats: CacheStats,
 }
+
+impl<K, V> TtlCache<K, V>
+where
+    K: Eq + Hash + Clone,
+{
+    /// Creates a new cache with the specified configuration.
+    pub fn new(config: TtlConfig) -> Self {
+        Self {
+            entries: HashMap::new(),
+            config,
+            stats: CacheStats::default(),
+        }
+    }
+
+    /// Creates a new cache with default capacity and given TTL.
+    pub fn with_ttl(ttl_ms: u64) -> Self {
+        Self::new(TtlConfig {
+            ttl_ms,
+            ..TtlConfig::default()
+        })
+    }
+}
