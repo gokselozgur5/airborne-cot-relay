@@ -211,3 +211,19 @@ mod tests {
         assert!(rx.is_joined());
         assert!(rx.local_addr().is_ok());
     }
+
+    #[test]
+    fn test_multicast_rx_leave_and_rejoin() {
+        let group: Ipv4Addr = "239.255.0.2".parse().unwrap();
+        let temp = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let port = temp.local_addr().unwrap().port();
+        drop(temp);
+
+        let cfg = MulticastRxConfig::new(group, port);
+        let mut rx = MulticastReceiver::bind(cfg).unwrap();
+        assert!(rx.is_joined());
+        assert!(rx.leave_group().is_ok());
+        assert!(!rx.is_joined());
+        assert!(rx.rejoin_group().is_ok());
+        assert!(rx.is_joined());
+    }
