@@ -70,3 +70,18 @@ impl UdpBatchQueue {
         self.queue.is_empty()
     }
 }
+
+impl UdpBatchQueue {
+    pub fn queued_bytes(&self) -> usize {
+        self.queued_bytes
+    }
+
+    pub fn stats(&self) -> BatchQueueStats {
+        self.stats
+    }
+
+    pub fn clear(&mut self) {
+        self.queue.clear();
+        self.queued_bytes = 0;
+    }
+}
