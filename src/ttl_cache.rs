@@ -219,3 +219,20 @@ where
 
 /// Convenience alias for byte packet caching by packet UID or sequence ID.
 pub type PacketTtlCache = TtlCache<String, Vec<u8>>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_insert_and_get_basic() {
+        let mut cache = TtlCache::with_ttl(1_000);
+        assert!(cache.is_empty());
+        assert_eq!(cache.insert("key1", 42, 100), None);
+        assert_eq!(cache.len(), 1);
+        assert_eq!(cache.get(&"key1", 150), Some(&42));
+        assert_eq!(cache.stats().hits, 1);
+        assert_eq!(cache.get(&"missing", 150), None);
+        assert_eq!(cache.stats().misses, 1);
+    }
+}
