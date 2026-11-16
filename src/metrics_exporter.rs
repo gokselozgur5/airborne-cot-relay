@@ -132,4 +132,20 @@ impl PrometheusExporter {
     pub fn add_common_label(&mut self, key: impl Into<String>, value: impl Into<String>) {
         self.config.common_labels.push((key.into(), value.into()));
     }
+
+    fn format_metric_name(&self, base_name: &str) -> String {
+        let mut parts = Vec::with_capacity(3);
+        if let Some(ns) = &self.config.namespace {
+            parts.push(ns.as_str());
+        }
+        if let Some(sub) = &self.config.subsystem {
+            parts.push(sub.as_str());
+        }
+        parts.push(base_name);
+        parts.join("_")
+    }
+
+    fn escape_help(text: &str) -> String {
+        text.replace('\\', "\\\\").replace('\n', "\\n")
+    }
 }
