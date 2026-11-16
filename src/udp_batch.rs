@@ -85,3 +85,22 @@ impl UdpBatchQueue {
         self.queued_bytes = 0;
     }
 }
+
+impl UdpBatchQueue {
+    pub fn enqueue(&mut self, packet: UdpPacket) -> Result<(), &'static str> {
+        if self.queue.len() >= self.policy.max_queue_depth {
+            if self.policy.drop_oldest_on_full {
+                if let Some(dropped) = self.queue.pop_front() {
+                    self.queued_bytes = self.queued_bytes.saturating_sub(dropped.payload.len());
+                    self.stats.dropped_packets += 1;
+                }
+            } else {
+                return Err("queue capacity exceeded");
+            }
+        }
+        self.queued_bytes += packet.payload.len();
+        self.stats.enqueued += 1;
+        self.queue.push_back(packet);
+        Ok(())
+    }
+}
