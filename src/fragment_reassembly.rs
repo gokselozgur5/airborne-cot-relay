@@ -31,3 +31,24 @@ impl fmt::Display for ReassemblyError {
 
 /// Binary header size in bytes: 4 (msg_id) + 2 (seq_index) + 2 (total_fragments).
 pub const HEADER_SIZE: usize = 8;
+
+/// 8-byte header preceding each fragmented UDP packet.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct FragmentHeader {
+    pub msg_id: u32,
+    pub seq_index: u16,
+    pub total_fragments: u16,
+}
+
+impl FragmentHeader {
+    /// Creates a new fragment header.
+    pub fn new(msg_id: u32, seq_index: u16, total_fragments: u16) -> Result<Self, ReassemblyError> {
+        if total_fragments == 0 {
+            return Err(ReassemblyError::InvalidTotalFragments);
+        }
+        if seq_index >= total_fragments {
+            return Err(ReassemblyError::IndexOutOfBounds);
+        }
+        Ok(Self { msg_id, seq_index, total_fragments })
+    }
+}
