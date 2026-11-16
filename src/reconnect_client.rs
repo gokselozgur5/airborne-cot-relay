@@ -361,3 +361,15 @@ impl ReconnectClient {
         }
     }
 }
+
+impl CotSink for ReconnectClient {
+    fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
+        match self.send_immediate(payload) {
+            Ok(bytes) => Ok(bytes),
+            Err(e) => {
+                let _ = self.enqueue(payload.to_vec());
+                Err(RelayError::from(e))
+            }
+        }
+    }
+}
