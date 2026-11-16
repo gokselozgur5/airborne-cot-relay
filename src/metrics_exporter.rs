@@ -24,3 +24,19 @@ impl MetricType {
         }
     }
 }
+
+/// Individual metric sample with key-value labels and float value.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MetricSample {
+    /// Dimension label pairs.
+    pub labels: Vec<(String, String)>,
+    /// Sample value.
+    pub value: f64,
+}
+
+impl MetricSample {
+    /// Creates a new metric sample.
+    pub fn new(labels: Vec<(String, String)>, value: f64) -> Self {
+        Self { labels, value }
+    }
+}
