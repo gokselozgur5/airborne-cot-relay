@@ -229,4 +229,17 @@ impl PriorityPacketScheduler {
         }
         None
     }
+
+    /// Prunes all packets exceeding their TTL relative to current_time_ms.
+    pub fn prune_expired(&mut self, current_time_ms: u64) -> usize {
+        let mut pruned = 0;
+        for q in &mut self.queues {
+            let before = q.len();
+            q.retain(|pkt| !pkt.is_expired(current_time_ms));
+            pruned += before - q.len();
+        }
+        self.current_count = self.current_count.saturating_sub(pruned);
+        self.stats.expired = self.stats.expired.saturating_add(pruned as u64);
+        pruned
+    }
 }
