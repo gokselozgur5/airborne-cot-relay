@@ -141,3 +141,17 @@ impl UdpBatchQueue {
         Ok(count)
     }
 }
+
+impl UdpBatchQueue {
+    pub fn flush_all(&mut self, socket: &UdpSocket) -> std::io::Result<usize> {
+        let mut total = 0;
+        while !self.is_empty() {
+            let sent = self.flush_batch(socket)?;
+            if sent == 0 {
+                break;
+            }
+            total += sent;
+        }
+        Ok(total)
+    }
+}
