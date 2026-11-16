@@ -225,4 +225,21 @@ impl FragmentReassembler {
     pub fn stats(&self) -> ReassemblyStats {
         self.stats
     }
+
+    /// Prunes in-flight messages that have exceeded their TTL.
+    pub fn prune_stale(&mut self, now_ms: u64) -> usize {
+        let ttl = self.ttl_ms;
+        let mut expired = Vec::new();
+        for (&id, msg) in &self.in_flight {
+            if now_ms.saturating_sub(msg.last_updated_ms) > ttl {
+                expired.push(id);
+            }
+        }
+        let count = expired.len();
+        for id in expired {
+            self.in_flight.remove(&id);
+            self.stats.stale_dropped_messages += 1;
+        }
+        count
+    }
 }
