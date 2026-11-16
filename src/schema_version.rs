@@ -257,3 +257,12 @@ impl DowngradeTransformer {
         Ok(res)
     }
 }
+
+/// Convenience function to downgrade CoT XML to a target schema version.
+pub fn downgrade_cot_xml(
+    xml: &str,
+    target_version: CotSchemaVersion,
+) -> Result<String, SchemaVersionError> {
+    DowngradeTransformer::new(target_version).transform(xml)
+}
+
