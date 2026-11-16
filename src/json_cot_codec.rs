@@ -187,3 +187,15 @@ fn extract_json_str<'a>(json: &'a str, key: &str) -> Option<&'a str> {
     let end_quote = after_quote.find('"')?;
     Some(&after_quote[..end_quote])
 }
+
+fn extract_json_f64(json: &str, key: &str) -> Option<f64> {
+    let key_pat = format!("\"{key}\"");
+    let key_idx = json.find(&key_pat)?;
+    let rest = &json[key_idx + key_pat.len()..];
+    let colon_idx = rest.find(':')?;
+    let val_part = rest[colon_idx + 1..].trim_start();
+    let end_idx = val_part
+        .find(|c: char| c == ',' || c == '}' || c.is_whitespace())
+        .unwrap_or(val_part.len());
+    val_part[..end_idx].trim().parse::<f64>().ok()
+}
