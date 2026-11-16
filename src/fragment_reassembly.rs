@@ -318,4 +318,19 @@ mod tests {
         assert_eq!(FragmentHeader::new(1, 3, 2), Err(ReassemblyError::IndexOutOfBounds));
         assert_eq!(FragmentHeader::decode(&[0; 4]), Err(ReassemblyError::PacketTooShort));
     }
+
+    #[test]
+    fn test_fragment_payload_splitting() {
+        let data = b"0123456789abcdefghij";
+        let mtu = 16;
+        let frags = fragment_payload(100, data, mtu).unwrap();
+        assert_eq!(frags.len(), 3);
+        assert_eq!(frags[0].header.seq_index, 0);
+        assert_eq!(frags[0].payload, b"01234567");
+        assert_eq!(frags[1].header.seq_index, 1);
+        assert_eq!(frags[1].payload, b"89abcdef");
+        assert_eq!(frags[2].header.seq_index, 2);
+        assert_eq!(frags[2].payload, b"ghij");
+        assert_eq!(fragment_payload(1, data, 8), Err(ReassemblyError::MtuTooSmall));
+    }
 }
