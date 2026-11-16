@@ -30,3 +30,16 @@ impl TtlConfig {
         }
     }
 }
+
+/// Statistics on cache operations.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct CacheStats {
+    /// Number of successful lookups.
+    pub hits: u64,
+    /// Number of lookups finding no entry or expired entry.
+    pub misses: u64,
+    /// Number of entries evicted due to capacity limits.
+    pub evictions: u64,
+    /// Number of entries dropped due to TTL expiry.
+    pub expirations: u64,
+}
