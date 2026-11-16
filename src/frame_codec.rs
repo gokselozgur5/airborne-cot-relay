@@ -86,3 +86,20 @@ impl FrameDecoder {
         self
     }
 }
+
+impl FrameDecoder {
+    /// Returns the maximum allowed frame length.
+    pub const fn max_frame_len(&self) -> usize { self.max_frame_len }
+
+    /// Returns configured length prefix format.
+    pub const fn length_field(&self) -> LengthField { self.length_field }
+
+    /// Returns configured endianness.
+    pub const fn endianness(&self) -> Endianness { self.endianness }
+
+    /// Number of buffered unparsed bytes.
+    pub fn buffer_len(&self) -> usize { self.buffer.len() }
+
+    /// Clears any unparsed buffered bytes.
+    pub fn clear(&mut self) { self.buffer.clear(); }
+}
