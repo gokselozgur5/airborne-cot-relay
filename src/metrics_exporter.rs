@@ -168,4 +168,28 @@ impl PrometheusExporter {
         }
         format!("{{{}}}", parts.join(","))
     }
+
+    fn render_family(
+        &self,
+        family: &MetricFamily,
+        full_name: &str,
+        out: &mut String,
+    ) {
+        out.push_str("# HELP ");
+        out.push_str(full_name);
+        out.push(' ');
+        out.push_str(&Self::escape_help(&family.help));
+        out.push('\n');
+
+        out.push_str("# TYPE ");
+        out.push_str(full_name);
+        out.push(' ');
+        out.push_str(family.metric_type.as_str());
+        out.push('\n');
+
+        for sample in &family.samples {
+            let label_str = Self::format_labels(&self.config.common_labels, &sample.labels);
+            out.push_str(&format!("{}{} {}\n", full_name, label_str, sample.value));
+        }
+    }
 }
