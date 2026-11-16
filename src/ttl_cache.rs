@@ -174,4 +174,17 @@ where
             None
         }
     }
+
+    /// Peeks at a value without modifying hit/miss statistics.
+    pub fn peek(&self, key: &K, now_ms: u64) -> Option<&V> {
+        self.entries
+            .get(key)
+            .filter(|entry| !entry.is_expired(now_ms))
+            .map(|entry| &entry.value)
+    }
+
+    /// Checks if an unexpired key exists in the cache.
+    pub fn contains_key(&self, key: &K, now_ms: u64) -> bool {
+        self.peek(key, now_ms).is_some()
+    }
 }
