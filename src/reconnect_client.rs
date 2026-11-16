@@ -240,3 +240,19 @@ impl ReconnectClient {
         Ok(())
     }
 }
+
+impl ReconnectClient {
+    fn handle_connect_failure(&mut self, now: Instant) {
+        let backoff = self.policy.compute_backoff(self.consecutive_failures);
+        self.consecutive_failures += 1;
+        self.next_connect_deadline = Some(now + backoff);
+        self.stream = None;
+    }
+
+    fn handle_connect_success(&mut self, stream: TcpStream) {
+        self.stream = Some(stream);
+        self.consecutive_failures = 0;
+        self.next_connect_deadline = None;
+        self.stats.successful_connects += 1;
+    }
+}
