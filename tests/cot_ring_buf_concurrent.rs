@@ -22,3 +22,22 @@ fn make_cot(i: usize) -> CotEvent {
         speed_mps: 10.0,
     }
 }
+
+#[test]
+fn test_cot_ring_buffer_concurrent_spsc() {
+    let buf = Arc::new(CotRingBuffer::new(64));
+    let buf_producer = Arc::clone(&buf);
+    let n = 200;
+
+    let producer = thread::spawn(move || {
+        for i in 0..n {
+            buf_producer.push_overwrite(make_cot(i));
+        }
+    });
+
+    producer.join().expect("producer finished");
+    assert!(buf.len() > 0);
+    let drained = buf.drain_all();
+    assert!(drained.len() <= 64);
+    assert_eq!(drained.len() + buf.dropped_count(), n);
+}
