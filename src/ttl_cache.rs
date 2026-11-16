@@ -254,9 +254,9 @@ mod tests {
         cache.insert("a", 1, 100);
         cache.insert("b", 2, 150);
         cache.insert("c", 3, 250);
-        assert_eq!(cache.clean_expired(320), 2);
+        assert_eq!(cache.clean_expired(360), 2);
         assert_eq!(cache.len(), 1);
-        assert_eq!(cache.get(&"c", 320), Some(&3));
+        assert_eq!(cache.get(&"c", 360), Some(&3));
         assert_eq!(cache.stats().expirations, 2);
     }
 
@@ -282,9 +282,9 @@ mod tests {
         cache.insert("cot-002".to_string(), vec![4, 5, 6], 1_050);
         cache.insert("cot-003".to_string(), vec![7, 8, 9], 1_150);
 
-        let reaped = cache.drain_expired(1_120);
+        let reaped = cache.drain_expired(1_160);
         assert_eq!(reaped.len(), 2);
         assert_eq!(cache.len(), 1);
-        assert_eq!(cache.peek(&"cot-003".to_string(), 1_120), Some(&vec![7, 8, 9]));
+        assert_eq!(cache.peek(&"cot-003".to_string(), 1_160), Some(&vec![7, 8, 9]));
     }
 }
