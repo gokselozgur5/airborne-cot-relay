@@ -49,3 +49,16 @@ fn test_dto_json_roundtrip() {
     assert!((parsed.lat - dto.lat).abs() < 1e-6);
     assert_eq!(parsed.speed, dto.speed);
 }
+
+#[test]
+fn test_direct_json_xml_roundtrip() {
+    let json_in = r#"{"uid":"HELO-9","type":"a-f-A","how":"m-g","time":"2026-11-16T08:10:00Z","start":"2026-11-16T08:10:00Z","stale":"2026-11-16T08:10:30Z","lat":39.5000000,"lon":-104.9000000,"hae":1600.00,"ce":12.00,"le":18.00,"course":180.00,"speed":45.00}"#;
+
+    let xml = airborne_cot_relay::json_cot_codec::json_to_cot_xml(json_in).expect("json to xml succeeds");
+    assert!(xml.contains(r#"uid="HELO-9""#));
+    assert!(xml.contains(r#"lat="39.5000000""#));
+
+    let json_out = airborne_cot_relay::json_cot_codec::cot_xml_to_json(&xml).expect("xml to json succeeds");
+    assert!(json_out.contains(r#""uid":"HELO-9""#));
+    assert!(json_out.contains(r#""course":180.00"#));
+}
