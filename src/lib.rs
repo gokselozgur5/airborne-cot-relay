@@ -27,3 +27,4 @@ pub mod track_filter;
 
 pub mod relay_loop;
 pub mod xml_sanitize;
+pub mod frame_codec;
