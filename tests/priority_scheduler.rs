@@ -11,3 +11,16 @@ fn test_scheduler_emergency_preemption_scenario() {
     assert_eq!(first.priority, CotPriority::Emergency);
     assert_eq!(first.sequence, 3);
 }
+
+#[test]
+fn test_scheduler_stats_tracking() {
+    let mut sched = PriorityPacketScheduler::new(3);
+    sched.push(b"p1".to_vec(), CotPriority::Low, 1).unwrap();
+    sched.push(b"p2".to_vec(), CotPriority::Normal, 2).unwrap();
+    sched.push(b"p3".to_vec(), CotPriority::Critical, 3).unwrap();
+    sched.push(b"p4".to_vec(), CotPriority::Emergency, 4).unwrap();
+
+    let stats = sched.stats();
+    assert_eq!(stats.dropped[CotPriority::Low.as_tier()], 1);
+    assert_eq!(stats.enqueued[CotPriority::Emergency.as_tier()], 1);
+}
