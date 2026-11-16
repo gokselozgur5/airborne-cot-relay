@@ -104,3 +104,23 @@ impl UdpBatchQueue {
         Ok(())
     }
 }
+
+impl UdpBatchQueue {
+    pub fn drain_batch(&mut self) -> Vec<UdpPacket> {
+        let mut batch = Vec::new();
+        let mut batch_bytes = 0;
+        while let Some(front) = self.queue.front() {
+            if !batch.is_empty() && batch.len() >= self.policy.max_batch_packets {
+                break;
+            }
+            if !batch.is_empty() && batch_bytes + front.payload.len() > self.policy.max_batch_bytes {
+                break;
+            }
+            let packet = self.queue.pop_front().unwrap();
+            batch_bytes += packet.payload.len();
+            self.queued_bytes = self.queued_bytes.saturating_sub(packet.payload.len());
+            batch.push(packet);
+        }
+        batch
+    }
+}
