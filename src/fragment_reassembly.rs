@@ -72,3 +72,22 @@ impl FragmentHeader {
         Self::new(msg_id, seq_index, total_fragments)
     }
 }
+
+/// Complete fragment containing header and partial payload bytes.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Fragment {
+    pub header: FragmentHeader,
+    pub payload: Vec<u8>,
+}
+
+impl Fragment {
+    /// Creates a new fragment from header and payload.
+    pub fn new(header: FragmentHeader, payload: Vec<u8>) -> Self {
+        Self { header, payload }
+    }
+
+    /// Returns the fragment byte length including the 8-byte header.
+    pub fn wire_size(&self) -> usize {
+        HEADER_SIZE + self.payload.len()
+    }
+}
