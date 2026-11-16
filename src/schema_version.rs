@@ -238,3 +238,22 @@ impl DowngradeTransformer {
                 .ok_or(SchemaVersionError::MalformedXml("unclosed version attr"))?
                 + vs;
             format!(
+                "{}{}{}",
+                &tag[..vs],
+                self.target_version.as_str(),
+                &tag[ve..]
+            )
+        } else {
+            format!(
+                "<event version=\"{}\"{}",
+                self.target_version.as_str(),
+                &tag["<event".len()..]
+            )
+        };
+        let mut res = format!("{before}{new_tag}{after}");
+        if self.strip_flow_tags {
+            res = strip_flow_tags_element(&res);
+        }
+        Ok(res)
+    }
+}
