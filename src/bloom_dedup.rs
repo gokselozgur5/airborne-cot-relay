@@ -60,4 +60,19 @@ impl BloomFilter {
         }
         true
     }
+
+    /// Clears all bits in the filter.
+    pub fn clear(&mut self) {
+        self.bits.fill(0);
+    }
+
+    /// Returns the number of set bits (popcount) in the filter.
+    pub fn count_ones(&self) -> usize {
+        self.bits.iter().map(|word| word.count_ones() as usize).sum()
+    }
+
+    /// Returns true if no bits are set.
+    pub fn is_empty(&self) -> bool {
+        self.bits.iter().all(|&word| word == 0)
+    }
 }
