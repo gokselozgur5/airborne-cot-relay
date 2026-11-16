@@ -163,4 +163,15 @@ impl InFlightMessage {
             last_updated_ms: now_ms,
         }
     }
+
+    fn assemble(&self) -> Vec<u8> {
+        let total_size: usize = self.slots.iter().map(|s| s.as_ref().map_or(0, |b| b.len())).sum();
+        let mut assembled = Vec::with_capacity(total_size);
+        for slot in &self.slots {
+            if let Some(chunk) = slot {
+                assembled.extend_from_slice(chunk);
+            }
+        }
+        assembled
+    }
 }
