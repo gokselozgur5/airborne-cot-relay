@@ -118,4 +118,24 @@ impl CotBloomDeduplicator {
         key.extend_from_slice(time_str.as_bytes());
         self.check_and_record_raw(&key)
     }
+
+    /// Resets the internal Bloom filter for a new telemetry epoch.
+    pub fn reset_window(&mut self) {
+        self.filter.clear();
+    }
+
+    /// Total packets checked since creation.
+    pub fn total_checked(&self) -> u64 {
+        self.total_checked
+    }
+
+    /// Number of duplicate packets dropped.
+    pub fn duplicates_dropped(&self) -> u64 {
+        self.duplicates_dropped
+    }
+
+    /// Number of unique packets passed through.
+    pub fn unique_passed(&self) -> u64 {
+        self.unique_passed
+    }
 }
