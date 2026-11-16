@@ -49,3 +49,18 @@ pub struct DualBufferSampler {
 
 unsafe impl Sync for DualBufferSampler {}
 unsafe impl Send for DualBufferSampler {}
+
+impl DualBufferSampler {
+    /// Create a new sampler with an initial pose.
+    pub fn new(initial_pose: PlatformPose, timestamp_ns: u64) -> Self {
+        let snap = TelemetrySnapshot::new(initial_pose, 0, timestamp_ns);
+        Self {
+            buffers: [UnsafeCell::new(snap), UnsafeCell::new(snap)],
+            versions: [AtomicU64::new(0), AtomicU64::new(0)],
+            active_idx: AtomicUsize::new(0),
+            writes_total: AtomicU64::new(0),
+            reads_total: AtomicU64::new(0),
+            retries_total: AtomicU64::new(0),
+        }
+    }
+}
