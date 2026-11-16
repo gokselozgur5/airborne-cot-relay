@@ -62,3 +62,14 @@ impl CotSchemaVersion {
     }
 }
 
+impl CotSchemaVersion {
+    /// Detects schema version by inspecting the `<event` tag in CoT XML.
+    pub fn detect_from_xml(xml: &str) -> Result<Self, SchemaVersionError> {
+        let s = xml
+            .find("<event")
+            .ok_or(SchemaVersionError::MalformedXml("missing event tag"))?;
+        let rest = &xml[s..];
+        let e = rest
+            .find('>')
+            .ok_or(SchemaVersionError::MalformedXml("unclosed event tag"))?;
+        let tag = &rest[..e];
