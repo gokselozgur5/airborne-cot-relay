@@ -135,3 +135,23 @@ fn parse_point_tag(point_tag: &str) -> Result<PointTagAttrs, JsonCotError> {
         .and_then(|v| v.parse().ok()).unwrap_or(10.0);
     Ok(PointTagAttrs { lat, lon, hae, ce, le })
 }
+
+impl CotEventDto {
+    /// Deserializes a Cursor-on-Target XML string into a `CotEventDto`.
+    pub fn from_xml(xml: &str) -> Result<Self, JsonCotError> {
+        let ev = parse_event_tag(extract_xml_tag(xml, "event")
+            .ok_or(JsonCotError::MalformedXml("missing event tag"))?)?;
+        let pt = parse_point_tag(extract_xml_tag(xml, "point")
+            .ok_or(JsonCotError::MalformedXml("missing point tag"))?)?;
+        let track_tag = extract_xml_tag(xml, "track");
+        let course = track_tag.and_then(|t| extract_xml_attr(t, "course")).and_then(|v| v.parse().ok());
+        let speed = track_tag.and_then(|t| extract_xml_attr(t, "speed")).and_then(|v| v.parse().ok());
+        let callsign = extract_xml_tag(xml, "contact")
+            .and_then(|t| extract_xml_attr(t, "callsign")).map(ToString::to_string);
+        Ok(Self {
+            uid: ev.uid, cot_type: ev.cot_type, how: ev.how, time: ev.time,
+            start: ev.start, stale: ev.stale, lat: pt.lat, lon: pt.lon, hae: pt.hae,
+            ce: pt.ce, le: pt.le, course, speed, callsign,
+        })
+    }
+}
