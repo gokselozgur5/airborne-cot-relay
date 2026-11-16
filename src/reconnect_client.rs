@@ -339,3 +339,25 @@ impl ReconnectClient {
         Ok(total_sent)
     }
 }
+
+impl ReconnectClient {
+    /// Attempts immediate transmission of payload over connected stream.
+    pub fn send_immediate(&mut self, payload: &[u8]) -> Result<usize, ReconnectClientError> {
+        self.try_connect()?;
+        let stream = match self.stream.as_mut() {
+            Some(s) => s,
+            None => return Err(ReconnectClientError::NotConnected),
+        };
+        match stream.write_all(payload) {
+            Ok(()) => {
+                self.stats.messages_sent += 1;
+                self.stats.bytes_sent += payload.len();
+                Ok(payload.len())
+            }
+            Err(err) => {
+                self.handle_connect_failure(Instant::now());
+                Err(ReconnectClientError::Io(err))
+            }
+        }
+    }
+}
