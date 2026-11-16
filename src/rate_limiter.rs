@@ -92,3 +92,15 @@ impl TokenBucket {
         self.stats = RateLimiterStats::default();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_token_bucket_initial_capacity() {
+        let mut bucket = TokenBucket::new(10.0, 2.0);
+        assert!((bucket.tokens() - 10.0).abs() < 1e-4);
+        assert_eq!(bucket.stats(), RateLimiterStats::default());
+    }
+}
