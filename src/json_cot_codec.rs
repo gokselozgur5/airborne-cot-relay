@@ -224,3 +224,24 @@ impl CotEventDto {
         Ok(Self { uid, cot_type, how, time, start, stale, lat, lon, hae, ce, le, course, speed, callsign })
     }
 }
+
+impl CotEventDto {
+    /// Serializes this `CotEventDto` into a JSON string.
+    pub fn to_json(&self) -> String {
+        let mut fields = format!(
+            r#""uid":"{}","type":"{}","how":"{}","time":"{}","start":"{}","stale":"{}","lat":{:.7},"lon":{:.7},"hae":{:.2},"ce":{:.2},"le":{:.2}"#,
+            self.uid, self.cot_type, self.how, self.time, self.start, self.stale,
+            self.lat, self.lon, self.hae, self.ce, self.le
+        );
+        if let Some(c) = self.course {
+            fields.push_str(&format!(r#","course":{c:.2}"#));
+        }
+        if let Some(s) = self.speed {
+            fields.push_str(&format!(r#","speed":{s:.2}"#));
+        }
+        if let Some(cs) = &self.callsign {
+            fields.push_str(&format!(r#","callsign":"{cs}""#));
+        }
+        format!("{{{fields}}}")
+    }
+}
