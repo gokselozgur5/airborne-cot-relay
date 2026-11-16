@@ -155,4 +155,29 @@ impl CotRingBuffer {
             dropped_count: AtomicUsize::new(0),
         }
     }
+
+    /// Returns the buffer capacity.
+    pub fn capacity(&self) -> usize {
+        self.inner.capacity()
+    }
+
+    /// Returns current number of CoT events queued.
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    /// Returns true if the buffer has no events queued.
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
+    }
+
+    /// Enqueues a CoT event. Returns Err(event) if full.
+    pub fn push(&self, event: CotEvent) -> Result<(), CotEvent> {
+        self.inner.push(event)
+    }
+
+    /// Dequeues the next available CoT event.
+    pub fn pop(&self) -> Option<CotEvent> {
+        self.inner.pop()
+    }
 }
