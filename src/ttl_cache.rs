@@ -247,4 +247,16 @@ mod tests {
         assert_eq!(cache.stats().expirations, 1);
         assert_eq!(cache.stats().misses, 1);
     }
+
+    #[test]
+    fn test_clean_expired_batch() {
+        let mut cache = TtlCache::with_ttl(200);
+        cache.insert("a", 1, 100);
+        cache.insert("b", 2, 150);
+        cache.insert("c", 3, 250);
+        assert_eq!(cache.clean_expired(320), 2);
+        assert_eq!(cache.len(), 1);
+        assert_eq!(cache.get(&"c", 320), Some(&3));
+        assert_eq!(cache.stats().expirations, 2);
+    }
 }
