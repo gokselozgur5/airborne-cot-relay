@@ -180,3 +180,18 @@ mod tests {
         assert_eq!(queue.len(), 0);
         assert_eq!(queue.queued_bytes(), 0);
     }
+
+    #[test]
+    fn test_capacity_rejection() {
+        let policy = BatchPolicy {
+            max_queue_depth: 2,
+            drop_oldest_on_full: false,
+            ..Default::default()
+        };
+        let mut queue = UdpBatchQueue::new(policy);
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        queue.enqueue(UdpPacket::new(addr, vec![1])).unwrap();
+        queue.enqueue(UdpPacket::new(addr, vec![2])).unwrap();
+        assert!(queue.enqueue(UdpPacket::new(addr, vec![3])).is_err());
+        assert_eq!(queue.len(), 2);
+    }
