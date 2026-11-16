@@ -305,4 +305,14 @@ mod tests {
         assert_eq!(sched.pop().unwrap().payload, b"emerg3");
         assert_eq!(sched.pop().unwrap().payload, b"norm2");
     }
+
+    #[test]
+    fn test_queue_full_rejection() {
+        let mut sched = PriorityPacketScheduler::new(2);
+        sched.push(b"emerg1".to_vec(), CotPriority::Emergency, 1).unwrap();
+        sched.push(b"emerg2".to_vec(), CotPriority::Emergency, 2).unwrap();
+
+        let err = sched.push(b"low3".to_vec(), CotPriority::Low, 3);
+        assert_eq!(err, Err(SchedulerError::QueueFull));
+    }
 }
