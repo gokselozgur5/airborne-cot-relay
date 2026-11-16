@@ -139,3 +139,24 @@ impl CotBloomDeduplicator {
         self.unique_passed
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bloom_filter_insert_and_contains() {
+        let mut filter = BloomFilter::new(512, 3);
+        assert!(filter.is_empty());
+        assert!(!filter.contains(b"alpha"));
+
+        filter.insert(b"alpha");
+        assert!(!filter.is_empty());
+        assert!(filter.contains(b"alpha"));
+        assert!(!filter.contains(b"bravo"));
+
+        filter.clear();
+        assert!(filter.is_empty());
+        assert!(!filter.contains(b"alpha"));
+    }
+}
