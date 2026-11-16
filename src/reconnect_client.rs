@@ -373,3 +373,28 @@ impl CotSink for ReconnectClient {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Read;
+    use std::net::TcpListener;
+
+    #[test]
+    fn test_reconnect_policy_defaults_and_builders() {
+        let p = ReconnectPolicy::new()
+            .with_initial_backoff(Duration::from_millis(50))
+            .with_max_backoff(Duration::from_millis(500))
+            .with_multiplier(3.0)
+            .with_max_retries(Some(5))
+            .with_queue_limits(10, 100)
+            .with_drop_oldest(false);
+
+        assert_eq!(p.initial_backoff, Duration::from_millis(50));
+        assert_eq!(p.max_backoff, Duration::from_millis(500));
+        assert!((p.backoff_multiplier - 3.0).abs() < f64::EPSILON);
+        assert_eq!(p.max_retries, Some(5));
+        assert_eq!(p.max_queue_messages, 10);
+        assert_eq!(p.max_queue_bytes, 100);
+        assert!(!p.drop_oldest_on_full);
+    }
