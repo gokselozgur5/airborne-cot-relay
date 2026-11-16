@@ -24,3 +24,14 @@ fn test_integration_sanitize_cot_uid_and_callsign() {
         "HAWK &amp; EAGLE &quot;LEAD&quot;"
     );
 }
+
+#[test]
+fn test_integration_roundtrip_unescape_and_edge_cases() {
+    let original = "Unit 'Alpha' & \"Bravo\" <tag> &amp;";
+    let escaped = escape_xml_attr(original);
+    assert_eq!(unescape_xml(&escaped), original);
+
+    assert_eq!(sanitize_xml_chars(""), "");
+    assert_eq!(escape_xml_attr(""), "");
+    assert_eq!(unescape_xml(""), "");
+}
