@@ -35,3 +35,19 @@ pub enum CotSchemaVersion {
     V2_0,
 }
 
+impl fmt::Display for CotSchemaVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl CotSchemaVersion {
+    /// Canonical version string representation.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::V1_0 => "1.0",
+            Self::V2_0 => "2.0",
+        }
+    }
+}
+
