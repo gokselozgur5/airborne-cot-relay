@@ -278,4 +278,21 @@ mod tests {
         let empty_exp = PrometheusExporter::new(ExporterConfig::empty());
         assert_eq!(empty_exp.format_metric_name("raw"), "raw");
     }
+
+    #[test]
+    fn test_custom_counter_and_gauge() {
+        let mut exp = PrometheusExporter::new(ExporterConfig::empty());
+        exp.add_common_label("host", "node-1");
+        exp.add_counter("http_requests", "Total requests", 10.0, &[("method", "GET")]);
+        exp.add_gauge("cpu_load", "CPU load", 0.75, &[]);
+
+        let snap = Snapshot {
+            packets_in: 0, dropped: 0, sent: 0, reconnects: 0, queue_depth: 0, last_send_age_ms: None,
+        };
+        let rendered = exp.export_snapshot(&snap);
+        assert!(rendered.contains("# HELP http_requests Total requests\n"));
+        assert!(rendered.contains("# TYPE http_requests counter\n"));
+        assert!(rendered.contains("http_requests{host=\"node-1\",method=\"GET\"} 10\n"));
+        assert!(rendered.contains("cpu_load{host=\"node-1\"} 0.75\n"));
+    }
 }
