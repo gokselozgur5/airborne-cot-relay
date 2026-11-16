@@ -96,4 +96,26 @@ impl CotBloomDeduplicator {
             unique_passed: 0,
         }
     }
+
+    /// Checks a raw byte slice. Returns true if unique (new), false if duplicate.
+    pub fn check_and_record_raw(&mut self, data: &[u8]) -> bool {
+        self.total_checked += 1;
+        if self.filter.contains(data) {
+            self.duplicates_dropped += 1;
+            false
+        } else {
+            self.filter.insert(data);
+            self.unique_passed += 1;
+            true
+        }
+    }
+
+    /// Checks a CoT (UID, time) tuple. Returns true if unique (new), false if duplicate.
+    pub fn check_and_record_uid_time(&mut self, uid: &str, time_str: &str) -> bool {
+        let mut key = Vec::with_capacity(uid.len() + time_str.len() + 1);
+        key.extend_from_slice(uid.as_bytes());
+        key.push(b':');
+        key.extend_from_slice(time_str.as_bytes());
+        self.check_and_record_raw(&key)
+    }
 }
