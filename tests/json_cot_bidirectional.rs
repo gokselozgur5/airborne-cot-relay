@@ -1,0 +1,28 @@
+use airborne_cot_relay::json_cot_codec::CotEventDto;
+
+#[test]
+fn test_dto_xml_roundtrip() {
+    let mut dto = CotEventDto::new(
+        "TRACK-0001",
+        "a-f-G-E-V-C",
+        "2026-11-16T08:00:00.000Z",
+        35.1234567,
+        139.1234567,
+    );
+    dto.hae = 250.5;
+    dto.course = Some(45.0);
+    dto.speed = Some(15.2);
+    dto.callsign = Some("VIPER-1".to_string());
+
+    let xml = dto.to_xml();
+    assert!(xml.contains(r#"uid="TRACK-0001""#));
+    assert!(xml.contains(r#"course="45.00""#));
+
+    let parsed = CotEventDto::from_xml(&xml).expect("parse xml succeeds");
+    assert_eq!(parsed.uid, dto.uid);
+    assert_eq!(parsed.cot_type, dto.cot_type);
+    assert!((parsed.lat - dto.lat).abs() < 1e-6);
+    assert!((parsed.lon - dto.lon).abs() < 1e-6);
+    assert_eq!(parsed.course, dto.course);
+    assert_eq!(parsed.callsign, dto.callsign);
+}
