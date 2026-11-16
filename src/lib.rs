@@ -38,3 +38,4 @@ pub mod json_cot_codec;
 pub use json_cot_codec::{
     cot_xml_to_json, json_to_cot_xml, CotEventDto, CotToJsonStream, JsonCotError, JsonToCotStream,
 };
+pub mod multicast_rx;
