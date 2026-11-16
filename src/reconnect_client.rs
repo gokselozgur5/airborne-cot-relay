@@ -96,3 +96,25 @@ impl ReconnectPolicy {
         self.backoff_multiplier = multiplier.max(1.0);
         self
     }
+
+    pub fn with_max_retries(mut self, retries: Option<usize>) -> Self {
+        self.max_retries = retries;
+        self
+    }
+
+    pub fn with_connect_timeout(mut self, timeout: Duration) -> Self {
+        self.connect_timeout = timeout;
+        self
+    }
+
+    pub fn with_queue_limits(mut self, max_messages: usize, max_bytes: usize) -> Self {
+        self.max_queue_messages = max_messages;
+        self.max_queue_bytes = max_bytes;
+        self
+    }
+
+    pub fn with_drop_oldest(mut self, drop_oldest: bool) -> Self {
+        self.drop_oldest_on_full = drop_oldest;
+        self
+    }
+}
