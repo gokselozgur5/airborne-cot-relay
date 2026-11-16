@@ -252,4 +252,30 @@ impl FragmentReassembler {
         }
         Ok(())
     }
+
+    /// Ingests a decoded fragment. Returns complete payload when all parts arrive.
+    pub fn process_fragment(&mut self, frag: Fragment, now_ms: u64) -> Result<Option<Vec<u8>>, ReassemblyError> {
+        self.stats.packets_received += 1;
+        if frag.header.total_fragments == 1 {
+            self.stats.messages_completed += 1;
+            return Ok(Some(frag.payload));
+        }
+        let (id, total, seq) = (frag.header.msg_id, frag.header.total_fragments, frag.header.seq_index as usize);
+        self.check_capacity(id, now_ms)?;
+        let entry = self.in_flight.entry(id).or_insert_with(|| InFlightMessage::new(total, now_ms));
+        if entry.total_fragments != total {
+            return Err(ReassemblyError::PayloadMismatch);
+        }
+        entry.last_updated_ms = now_ms;
+        if !entry.insert(seq, frag.payload) {
+            self.stats.duplicate_fragments += 1;
+        }
+        if entry.is_complete() {
+            let completed = self.in_flight.remove(&id).unwrap();
+            self.stats.messages_completed += 1;
+            Ok(Some(completed.assemble()))
+        } else {
+            Ok(None)
+        }
+    }
 }
