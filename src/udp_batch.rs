@@ -195,3 +195,22 @@ mod tests {
         assert!(queue.enqueue(UdpPacket::new(addr, vec![3])).is_err());
         assert_eq!(queue.len(), 2);
     }
+
+    #[test]
+    fn test_drop_oldest_on_full() {
+        let policy = BatchPolicy {
+            max_queue_depth: 2,
+            drop_oldest_on_full: true,
+            ..Default::default()
+        };
+        let mut queue = UdpBatchQueue::new(policy);
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        queue.enqueue(UdpPacket::new(addr, vec![1, 1])).unwrap();
+        queue.enqueue(UdpPacket::new(addr, vec![2, 2])).unwrap();
+        queue.enqueue(UdpPacket::new(addr, vec![3, 3])).unwrap();
+        assert_eq!(queue.len(), 2);
+        assert_eq!(queue.stats().dropped_packets, 1);
+        let batch = queue.drain_batch();
+        assert_eq!(batch[0].payload, vec![2, 2]);
+        assert_eq!(batch[1].payload, vec![3, 3]);
+    }
