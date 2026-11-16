@@ -109,3 +109,26 @@ pub fn unescape_xml(input: &str) -> String {
         .replace("&gt;", ">")
         .replace("&amp;", "&")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_valid_and_invalid_xml_chars() {
+        assert!(is_xml_valid_char('a'));
+        assert!(is_xml_valid_char('\t'));
+        assert!(is_xml_valid_char('\n'));
+        assert!(is_xml_valid_char('\r'));
+        assert!(!is_xml_valid_char('\0'));
+        assert!(!is_xml_valid_char('\x08'));
+        assert!(!is_xml_valid_char('\x1b'));
+    }
+
+    #[test]
+    fn test_escape_xml_attr_predefined_entities() {
+        let raw = "<a & b 'c' \"d\">";
+        let escaped = escape_xml_attr(raw);
+        assert_eq!(escaped, "&lt;a &amp; b &apos;c&apos; &quot;d&quot;&gt;");
+    }
+}
