@@ -318,3 +318,14 @@ mod tests {
     }
 
     #[test]
+    fn test_downgrade_transformer() {
+        let v2_xml = r#"<event version="2.0" uid="test"><_flow-tags_ f="1"/></event>"#;
+        let downgraded = downgrade_cot_xml(v2_xml, CotSchemaVersion::V1_0).unwrap();
+        assert!(downgraded.contains("version=\"1.0\""));
+        assert!(!downgraded.contains("_flow-tags_"));
+
+        let legacy = r#"<event uid="test"></event>"#;
+        let tagged = downgrade_cot_xml(legacy, CotSchemaVersion::V1_0).unwrap();
+        assert!(tagged.contains("version=\"1.0\""));
+    }
+}
