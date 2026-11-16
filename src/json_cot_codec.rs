@@ -25,3 +25,22 @@ impl std::fmt::Display for JsonCotError {
 }
 
 impl std::error::Error for JsonCotError {}
+
+/// Canonical intermediate representation of a Cursor-on-Target event.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CotEventDto {
+    pub uid: String,
+    pub cot_type: String,
+    pub how: String,
+    pub time: String,
+    pub start: String,
+    pub stale: String,
+    pub lat: f64,
+    pub lon: f64,
+    pub hae: f64,
+    pub ce: f64,
+    pub le: f64,
+    pub course: Option<f64>,
+    pub speed: Option<f64>,
+    pub callsign: Option<String>,
+}
