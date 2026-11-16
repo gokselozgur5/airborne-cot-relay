@@ -240,4 +240,10 @@ impl PrometheusExporter {
         }
         out
     }
+
+    /// Takes a snapshot of live Metrics and exports to Prometheus format.
+    pub fn export_metrics(&self, metrics: &Metrics, now_ms: u64) -> String {
+        let snap = metrics.snapshot(now_ms);
+        self.export_snapshot(&snap)
+    }
 }
