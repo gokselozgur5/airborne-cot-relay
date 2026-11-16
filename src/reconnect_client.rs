@@ -178,3 +178,25 @@ impl ReconnectClient {
         Self::new(target_addr, ReconnectPolicy::default())
     }
 }
+
+impl ReconnectClient {
+    pub fn target_addr(&self) -> SocketAddr {
+        self.target_addr
+    }
+
+    pub fn policy(&self) -> &ReconnectPolicy {
+        &self.policy
+    }
+
+    pub fn is_connected(&self) -> bool {
+        self.stream.is_some()
+    }
+
+    pub fn consecutive_failures(&self) -> usize {
+        self.consecutive_failures
+    }
+
+    pub fn stats(&self) -> &StreamClientStats {
+        &self.stats
+    }
+}
