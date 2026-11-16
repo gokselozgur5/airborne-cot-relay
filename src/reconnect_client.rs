@@ -428,3 +428,22 @@ mod tests {
             other => panic!("expected MaxRetriesExceeded, got {:?}", other),
         }
     }
+
+    #[test]
+    fn test_queue_enqueue_and_drop_oldest() {
+        let addr = "127.0.0.1:9".parse().unwrap();
+        let p = ReconnectPolicy::new()
+            .with_queue_limits(2, 100)
+            .with_drop_oldest(true);
+        let mut client = ReconnectClient::new(addr, p);
+
+        client.enqueue(vec![1, 2, 3]).unwrap();
+        client.enqueue(vec![4, 5, 6]).unwrap();
+        assert_eq!(client.queued_messages(), 2);
+        assert_eq!(client.queued_bytes(), 6);
+
+        client.enqueue(vec![7, 8, 9]).unwrap();
+        assert_eq!(client.queued_messages(), 2);
+        assert_eq!(client.stats().messages_dropped, 1);
+        assert_eq!(client.stats().bytes_dropped, 3);
+    }
