@@ -81,3 +81,11 @@ fn extract_xml_attr<'a>(tag_content: &'a str, attr_name: &str) -> Option<&'a str
     let end = rest.find('"')?;
     Some(&rest[..end])
 }
+
+fn extract_xml_tag<'a>(xml: &'a str, tag_name: &str) -> Option<&'a str> {
+    let start_pat = format!("<{tag_name}");
+    let start = xml.find(&start_pat)?;
+    let rest = &xml[start..];
+    let end = rest.find('>')?;
+    Some(&rest[..=end])
+}
