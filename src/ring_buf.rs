@@ -260,4 +260,18 @@ mod tests {
             speed_mps: 25.0,
         }
     }
+
+    #[test]
+    fn test_cot_ring_buffer_operations() {
+        let cot_buf = CotRingBuffer::new(2);
+        assert_eq!(cot_buf.capacity(), 2);
+        assert!(cot_buf.push(make_test_cot("cot-1")).is_ok());
+        assert!(cot_buf.push(make_test_cot("cot-2")).is_ok());
+        assert!(cot_buf.is_full());
+        let popped = cot_buf.pop().unwrap();
+        assert_eq!(popped.uid, "cot-1");
+        assert_eq!(cot_buf.len(), 1);
+        cot_buf.clear();
+        assert!(cot_buf.is_empty());
+    }
 }
