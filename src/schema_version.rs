@@ -125,3 +125,25 @@ impl SchemaNegotiator {
     }
 }
 
+impl SchemaNegotiator {
+    /// Negotiates an agreed schema version given a client's requested version.
+    pub fn negotiate(
+        &self,
+        requested: CotSchemaVersion,
+    ) -> Result<CotSchemaVersion, SchemaVersionError> {
+        if requested == self.server_version {
+            return Ok(self.server_version);
+        }
+        if requested < self.server_version {
+            if self.allow_downgrade && requested >= self.min_supported {
+                Ok(requested)
+            } else {
+                Err(SchemaVersionError::NegotiationFailed)
+            }
+        } else if self.server_version >= self.min_supported {
+            Ok(self.server_version)
+        } else {
+            Err(SchemaVersionError::NegotiationFailed)
+        }
+    }
+}
