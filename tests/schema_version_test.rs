@@ -16,3 +16,13 @@ fn test_integration_negotiate_and_transform_pipeline() {
     assert!(!output.contains("_flow-tags_"));
 }
 
+#[test]
+fn test_integration_legacy_unversioned_event_upgrade() {
+    let unversioned = "<event uid=\"MISC-99\"><point lat=\"10.0\" lon=\"20.0\"/></event>";
+    let ver = CotSchemaVersion::detect_from_xml(unversioned).unwrap();
+    assert_eq!(ver, CotSchemaVersion::V1_0);
+
+    let transformed = downgrade_cot_xml(unversioned, CotSchemaVersion::V1_0).unwrap();
+    assert!(transformed.contains("version=\"1.0\""));
+    assert!(transformed.contains("uid=\"MISC-99\""));
+}
