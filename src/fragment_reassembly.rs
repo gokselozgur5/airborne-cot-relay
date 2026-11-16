@@ -174,6 +174,16 @@ impl InFlightMessage {
         }
         assembled
     }
+
+    fn insert(&mut self, seq: usize, payload: Vec<u8>) -> bool {
+        if seq < self.slots.len() && self.slots[seq].is_none() {
+            self.slots[seq] = Some(payload);
+            self.received_count += 1;
+            true
+        } else {
+            false
+        }
+    }
 }
 
 /// Lock-free/deterministic UDP fragment reassembler.
