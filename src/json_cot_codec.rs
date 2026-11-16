@@ -245,3 +245,13 @@ impl CotEventDto {
         format!("{{{fields}}}")
     }
 }
+
+/// Converts a JSON string directly into a Cursor-on-Target XML string.
+pub fn json_to_cot_xml(json: &str) -> Result<String, JsonCotError> {
+    CotEventDto::from_json(json).map(|dto| dto.to_xml())
+}
+
+/// Converts a Cursor-on-Target XML string directly into a JSON string.
+pub fn cot_xml_to_json(xml: &str) -> Result<String, JsonCotError> {
+    CotEventDto::from_xml(xml).map(|dto| dto.to_json())
+}
