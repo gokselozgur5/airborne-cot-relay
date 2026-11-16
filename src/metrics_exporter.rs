@@ -40,3 +40,28 @@ impl MetricSample {
         Self { labels, value }
     }
 }
+
+/// Metric family containing metadata and samples.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MetricFamily {
+    /// Metric base identifier.
+    pub name: String,
+    /// Human-readable description.
+    pub help: String,
+    /// Metric type.
+    pub metric_type: MetricType,
+    /// Samples collected under this family.
+    pub samples: Vec<MetricSample>,
+}
+
+impl MetricFamily {
+    /// Creates a new metric family with empty samples.
+    pub fn new(name: impl Into<String>, help: impl Into<String>, metric_type: MetricType) -> Self {
+        Self {
+            name: name.into(),
+            help: help.into(),
+            metric_type,
+            samples: Vec::new(),
+        }
+    }
+}
