@@ -40,4 +40,19 @@ impl CotPriority {
             CotPriority::Normal
         }
     }
+
+    /// Infers priority tier from raw CoT XML content.
+    pub fn from_xml_str(xml: &str) -> Self {
+        if xml.contains("emergency") || xml.contains("911") || xml.contains("b-a-o-tbl") {
+            CotPriority::Emergency
+        } else if let Some(idx) = xml.find("type=\"") {
+            let rem = &xml[idx + 6..];
+            if let Some(end) = rem.find('"') {
+                return Self::from_cot_type(&rem[..end]);
+            }
+            CotPriority::Normal
+        } else {
+            CotPriority::Normal
+        }
+    }
 }
