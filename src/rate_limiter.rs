@@ -84,3 +84,11 @@ impl TokenBucket {
         self.tokens
     }
 }
+
+impl TokenBucket {
+    pub fn reset(&mut self) {
+        self.tokens = self.config.capacity;
+        self.last_refill = Instant::now();
+        self.stats = RateLimiterStats::default();
+    }
+}
