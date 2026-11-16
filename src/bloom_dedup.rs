@@ -37,4 +37,27 @@ impl BloomFilter {
             num_hashes,
         }
     }
+
+    /// Inserts raw byte slice into the filter.
+    pub fn insert(&mut self, data: &[u8]) {
+        let (h1, h2) = double_hash(data);
+        for i in 0..self.num_hashes {
+            let combined = h1.wrapping_add((i as u64).wrapping_mul(h2));
+            let bit_idx = (combined % self.num_bits as u64) as usize;
+            self.bits[bit_idx / 64] |= 1u64 << (bit_idx % 64);
+        }
+    }
+
+    /// Checks whether the filter may contain the byte slice.
+    pub fn contains(&self, data: &[u8]) -> bool {
+        let (h1, h2) = double_hash(data);
+        for i in 0..self.num_hashes {
+            let combined = h1.wrapping_add((i as u64).wrapping_mul(h2));
+            let bit_idx = (combined % self.num_bits as u64) as usize;
+            if (self.bits[bit_idx / 64] & (1u64 << (bit_idx % 64))) == 0 {
+                return false;
+            }
+        }
+        true
+    }
 }
