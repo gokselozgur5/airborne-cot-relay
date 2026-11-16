@@ -54,3 +54,19 @@ pub struct CacheEntry<V> {
     /// Millisecond timestamp when entry expires.
     pub expires_at_ms: u64,
 }
+
+impl<V> CacheEntry<V> {
+    /// Creates a new cache entry with calculated expiration.
+    pub fn new(value: V, inserted_at_ms: u64, ttl_ms: u64) -> Self {
+        Self {
+            value,
+            inserted_at_ms,
+            expires_at_ms: inserted_at_ms.saturating_add(ttl_ms),
+        }
+    }
+
+    /// Checks if this entry is expired at the given timestamp.
+    pub fn is_expired(&self, now_ms: u64) -> bool {
+        now_ms >= self.expires_at_ms
+    }
+}
