@@ -11,3 +11,22 @@ pub struct TtlConfig {
     /// Maximum number of items before oldest entries are evicted.
     pub max_capacity: usize,
 }
+
+impl Default for TtlConfig {
+    fn default() -> Self {
+        Self {
+            ttl_ms: 30_000,
+            max_capacity: 10_000,
+        }
+    }
+}
+
+impl TtlConfig {
+    /// Creates a configuration with explicit TTL and max capacity.
+    pub const fn new(ttl_ms: u64, max_capacity: usize) -> Self {
+        Self {
+            ttl_ms,
+            max_capacity,
+        }
+    }
+}
