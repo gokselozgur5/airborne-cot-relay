@@ -34,3 +34,4 @@ pub mod xml_sanitize;
 pub mod frame_codec;
 pub use frame_codec::{Endianness, FrameCodecError, FrameDecoder, LengthField};
 pub mod udp_batch;
+pub mod json_cot_codec;
