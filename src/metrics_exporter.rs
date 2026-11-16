@@ -3,6 +3,8 @@
 //! Formats relay counters, gauges, and queue telemetry according to the
 //! Prometheus 0.0.4 text exposition specification.
 
+use crate::metrics::{Metrics, Snapshot};
+
 /// Standard Prometheus text format media type.
 pub const PROMETHEUS_CONTENT_TYPE: &str = "text/plain; version=0.0.4; charset=utf-8";
 
@@ -219,5 +221,23 @@ impl PrometheusExporter {
         let mut fam = MetricFamily::new(base_name, help, mtype);
         fam.samples.push(MetricSample::new(Vec::new(), val));
         self.render_family(&fam, &full, out);
+    }
+
+    /// Exports a metrics Snapshot into Prometheus exposition text.
+    pub fn export_snapshot(&self, snapshot: &Snapshot) -> String {
+        let mut out = String::with_capacity(1024);
+        self.render_single("packets_in_total", "Total incoming packets.", MetricType::Counter, snapshot.packets_in as f64, &mut out);
+        self.render_single("packets_dropped_total", "Total packets dropped.", MetricType::Counter, snapshot.dropped as f64, &mut out);
+        self.render_single("packets_sent_total", "Total packets sent.", MetricType::Counter, snapshot.sent as f64, &mut out);
+        self.render_single("reconnects_total", "Total reconnect attempts.", MetricType::Counter, snapshot.reconnects as f64, &mut out);
+        self.render_single("queue_depth", "Current queue depth.", MetricType::Gauge, snapshot.queue_depth as f64, &mut out);
+        if let Some(age_ms) = snapshot.last_send_age_ms {
+            self.render_single("last_send_age_seconds", "Seconds since last send.", MetricType::Gauge, (age_ms as f64) / 1000.0, &mut out);
+        }
+        for fam in &self.custom_families {
+            let full = self.format_metric_name(&fam.name);
+            self.render_family(fam, &full, &mut out);
+        }
+        out
     }
 }
