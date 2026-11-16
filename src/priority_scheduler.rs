@@ -279,4 +279,16 @@ mod tests {
         assert_eq!(sched.pop().unwrap().payload, b"pkt3");
         assert!(sched.pop().is_none());
     }
+
+    #[test]
+    fn test_emergency_preemption() {
+        let mut sched = PriorityPacketScheduler::new(10);
+        sched.push(b"normal_pos".to_vec(), CotPriority::Normal, 10).unwrap();
+        sched.push(b"high_track".to_vec(), CotPriority::High, 11).unwrap();
+        sched.push(b"emergency_911".to_vec(), CotPriority::Emergency, 12).unwrap();
+
+        assert_eq!(sched.pop().unwrap().payload, b"emergency_911");
+        assert_eq!(sched.pop().unwrap().payload, b"high_track");
+        assert_eq!(sched.pop().unwrap().payload, b"normal_pos");
+    }
 }
