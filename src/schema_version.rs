@@ -106,3 +106,22 @@ impl SchemaNegotiator {
     }
 }
 
+impl SchemaNegotiator {
+    /// Sets the minimum supported schema version.
+    pub fn with_min_supported(mut self, min: CotSchemaVersion) -> Self {
+        self.min_supported = min;
+        self
+    }
+
+    /// Sets whether downgrade from server version is allowed.
+    pub fn with_allow_downgrade(mut self, allow: bool) -> Self {
+        self.allow_downgrade = allow;
+        self
+    }
+
+    /// Returns configured server version.
+    pub fn server_version(&self) -> CotSchemaVersion {
+        self.server_version
+    }
+}
+
