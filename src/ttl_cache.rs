@@ -235,4 +235,16 @@ mod tests {
         assert_eq!(cache.get(&"missing", 150), None);
         assert_eq!(cache.stats().misses, 1);
     }
+
+    #[test]
+    fn test_ttl_expiry_and_contains() {
+        let mut cache = TtlCache::with_ttl(500);
+        cache.insert("p1", 100, 1_000);
+        assert!(cache.contains_key(&"p1", 1_400));
+        assert_eq!(cache.peek(&"p1", 1_400), Some(&100));
+        assert!(!cache.contains_key(&"p1", 1_500));
+        assert_eq!(cache.get(&"p1", 1_501), None);
+        assert_eq!(cache.stats().expirations, 1);
+        assert_eq!(cache.stats().misses, 1);
+    }
 }
