@@ -41,3 +41,13 @@ impl LengthField {
         }
     }
 }
+
+/// Byte order for the length prefix field.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Endianness {
+    /// Big-endian network byte order (default).
+    #[default]
+    BigEndian,
+    /// Little-endian host byte order.
+    LittleEndian,
+}
