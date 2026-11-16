@@ -114,4 +114,13 @@ mod tests {
         assert_eq!(stats.allowed, 2);
         assert_eq!(stats.dropped, 1);
     }
+
+    #[test]
+    fn test_token_bucket_refill() {
+        let mut bucket = TokenBucket::new(5.0, 100.0);
+        assert!(bucket.try_acquire(5.0));
+        assert!(!bucket.try_acquire(1.0));
+        std::thread::sleep(std::time::Duration::from_millis(30));
+        assert!(bucket.try_acquire(1.0));
+    }
 }
