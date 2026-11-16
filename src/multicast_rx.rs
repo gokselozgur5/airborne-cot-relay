@@ -162,3 +162,23 @@ impl MulticastReceiver {
         self.joined
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_validation_valid() {
+        let group: Ipv4Addr = "239.2.3.1".parse().unwrap();
+        let cfg = MulticastRxConfig::new(group, 8080)
+            .with_buffer_size(4096)
+            .with_read_timeout(Duration::from_millis(100));
+        assert!(cfg.validate().is_ok());
+    }
+
+    #[test]
+    fn test_config_validation_invalid_group() {
+        let unicast: Ipv4Addr = "192.168.1.1".parse().unwrap();
+        let cfg = MulticastRxConfig::new(unicast, 8080);
+        assert!(matches!(cfg.validate(), Err(MulticastRxError::InvalidGroup(_))));
+    }
