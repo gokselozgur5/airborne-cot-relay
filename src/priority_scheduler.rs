@@ -106,3 +106,13 @@ pub struct SchedulerStats {
     pub dropped: [u64; 5],
     pub expired: u64,
 }
+
+/// Priority queue scheduler managing tiered CoT packet traffic.
+#[derive(Debug)]
+pub struct PriorityPacketScheduler {
+    pub(crate) queues: [VecDeque<PrioritizedPacket>; 5],
+    pub(crate) max_capacity: usize,
+    pub(crate) current_count: usize,
+    pub(crate) next_sequence: u64,
+    pub(crate) stats: SchedulerStats,
+}
