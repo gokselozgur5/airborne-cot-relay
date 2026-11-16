@@ -187,4 +187,14 @@ where
     pub fn contains_key(&self, key: &K, now_ms: u64) -> bool {
         self.peek(key, now_ms).is_some()
     }
+
+    /// Removes an entry by key regardless of expiration state.
+    pub fn remove(&mut self, key: &K) -> Option<V> {
+        self.entries.remove(key).map(|entry| entry.value)
+    }
+
+    /// Clears all entries from the cache.
+    pub fn clear(&mut self) {
+        self.entries.clear();
+    }
 }
