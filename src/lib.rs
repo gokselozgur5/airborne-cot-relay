@@ -24,5 +24,6 @@ pub use pipeline::Pipeline;
 pub mod resilience;
 pub mod runtime;
 pub mod track_filter;
+pub mod ttl_cache;
 
 pub mod relay_loop;
