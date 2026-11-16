@@ -19,6 +19,10 @@ pub mod http;
 pub mod log;
 pub mod metrics;
 pub mod metrics_exporter;
+pub use metrics_exporter::{
+    ExporterConfig, MetricFamily, MetricSample, MetricType, PrometheusExporter,
+    PROMETHEUS_CONTENT_TYPE,
+};
 pub mod output;
 pub mod pipeline;
 pub use pipeline::Pipeline;
