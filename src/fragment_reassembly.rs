@@ -51,4 +51,24 @@ impl FragmentHeader {
         }
         Ok(Self { msg_id, seq_index, total_fragments })
     }
+
+    /// Encodes header into an 8-byte big-endian array.
+    pub fn encode(&self) -> [u8; HEADER_SIZE] {
+        let mut buf = [0u8; HEADER_SIZE];
+        buf[0..4].copy_from_slice(&self.msg_id.to_be_bytes());
+        buf[4..6].copy_from_slice(&self.seq_index.to_be_bytes());
+        buf[6..8].copy_from_slice(&self.total_fragments.to_be_bytes());
+        buf
+    }
+
+    /// Decodes header from an 8-byte big-endian slice.
+    pub fn decode(bytes: &[u8]) -> Result<Self, ReassemblyError> {
+        if bytes.len() < HEADER_SIZE {
+            return Err(ReassemblyError::PacketTooShort);
+        }
+        let msg_id = u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]);
+        let seq_index = u16::from_be_bytes([bytes[4], bytes[5]]);
+        let total_fragments = u16::from_be_bytes([bytes[6], bytes[7]]);
+        Self::new(msg_id, seq_index, total_fragments)
+    }
 }
