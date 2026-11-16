@@ -55,3 +55,17 @@ impl TokenBucket {
         self.last_refill = now;
     }
 }
+
+impl TokenBucket {
+    pub fn try_acquire(&mut self, amount: f64) -> bool {
+        self.refill();
+        if self.tokens >= amount {
+            self.tokens -= amount;
+            self.stats.allowed += 1;
+            true
+        } else {
+            self.stats.dropped += 1;
+            false
+        }
+    }
+}
