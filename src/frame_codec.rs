@@ -127,3 +127,27 @@ impl FrameDecoder {
         }
     }
 }
+
+impl FrameDecoder {
+    /// Attempts to decode the next frame from the internal buffer.
+    pub fn decode_next(&mut self) -> Result<Option<Vec<u8>>, FrameCodecError> {
+        let prefix_len = self.length_field.byte_len();
+        if self.buffer.len() < prefix_len {
+            return Ok(None);
+        }
+        let frame_len = Self::parse_length(&self.buffer[..prefix_len], self.length_field, self.endianness);
+        if frame_len > self.max_frame_len {
+            return Err(FrameCodecError::FrameTooLarge {
+                frame_len,
+                max_len: self.max_frame_len,
+            });
+        }
+        let total_len = prefix_len + frame_len;
+        if self.buffer.len() < total_len {
+            return Ok(None);
+        }
+        let payload = self.buffer[prefix_len..total_len].to_vec();
+        self.buffer.drain(..total_len);
+        Ok(Some(payload))
+    }
+}
