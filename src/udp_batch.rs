@@ -267,3 +267,11 @@ mod tests {
         assert_eq!(queue.stats().sent_packets, 2);
         assert_eq!(queue.stats().sent_bytes, 4);
         assert_eq!(queue.stats().batches_sent, 1);
+
+        let mut buf = [0u8; 16];
+        let (n1, _) = receiver.recv_from(&mut buf).unwrap();
+        assert_eq!(&buf[..n1], &[10, 20]);
+        let (n2, _) = receiver.recv_from(&mut buf).unwrap();
+        assert_eq!(&buf[..n2], &[30, 40]);
+    }
+}
