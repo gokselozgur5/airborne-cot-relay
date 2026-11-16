@@ -27,3 +27,13 @@ fn test_cot_deduplicator_packet_burst() {
     assert_eq!(dedup.unique_passed(), 1);
     assert_eq!(dedup.duplicates_dropped(), 4);
 }
+
+#[test]
+fn test_cot_deduplicator_reset_window() {
+    let mut dedup = CotBloomDeduplicator::new(1024, 3);
+    assert!(dedup.check_and_record_uid_time("DRONE-1", "10:00:00"));
+    assert!(!dedup.check_and_record_uid_time("DRONE-1", "10:00:00"));
+
+    dedup.reset_window();
+    assert!(dedup.check_and_record_uid_time("DRONE-1", "10:00:00"));
+}
