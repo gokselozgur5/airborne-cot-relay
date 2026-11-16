@@ -86,3 +86,23 @@ impl Default for ExporterConfig {
         }
     }
 }
+
+impl ExporterConfig {
+    /// Creates an empty configuration with no prefixes or default labels.
+    pub fn empty() -> Self {
+        Self {
+            namespace: None,
+            subsystem: None,
+            common_labels: Vec::new(),
+        }
+    }
+
+    /// Creates a configuration with an explicit namespace prefix.
+    pub fn with_namespace(namespace: impl Into<String>) -> Self {
+        Self {
+            namespace: Some(namespace.into()),
+            subsystem: None,
+            common_labels: Vec::new(),
+        }
+    }
+}
