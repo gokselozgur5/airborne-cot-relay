@@ -182,3 +182,17 @@ mod tests {
         let cfg = MulticastRxConfig::new(unicast, 8080);
         assert!(matches!(cfg.validate(), Err(MulticastRxError::InvalidGroup(_))));
     }
+
+    #[test]
+    fn test_config_validation_zero_port() {
+        let group: Ipv4Addr = "239.2.3.1".parse().unwrap();
+        let cfg = MulticastRxConfig::new(group, 0);
+        assert!(matches!(cfg.validate(), Err(MulticastRxError::InvalidPort)));
+    }
+
+    #[test]
+    fn test_config_validation_zero_buffer() {
+        let group: Ipv4Addr = "239.2.3.1".parse().unwrap();
+        let cfg = MulticastRxConfig::new(group, 8080).with_buffer_size(0);
+        assert!(matches!(cfg.validate(), Err(MulticastRxError::InvalidBufferSize)));
+    }
