@@ -24,3 +24,16 @@ fn test_scheduler_stats_tracking() {
     assert_eq!(stats.dropped[CotPriority::Low.as_tier()], 1);
     assert_eq!(stats.enqueued[CotPriority::Emergency.as_tier()], 1);
 }
+
+#[test]
+fn test_scheduler_exhaustion_and_clear() {
+    let mut sched = PriorityPacketScheduler::new(5);
+    sched.push(b"item".to_vec(), CotPriority::Normal, 1).unwrap();
+    assert_eq!(sched.len(), 1);
+    assert!(!sched.is_empty());
+
+    sched.clear();
+    assert_eq!(sched.len(), 0);
+    assert!(sched.is_empty());
+    assert!(sched.pop().is_none());
+}
