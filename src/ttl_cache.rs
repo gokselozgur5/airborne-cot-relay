@@ -144,4 +144,16 @@ where
             self.stats.evictions = self.stats.evictions.saturating_add(1);
         }
     }
+
+    /// Inserts a key-value pair, evicting expired or oldest items if at capacity.
+    pub fn insert(&mut self, key: K, value: V, now_ms: u64) -> Option<V> {
+        if self.entries.len() >= self.config.max_capacity && !self.entries.contains_key(&key) {
+            self.clean_expired(now_ms);
+            if self.entries.len() >= self.config.max_capacity {
+                self.evict_oldest();
+            }
+        }
+        let entry = CacheEntry::new(value, now_ms, self.config.ttl_ms);
+        self.entries.insert(key, entry).map(|old| old.value)
+    }
 }
