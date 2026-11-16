@@ -156,4 +156,22 @@ where
         let entry = CacheEntry::new(value, now_ms, self.config.ttl_ms);
         self.entries.insert(key, entry).map(|old| old.value)
     }
+
+    /// Returns a reference to the value if present and unexpired.
+    pub fn get(&mut self, key: &K, now_ms: u64) -> Option<&V> {
+        if let Some(entry) = self.entries.get(key) {
+            if entry.is_expired(now_ms) {
+                self.entries.remove(key);
+                self.stats.expirations = self.stats.expirations.saturating_add(1);
+                self.stats.misses = self.stats.misses.saturating_add(1);
+                None
+            } else {
+                self.stats.hits = self.stats.hits.saturating_add(1);
+                self.entries.get(key).map(|e| &e.value)
+            }
+        } else {
+            self.stats.misses = self.stats.misses.saturating_add(1);
+            None
+        }
+    }
 }
