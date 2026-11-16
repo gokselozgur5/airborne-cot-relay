@@ -366,4 +366,16 @@ mod tests {
         }
         assert_eq!(res, Some(b"telemetry-feed".to_vec()));
     }
+
+    #[test]
+    fn test_reassembler_ttl_expiration() {
+        let mut reassembler = FragmentReassembler::new(5, 50);
+        let frags = fragment_payload(88, b"abandoned", 10).unwrap();
+        assert_eq!(reassembler.process_fragment(frags[0].clone(), 100).unwrap(), None);
+        assert_eq!(reassembler.in_flight_count(), 1);
+        assert_eq!(reassembler.prune_stale(120), 0);
+        assert_eq!(reassembler.prune_stale(160), 1);
+        assert_eq!(reassembler.in_flight_count(), 0);
+        assert_eq!(reassembler.stats().stale_dropped_messages, 1);
+    }
 }
