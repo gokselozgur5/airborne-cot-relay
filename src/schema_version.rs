@@ -25,3 +25,13 @@ impl fmt::Display for SchemaVersionError {
 
 impl std::error::Error for SchemaVersionError {}
 
+/// Recognized Cursor-on-Target XML schema versions.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+pub enum CotSchemaVersion {
+    /// Legacy schema version 1.0 (or unversioned legacy events).
+    V1_0,
+    /// Standard modern schema version 2.0.
+    #[default]
+    V2_0,
+}
+
