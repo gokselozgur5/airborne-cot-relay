@@ -134,4 +134,20 @@ impl PriorityPacketScheduler {
             stats: SchedulerStats::default(),
         }
     }
+
+    pub fn max_capacity(&self) -> usize {
+        self.max_capacity
+    }
+
+    pub fn len(&self) -> usize {
+        self.current_count
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.current_count == 0
+    }
+
+    pub fn stats(&self) -> &SchedulerStats {
+        &self.stats
+    }
 }
