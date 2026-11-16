@@ -297,3 +297,24 @@ mod tests {
         assert!(CotSchemaVersion::detect_from_xml("<invalid/>").is_err());
     }
 
+    #[test]
+    fn test_schema_negotiator_cases() {
+        let neg = SchemaNegotiator::new(CotSchemaVersion::V2_0);
+        assert_eq!(
+            neg.negotiate(CotSchemaVersion::V2_0),
+            Ok(CotSchemaVersion::V2_0)
+        );
+        assert_eq!(
+            neg.negotiate(CotSchemaVersion::V1_0),
+            Ok(CotSchemaVersion::V1_0)
+        );
+
+        let no_down = SchemaNegotiator::new(CotSchemaVersion::V2_0).with_allow_downgrade(false);
+        assert!(no_down.negotiate(CotSchemaVersion::V1_0).is_err());
+
+        let caps = [CotSchemaVersion::V1_0, CotSchemaVersion::V2_0];
+        assert_eq!(neg.negotiate_best(&caps), Ok(CotSchemaVersion::V2_0));
+        assert_eq!(neg.negotiate_from_header("1.0"), Ok(CotSchemaVersion::V1_0));
+    }
+
+    #[test]
