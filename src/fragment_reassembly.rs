@@ -106,3 +106,23 @@ impl Fragment {
         Ok(Self { header, payload })
     }
 }
+
+/// Fragments a contiguous payload into MTU-bounded fragments.
+pub fn fragment_payload(msg_id: u32, data: &[u8], mtu_size: usize) -> Result<Vec<Fragment>, ReassemblyError> {
+    if mtu_size <= HEADER_SIZE {
+        return Err(ReassemblyError::MtuTooSmall);
+    }
+    let max_chunk = mtu_size - HEADER_SIZE;
+    if data.is_empty() {
+        let header = FragmentHeader::new(msg_id, 0, 1)?;
+        return Ok(vec![Fragment::new(header, Vec::new())]);
+    }
+    let chunks: Vec<&[u8]> = data.chunks(max_chunk).collect();
+    let total_fragments = chunks.len() as u16;
+    let mut fragments = Vec::with_capacity(chunks.len());
+    for (idx, chunk) in chunks.into_iter().enumerate() {
+        let header = FragmentHeader::new(msg_id, idx as u16, total_fragments)?;
+        fragments.push(Fragment::new(header, chunk.to_vec()));
+    }
+    Ok(fragments)
+}
