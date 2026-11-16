@@ -89,3 +89,13 @@ pub fn sanitize_and_escape_text(input: &str) -> String {
     }
     out
 }
+
+/// Sanitizes and escapes a Cursor-on-Target UID string.
+pub fn sanitize_cot_uid(uid: &str) -> String {
+    sanitize_and_escape_attr(uid.trim())
+}
+
+/// Sanitizes and escapes a Cursor-on-Target callsign string.
+pub fn sanitize_cot_callsign(callsign: &str) -> String {
+    sanitize_and_escape_attr(callsign.trim())
+}
