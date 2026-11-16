@@ -111,3 +111,16 @@ impl MulticastReceiver {
         })
     }
 }
+
+impl MulticastReceiver {
+    pub fn recv(&self, buf: &mut [u8]) -> Result<(usize, SocketAddr), MulticastRxError> {
+        self.socket.recv_from(buf).map_err(MulticastRxError::Io)
+    }
+
+    pub fn recv_datagram(&self) -> Result<(Vec<u8>, SocketAddr), MulticastRxError> {
+        let mut buf = vec![0u8; self.config.buffer_size];
+        let (bytes_read, src) = self.recv(&mut buf)?;
+        buf.truncate(bytes_read);
+        Ok((buf, src))
+    }
+}
