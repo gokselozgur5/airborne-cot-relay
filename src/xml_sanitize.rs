@@ -72,3 +72,20 @@ pub fn sanitize_and_escape_attr(input: &str) -> String {
     }
     out
 }
+
+/// Sanitizes invalid XML characters and escapes text entities in a single pass.
+pub fn sanitize_and_escape_text(input: &str) -> String {
+    let mut out = String::with_capacity(input.len());
+    for c in input.chars() {
+        if !is_xml_valid_char(c) {
+            continue;
+        }
+        match c {
+            '&' => out.push_str("&amp;"),
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            _ => out.push(c),
+        }
+    }
+    out
+}
