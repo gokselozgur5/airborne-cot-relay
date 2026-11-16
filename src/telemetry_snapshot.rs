@@ -11,5 +11,21 @@ pub struct TelemetrySnapshot {
     pub is_valid: bool,
 }
 
+impl TelemetrySnapshot {
+    /// Create a new snapshot instance.
+    pub const fn new(
+        pose: PlatformPose,
+        sequence: u64,
+        timestamp_ns: u64,
+    ) -> Self {
+        Self {
+            pose,
+            sequence,
+            timestamp_ns,
+            is_valid: true,
+        }
+    }
+}
+
 pub struct SamplerStats;
 pub struct DualBufferSampler;
