@@ -21,3 +21,23 @@ impl std::fmt::Display for FrameCodecError {
 }
 
 impl std::error::Error for FrameCodecError {}
+
+/// Width of the frame length prefix field in bytes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum LengthField {
+    /// 2-byte unsigned integer (max 65535 bytes).
+    U16,
+    /// 4-byte unsigned integer (max ~4GB bytes).
+    #[default]
+    U32,
+}
+
+impl LengthField {
+    /// Number of bytes occupied by this length prefix.
+    pub const fn byte_len(&self) -> usize {
+        match self {
+            Self::U16 => 2,
+            Self::U32 => 4,
+        }
+    }
+}
