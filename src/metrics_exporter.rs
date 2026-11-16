@@ -263,4 +263,19 @@ mod tests {
             "foo\\\"bar\\nbaz\\\\qux"
         );
     }
+
+    #[test]
+    fn test_format_metric_name_combinations() {
+        let default_exp = PrometheusExporter::default();
+        assert_eq!(
+            default_exp.format_metric_name("packets"),
+            "airborne_cot_relay_packets"
+        );
+
+        let ns_exp = PrometheusExporter::with_namespace("custom");
+        assert_eq!(ns_exp.format_metric_name("gauge"), "custom_gauge");
+
+        let empty_exp = PrometheusExporter::new(ExporterConfig::empty());
+        assert_eq!(empty_exp.format_metric_name("raw"), "raw");
+    }
 }
