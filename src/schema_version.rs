@@ -163,3 +163,13 @@ impl SchemaNegotiator {
         supported.pop().ok_or(SchemaVersionError::NegotiationFailed)
     }
 
+    /// Negotiates schema version from client version header (e.g. "2.0").
+    pub fn negotiate_from_header(
+        &self,
+        header: &str,
+    ) -> Result<CotSchemaVersion, SchemaVersionError> {
+        let requested = CotSchemaVersion::from_version_str(header)?;
+        self.negotiate(requested)
+    }
+}
+
