@@ -159,4 +159,16 @@ mod tests {
         assert!(filter.is_empty());
         assert!(!filter.contains(b"alpha"));
     }
+
+    #[test]
+    fn test_cot_deduplicator_uid_time_flow() {
+        let mut dedup = CotBloomDeduplicator::new(1024, 4);
+        assert!(dedup.check_and_record_uid_time("HAWK-1", "2026-11-16T10:00:00Z"));
+        assert!(!dedup.check_and_record_uid_time("HAWK-1", "2026-11-16T10:00:00Z"));
+        assert!(dedup.check_and_record_uid_time("HAWK-1", "2026-11-16T10:00:01Z"));
+
+        assert_eq!(dedup.total_checked(), 3);
+        assert_eq!(dedup.unique_passed(), 2);
+        assert_eq!(dedup.duplicates_dropped(), 1);
+    }
 }
