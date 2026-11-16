@@ -65,3 +65,18 @@ impl MulticastRxConfig {
         self
     }
 }
+
+impl MulticastRxConfig {
+    pub fn validate(&self) -> Result<(), MulticastRxError> {
+        if !self.multicast_addr.is_multicast() {
+            return Err(MulticastRxError::InvalidGroup(self.multicast_addr));
+        }
+        if self.port == 0 {
+            return Err(MulticastRxError::InvalidPort);
+        }
+        if self.buffer_size == 0 {
+            return Err(MulticastRxError::InvalidBufferSize);
+        }
+        Ok(())
+    }
+}
