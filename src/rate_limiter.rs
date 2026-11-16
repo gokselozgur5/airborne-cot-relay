@@ -13,3 +13,12 @@ pub struct RateLimiterStats {
     pub allowed: u64,
     pub dropped: u64,
 }
+
+impl RateLimiterConfig {
+    pub const fn new(capacity: f64, refill_rate: f64) -> Self {
+        Self {
+            capacity,
+            refill_rate,
+        }
+    }
+}
