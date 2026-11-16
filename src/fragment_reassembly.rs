@@ -175,3 +175,18 @@ impl InFlightMessage {
         assembled
     }
 }
+
+/// Lock-free/deterministic UDP fragment reassembler.
+#[derive(Debug)]
+pub struct FragmentReassembler {
+    in_flight: HashMap<u32, InFlightMessage>,
+    max_in_flight: usize,
+    ttl_ms: u64,
+    stats: ReassemblyStats,
+}
+
+impl Default for FragmentReassembler {
+    fn default() -> Self {
+        Self::new(256, 5000)
+    }
+}
