@@ -90,3 +90,19 @@ impl PrioritizedPacket {
         }
     }
 }
+
+/// Errors occurring during priority packet scheduling.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SchedulerError {
+    QueueFull,
+    InvalidPacket,
+}
+
+/// Operational statistics for the priority scheduler.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct SchedulerStats {
+    pub enqueued: [u64; 5],
+    pub dequeued: [u64; 5],
+    pub dropped: [u64; 5],
+    pub expired: u64,
+}
