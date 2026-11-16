@@ -282,3 +282,18 @@ mod tests {
         );
         assert!(CotSchemaVersion::from_version_str("3.0").is_err());
 
+        let v2_xml = r#"<event version="2.0" uid="test" type="a-f-G"/>"#;
+        assert_eq!(
+            CotSchemaVersion::detect_from_xml(v2_xml),
+            Ok(CotSchemaVersion::V2_0)
+        );
+
+        let legacy_xml = r#"<event uid="test" type="a-f-G"/>"#;
+        assert_eq!(
+            CotSchemaVersion::detect_from_xml(legacy_xml),
+            Ok(CotSchemaVersion::V1_0)
+        );
+
+        assert!(CotSchemaVersion::detect_from_xml("<invalid/>").is_err());
+    }
+
