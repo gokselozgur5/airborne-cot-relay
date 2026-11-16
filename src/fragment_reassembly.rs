@@ -184,6 +184,10 @@ impl InFlightMessage {
             false
         }
     }
+
+    fn is_complete(&self) -> bool {
+        self.received_count == self.total_fragments
+    }
 }
 
 /// Lock-free/deterministic UDP fragment reassembler.
