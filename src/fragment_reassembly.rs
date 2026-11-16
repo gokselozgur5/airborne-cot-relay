@@ -126,3 +126,19 @@ pub fn fragment_payload(msg_id: u32, data: &[u8], mtu_size: usize) -> Result<Vec
     }
     Ok(fragments)
 }
+
+/// Telemetry statistics for fragment reassembly operations.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct ReassemblyStats {
+    pub packets_received: u64,
+    pub messages_completed: u64,
+    pub duplicate_fragments: u64,
+    pub stale_dropped_messages: u64,
+}
+
+impl ReassemblyStats {
+    /// Resets all counters to zero.
+    pub fn reset(&mut self) {
+        *self = Self::default();
+    }
+}
