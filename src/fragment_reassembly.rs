@@ -289,3 +289,20 @@ impl FragmentReassembler {
         self.stats.reset();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_fragment_header_codec() {
+        let header = FragmentHeader::new(0x12345678, 2, 5).unwrap();
+        assert_eq!(header.msg_id, 0x12345678);
+        assert_eq!(header.seq_index, 2);
+        assert_eq!(header.total_fragments, 5);
+        let encoded = header.encode();
+        assert_eq!(encoded.len(), HEADER_SIZE);
+        let decoded = FragmentHeader::decode(&encoded).unwrap();
+        assert_eq!(header, decoded);
+    }
+}
