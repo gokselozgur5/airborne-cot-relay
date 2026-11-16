@@ -247,3 +247,20 @@ impl PrometheusExporter {
         self.export_snapshot(&snap)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_escape_help_and_labels() {
+        assert_eq!(
+            PrometheusExporter::escape_help("line 1\nline 2\\slash"),
+            "line 1\\nline 2\\\\slash"
+        );
+        assert_eq!(
+            PrometheusExporter::escape_label_value("foo\"bar\nbaz\\qux"),
+            "foo\\\"bar\\nbaz\\\\qux"
+        );
+    }
+}
