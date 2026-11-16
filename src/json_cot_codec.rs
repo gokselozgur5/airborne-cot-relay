@@ -280,3 +280,29 @@ impl JsonToCotStream {
         Ok(None)
     }
 }
+
+/// Streaming converter from Cursor-on-Target XML events into JSON strings.
+#[derive(Debug, Default)]
+pub struct CotToJsonStream {
+    buf: String,
+}
+
+impl CotToJsonStream {
+    /// Constructs a new empty `CotToJsonStream`.
+    pub fn new() -> Self { Self::default() }
+
+    /// Feeds incremental chunk of text/bytes into the stream buffer.
+    pub fn feed(&mut self, chunk: &str) { self.buf.push_str(chunk); }
+
+    /// Decodes the next available JSON object if a complete CoT XML event is buffered.
+    pub fn decode_next(&mut self) -> Result<Option<String>, JsonCotError> {
+        let end_tag = "</event>";
+        if let Some(pos) = self.buf.find(end_tag) {
+            let total = pos + end_tag.len();
+            let xml = self.buf[..total].to_string();
+            self.buf.drain(..total);
+            return cot_xml_to_json(&xml).map(Some);
+        }
+        Ok(None)
+    }
+}
