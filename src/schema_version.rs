@@ -173,3 +173,26 @@ impl SchemaNegotiator {
     }
 }
 
+/// Transforms CoT XML by downgrading schema version and stripping incompatible elements.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DowngradeTransformer {
+    target_version: CotSchemaVersion,
+    strip_flow_tags: bool,
+}
+
+impl DowngradeTransformer {
+    /// Creates transformer targeting specified version.
+    pub fn new(target_version: CotSchemaVersion) -> Self {
+        Self {
+            target_version,
+            strip_flow_tags: true,
+        }
+    }
+
+    /// Enables or disables stripping of `<_flow-tags_>` elements during downgrade.
+    pub fn with_strip_flow_tags(mut self, strip: bool) -> Self {
+        self.strip_flow_tags = strip;
+        self
+    }
+}
+
