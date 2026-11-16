@@ -95,4 +95,28 @@ impl<T> AtomicRingBuffer<T> {
             }
         }
     }
+
+    /// Dequeues an item from the ring buffer. Returns None if empty.
+    pub fn pop(&self) -> Option<T> {
+        let mut pos = self.dequeue_pos.load(Ordering::Relaxed);
+        loop {
+            let cell = &self.buffer[pos & self.mask];
+            let seq = cell.sequence.load(Ordering::Acquire);
+            let diff = seq as isize - (pos + 1) as isize;
+            if diff == 0 {
+                if self.dequeue_pos.compare_exchange_weak(
+                    pos, pos + 1, Ordering::AcqRel, Ordering::Relaxed,
+                ).is_ok() {
+                    let val = unsafe { (*cell.value.get()).assume_init_read() };
+                    cell.sequence.store(pos + self.mask + 1, Ordering::Release);
+                    return Some(val);
+                }
+                pos = self.dequeue_pos.load(Ordering::Relaxed);
+            } else if diff < 0 {
+                return None;
+            } else {
+                pos = self.dequeue_pos.load(Ordering::Relaxed);
+            }
+        }
+    }
 }
