@@ -205,4 +205,19 @@ impl PrometheusExporter {
         fam.samples.push(MetricSample::new(lbls, val));
         self.add_metric_family(fam);
     }
+
+    /// Registers a custom gauge metric with given name, description, and value.
+    pub fn add_gauge(&mut self, name: &str, help: &str, val: f64, labels: &[(&str, &str)]) {
+        let mut fam = MetricFamily::new(name, help, MetricType::Gauge);
+        let lbls = labels.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect();
+        fam.samples.push(MetricSample::new(lbls, val));
+        self.add_metric_family(fam);
+    }
+
+    fn render_single(&self, base_name: &str, help: &str, mtype: MetricType, val: f64, out: &mut String) {
+        let full = self.format_metric_name(base_name);
+        let mut fam = MetricFamily::new(base_name, help, mtype);
+        fam.samples.push(MetricSample::new(Vec::new(), val));
+        self.render_family(&fam, &full, out);
+    }
 }
