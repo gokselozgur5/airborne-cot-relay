@@ -3,6 +3,9 @@
 //! Provides time-to-live caching for telemetry, CoT events, and network packets
 //! with configurable eviction policies and expired item reaping.
 
+use std::collections::HashMap;
+use std::hash::Hash;
+
 /// Configuration options for TTL cache behavior.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TtlConfig {
@@ -69,4 +72,12 @@ impl<V> CacheEntry<V> {
     pub fn is_expired(&self, now_ms: u64) -> bool {
         now_ms >= self.expires_at_ms
     }
+}
+
+/// Cache with time-to-live expiration and periodic cleaning.
+#[derive(Debug, Clone)]
+pub struct TtlCache<K, V> {
+    entries: HashMap<K, CacheEntry<V>>,
+    config: TtlConfig,
+    stats: CacheStats,
 }
