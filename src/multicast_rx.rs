@@ -29,3 +29,12 @@ impl From<io::Error> for MulticastRxError {
         Self::Io(err)
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MulticastRxConfig {
+    pub multicast_addr: Ipv4Addr,
+    pub interface_addr: Ipv4Addr,
+    pub port: u16,
+    pub read_timeout: Option<Duration>,
+    pub buffer_size: usize,
+}
