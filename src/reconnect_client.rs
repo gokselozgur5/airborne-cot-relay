@@ -118,3 +118,16 @@ impl ReconnectPolicy {
         self
     }
 }
+
+impl ReconnectPolicy {
+    /// Computes backoff duration for given consecutive failure count.
+    pub fn compute_backoff(&self, consecutive_failures: usize) -> Duration {
+        if consecutive_failures == 0 {
+            return self.initial_backoff;
+        }
+        let factor = self.backoff_multiplier.powi(consecutive_failures as i32);
+        let computed_secs = self.initial_backoff.as_secs_f64() * factor;
+        let candidate = Duration::from_secs_f64(computed_secs);
+        candidate.min(self.max_backoff)
+    }
+}
