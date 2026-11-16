@@ -58,3 +58,8 @@ pub mod reconnect_client;
 pub use reconnect_client::{
     ReconnectClient, ReconnectClientError, ReconnectPolicy, StreamClientStats,
 };
+pub mod schema_version;
+pub use schema_version::{
+    downgrade_cot_xml, CotSchemaVersion, DowngradeTransformer, SchemaNegotiator,
+    SchemaVersionError,
+};
