@@ -24,6 +24,11 @@ pub use pipeline::Pipeline;
 pub mod resilience;
 pub mod ring_buf;
 pub use ring_buf::{AtomicRingBuffer, CotRingBuffer};
+pub mod fragment_reassembly;
+pub use fragment_reassembly::{
+    fragment_payload, Fragment, FragmentHeader, FragmentReassembler, ReassemblyError,
+    ReassemblyStats, HEADER_SIZE,
+};
 pub mod runtime;
 pub mod track_filter;
 pub mod ttl_cache;
