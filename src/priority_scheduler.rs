@@ -150,4 +150,22 @@ impl PriorityPacketScheduler {
     pub fn stats(&self) -> &SchedulerStats {
         &self.stats
     }
+
+    pub fn clear(&mut self) {
+        for q in &mut self.queues {
+            q.clear();
+        }
+        self.current_count = 0;
+    }
+
+    fn evict_lowest_priority(&mut self, incoming: CotPriority) -> bool {
+        for tier in 0..incoming.as_tier() {
+            if self.queues[tier].pop_front().is_some() {
+                self.stats.dropped[tier] = self.stats.dropped[tier].saturating_add(1);
+                self.current_count = self.current_count.saturating_sub(1);
+                return true;
+            }
+        }
+        false
+    }
 }
