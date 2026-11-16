@@ -188,4 +188,23 @@ impl PriorityPacketScheduler {
             self.stats.enqueued[priority.as_tier()].saturating_add(1);
         Ok(seq)
     }
+
+    pub fn push_packet(&mut self, mut pkt: PrioritizedPacket) -> Result<u64, SchedulerError> {
+        let prio = pkt.priority;
+        if self.current_count >= self.max_capacity && !self.evict_lowest_priority(prio) {
+            return Err(SchedulerError::QueueFull);
+        }
+        let seq = self.next_sequence;
+        self.next_sequence = self.next_sequence.wrapping_add(1);
+        pkt.sequence = seq;
+        self.queues[prio.as_tier()].push_back(pkt);
+        self.current_count += 1;
+        self.stats.enqueued[prio.as_tier()] = self.stats.enqueued[prio.as_tier()].saturating_add(1);
+        Ok(seq)
+    }
+
+    pub fn push_cot(&mut self, cot_xml: &str, timestamp_ms: u64) -> Result<u64, SchedulerError> {
+        let priority = CotPriority::from_xml_str(cot_xml);
+        self.push(cot_xml.as_bytes().to_vec(), priority, timestamp_ms)
+    }
 }
