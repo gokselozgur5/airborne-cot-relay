@@ -78,4 +78,25 @@ impl DualBufferSampler {
         self.active_idx.store(write_idx, Ordering::Release);
         seq
     }
+
+    /// Sample the latest consistent telemetry snapshot.
+    pub fn sample(&self) -> TelemetrySnapshot {
+        self.reads_total.fetch_add(1, Ordering::Relaxed);
+        loop {
+            let idx = self.active_idx.load(Ordering::Acquire);
+            let v1 = self.versions[idx].load(Ordering::Acquire);
+            if v1 % 2 != 0 {
+                self.retries_total.fetch_add(1, Ordering::Relaxed);
+                std::hint::spin_loop();
+                continue;
+            }
+            let snap = unsafe { *self.buffers[idx].get() };
+            let v2 = self.versions[idx].load(Ordering::Acquire);
+            if v1 == v2 {
+                return snap;
+            }
+            self.retries_total.fetch_add(1, Ordering::Relaxed);
+            std::hint::spin_loop();
+        }
+    }
 }
