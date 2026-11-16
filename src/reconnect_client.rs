@@ -311,3 +311,31 @@ impl ReconnectClient {
         Ok(())
     }
 }
+
+impl ReconnectClient {
+    /// Flushes all queued messages over the active or newly-established connection.
+    pub fn flush(&mut self) -> Result<usize, ReconnectClientError> {
+        self.try_connect()?;
+        let stream = match self.stream.as_mut() {
+            Some(s) => s,
+            None => return Err(ReconnectClientError::NotConnected),
+        };
+        let mut total_sent = 0usize;
+        while let Some(msg) = self.queue.pop_front() {
+            match stream.write_all(&msg) {
+                Ok(()) => {
+                    self.queued_bytes = self.queued_bytes.saturating_sub(msg.len());
+                    self.stats.messages_sent += 1;
+                    self.stats.bytes_sent += msg.len();
+                    total_sent += msg.len();
+                }
+                Err(err) => {
+                    self.queue.push_front(msg);
+                    self.handle_connect_failure(Instant::now());
+                    return Err(ReconnectClientError::Io(err));
+                }
+            }
+        }
+        Ok(total_sent)
+    }
+}
