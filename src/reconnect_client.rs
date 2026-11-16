@@ -61,3 +61,18 @@ pub struct ReconnectPolicy {
     pub max_queue_bytes: usize,
     pub drop_oldest_on_full: bool,
 }
+
+impl Default for ReconnectPolicy {
+    fn default() -> Self {
+        Self {
+            initial_backoff: Duration::from_millis(100),
+            max_backoff: Duration::from_secs(10),
+            backoff_multiplier: 2.0,
+            max_retries: None,
+            connect_timeout: Duration::from_secs(1),
+            max_queue_messages: 1024,
+            max_queue_bytes: 1024 * 1024,
+            drop_oldest_on_full: true,
+        }
+    }
+}
