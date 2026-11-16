@@ -48,3 +48,16 @@ impl From<ReconnectClientError> for RelayError {
         RelayError::IoError(err.to_string())
     }
 }
+
+/// Configuration policy governing reconnection behavior and queuing.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ReconnectPolicy {
+    pub initial_backoff: Duration,
+    pub max_backoff: Duration,
+    pub backoff_multiplier: f64,
+    pub max_retries: Option<usize>,
+    pub connect_timeout: Duration,
+    pub max_queue_messages: usize,
+    pub max_queue_bytes: usize,
+    pub drop_oldest_on_full: bool,
+}
