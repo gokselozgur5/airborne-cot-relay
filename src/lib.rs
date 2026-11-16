@@ -54,3 +54,7 @@ pub mod rate_limiter;
 pub use rate_limiter::{RateLimiterConfig, RateLimiterStats, TokenBucket};
 pub mod telemetry_snapshot;
 pub use telemetry_snapshot::{DualBufferSampler, SamplerStats, TelemetrySnapshot};
+pub mod reconnect_client;
+pub use reconnect_client::{
+    ReconnectClient, ReconnectClientError, ReconnectPolicy, StreamClientStats,
+};
