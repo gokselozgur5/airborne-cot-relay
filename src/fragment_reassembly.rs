@@ -242,4 +242,14 @@ impl FragmentReassembler {
         }
         count
     }
+
+    fn check_capacity(&mut self, id: u32, now_ms: u64) -> Result<(), ReassemblyError> {
+        if !self.in_flight.contains_key(&id) && self.in_flight.len() >= self.max_in_flight {
+            self.prune_stale(now_ms);
+            if self.in_flight.len() >= self.max_in_flight {
+                return Err(ReassemblyError::CapacityExceeded);
+            }
+        }
+        Ok(())
+    }
 }
