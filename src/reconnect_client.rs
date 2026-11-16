@@ -465,3 +465,27 @@ mod tests {
         socket.read_exact(&mut buf).unwrap();
         assert_eq!(&buf, b"test cot payload");
     }
+
+    #[test]
+    fn test_queue_flush_and_disconnect() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+        let mut client = ReconnectClient::with_defaults(addr);
+
+        client.enqueue(b"first".to_vec()).unwrap();
+        client.enqueue(b"second".to_vec()).unwrap();
+
+        let flushed = client.flush().unwrap();
+        assert_eq!(flushed, 11);
+        assert_eq!(client.queued_messages(), 0);
+
+        let (mut socket, _) = listener.accept().unwrap();
+        let mut buf = [0u8; 11];
+        socket.read_exact(&mut buf).unwrap();
+        assert_eq!(&buf, b"firstsecond");
+
+        client.disconnect();
+        assert!(!client.is_connected());
+        assert_eq!(client.stats().disconnections, 1);
+    }
+}
