@@ -51,3 +51,14 @@ impl CotSchemaVersion {
     }
 }
 
+impl CotSchemaVersion {
+    /// Parses schema version from version string (e.g. "1.0", "2.0").
+    pub fn from_version_str(s: &str) -> Result<Self, SchemaVersionError> {
+        match s.trim() {
+            "1.0" | "1" => Ok(Self::V1_0),
+            "2.0" | "2" => Ok(Self::V2_0),
+            other => Err(SchemaVersionError::UnsupportedVersion(other.to_string())),
+        }
+    }
+}
+
