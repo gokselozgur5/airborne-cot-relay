@@ -214,3 +214,22 @@ mod tests {
         assert_eq!(batch[0].payload, vec![2, 2]);
         assert_eq!(batch[1].payload, vec![3, 3]);
     }
+
+    #[test]
+    fn test_drain_batch_packet_limit() {
+        let policy = BatchPolicy {
+            max_batch_packets: 2,
+            ..Default::default()
+        };
+        let mut queue = UdpBatchQueue::new(policy);
+        let addr: SocketAddr = "127.0.0.1:8080".parse().unwrap();
+        for i in 0..5 {
+            queue.enqueue(UdpPacket::new(addr, vec![i])).unwrap();
+        }
+        let b1 = queue.drain_batch();
+        assert_eq!(b1.len(), 2);
+        assert_eq!(queue.len(), 3);
+        let b2 = queue.drain_batch();
+        assert_eq!(b2.len(), 2);
+        assert_eq!(queue.len(), 1);
+    }
