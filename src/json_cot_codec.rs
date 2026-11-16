@@ -111,3 +111,27 @@ fn parse_event_tag(event_tag: &str) -> Result<EventTagAttrs, JsonCotError> {
     let stale = extract_xml_attr(event_tag, "stale").unwrap_or(&time).to_string();
     Ok(EventTagAttrs { uid, cot_type, how, time, start, stale })
 }
+
+struct PointTagAttrs {
+    lat: f64,
+    lon: f64,
+    hae: f64,
+    ce: f64,
+    le: f64,
+}
+
+fn parse_point_tag(point_tag: &str) -> Result<PointTagAttrs, JsonCotError> {
+    let lat = extract_xml_attr(point_tag, "lat")
+        .ok_or(JsonCotError::MissingField("lat"))?
+        .parse::<f64>().map_err(|_| JsonCotError::NumericParseError("lat"))?;
+    let lon = extract_xml_attr(point_tag, "lon")
+        .ok_or(JsonCotError::MissingField("lon"))?
+        .parse::<f64>().map_err(|_| JsonCotError::NumericParseError("lon"))?;
+    let hae = extract_xml_attr(point_tag, "hae")
+        .and_then(|v| v.parse().ok()).unwrap_or(0.0);
+    let ce = extract_xml_attr(point_tag, "ce")
+        .and_then(|v| v.parse().ok()).unwrap_or(10.0);
+    let le = extract_xml_attr(point_tag, "le")
+        .and_then(|v| v.parse().ok()).unwrap_or(10.0);
+    Ok(PointTagAttrs { lat, lon, hae, ce, le })
+}
