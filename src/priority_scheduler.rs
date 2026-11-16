@@ -266,4 +266,17 @@ mod tests {
         let xml_emerg = r#"<event version="2.0" type="b-a-o-tbl"/>"#;
         assert_eq!(CotPriority::from_xml_str(xml_emerg), CotPriority::Emergency);
     }
+
+    #[test]
+    fn test_fifo_within_tier() {
+        let mut sched = PriorityPacketScheduler::new(10);
+        sched.push(b"pkt1".to_vec(), CotPriority::Normal, 100).unwrap();
+        sched.push(b"pkt2".to_vec(), CotPriority::Normal, 101).unwrap();
+        sched.push(b"pkt3".to_vec(), CotPriority::Normal, 102).unwrap();
+
+        assert_eq!(sched.pop().unwrap().payload, b"pkt1");
+        assert_eq!(sched.pop().unwrap().payload, b"pkt2");
+        assert_eq!(sched.pop().unwrap().payload, b"pkt3");
+        assert!(sched.pop().is_none());
+    }
 }
