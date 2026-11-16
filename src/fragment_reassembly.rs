@@ -90,4 +90,19 @@ impl Fragment {
     pub fn wire_size(&self) -> usize {
         HEADER_SIZE + self.payload.len()
     }
+
+    /// Serializes fragment to wire byte vector.
+    pub fn encode(&self) -> Vec<u8> {
+        let mut buf = Vec::with_capacity(HEADER_SIZE + self.payload.len());
+        buf.extend_from_slice(&self.header.encode());
+        buf.extend_from_slice(&self.payload);
+        buf
+    }
+
+    /// Deserializes fragment from wire byte slice.
+    pub fn decode(bytes: &[u8]) -> Result<Self, ReassemblyError> {
+        let header = FragmentHeader::decode(bytes)?;
+        let payload = bytes[HEADER_SIZE..].to_vec();
+        Ok(Self { header, payload })
+    }
 }
