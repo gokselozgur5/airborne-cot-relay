@@ -44,3 +44,32 @@ pub struct CotEventDto {
     pub speed: Option<f64>,
     pub callsign: Option<String>,
 }
+
+impl CotEventDto {
+    /// Constructs a new `CotEventDto` with mandatory coordinates and event headers.
+    pub fn new(
+        uid: impl Into<String>,
+        cot_type: impl Into<String>,
+        time: impl Into<String>,
+        lat: f64,
+        lon: f64,
+    ) -> Self {
+        let t = time.into();
+        Self {
+            uid: uid.into(),
+            cot_type: cot_type.into(),
+            how: "m-g".to_string(),
+            time: t.clone(),
+            start: t.clone(),
+            stale: t,
+            lat,
+            lon,
+            hae: 0.0,
+            ce: 10.0,
+            le: 10.0,
+            course: None,
+            speed: None,
+            callsign: None,
+        }
+    }
+}
