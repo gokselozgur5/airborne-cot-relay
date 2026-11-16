@@ -251,3 +251,19 @@ mod tests {
         assert_eq!(b2.len(), 1);
         assert_eq!(b2[0].payload, vec![4, 5, 6]);
     }
+
+    #[test]
+    fn test_flush_batch_to_socket() {
+        let receiver = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let target = receiver.local_addr().unwrap();
+        let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
+
+        let mut queue = UdpBatchQueue::new(BatchPolicy::default());
+        queue.enqueue(UdpPacket::new(target, vec![10, 20])).unwrap();
+        queue.enqueue(UdpPacket::new(target, vec![30, 40])).unwrap();
+
+        let count = queue.flush_batch(&sender).unwrap();
+        assert_eq!(count, 2);
+        assert_eq!(queue.stats().sent_packets, 2);
+        assert_eq!(queue.stats().sent_bytes, 4);
+        assert_eq!(queue.stats().batches_sent, 1);
