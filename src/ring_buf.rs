@@ -71,4 +71,28 @@ impl<T> AtomicRingBuffer<T> {
     pub fn is_full(&self) -> bool {
         self.len() >= self.capacity
     }
+
+    /// Enqueues an item into the ring buffer. Returns Err(item) if full.
+    pub fn push(&self, data: T) -> Result<(), T> {
+        let mut pos = self.enqueue_pos.load(Ordering::Relaxed);
+        loop {
+            let cell = &self.buffer[pos & self.mask];
+            let seq = cell.sequence.load(Ordering::Acquire);
+            let diff = seq as isize - pos as isize;
+            if diff == 0 {
+                if self.enqueue_pos.compare_exchange_weak(
+                    pos, pos + 1, Ordering::AcqRel, Ordering::Relaxed,
+                ).is_ok() {
+                    unsafe { (*cell.value.get()).write(data); }
+                    cell.sequence.store(pos + 1, Ordering::Release);
+                    return Ok(());
+                }
+                pos = self.enqueue_pos.load(Ordering::Relaxed);
+            } else if diff < 0 {
+                return Err(data);
+            } else {
+                pos = self.enqueue_pos.load(Ordering::Relaxed);
+            }
+        }
+    }
 }
