@@ -31,3 +31,18 @@ pub struct TokenBucket {
     last_refill: Instant,
     stats: RateLimiterStats,
 }
+
+impl TokenBucket {
+    pub fn new(capacity: f64, refill_rate: f64) -> Self {
+        Self::with_config(RateLimiterConfig::new(capacity, refill_rate))
+    }
+
+    pub fn with_config(config: RateLimiterConfig) -> Self {
+        Self {
+            tokens: config.capacity,
+            last_refill: Instant::now(),
+            stats: RateLimiterStats::default(),
+            config,
+        }
+    }
+}
