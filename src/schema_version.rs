@@ -196,3 +196,23 @@ impl DowngradeTransformer {
     }
 }
 
+fn strip_flow_tags_element(xml: &str) -> String {
+    let mut out = String::with_capacity(xml.len());
+    let mut cursor = 0;
+    while let Some(pos) = xml[cursor..].find("<_flow-tags_") {
+        let start = cursor + pos;
+        out.push_str(&xml[cursor..start]);
+        if let Some(end_pos) = xml[start..].find("/>") {
+            cursor = start + end_pos + 2;
+        } else if let Some(close_pos) = xml[start..].find("</_flow-tags_>") {
+            cursor = start + close_pos + "</_flow-tags_>".len();
+        } else {
+            out.push_str(&xml[start..]);
+            cursor = xml.len();
+            break;
+        }
+    }
+    out.push_str(&xml[cursor..]);
+    out
+}
+
