@@ -20,3 +20,15 @@ impl<T> RingCell<T> {
         }
     }
 }
+
+/// Lock-free bounded multi-producer multi-consumer atomic ring buffer.
+pub struct AtomicRingBuffer<T> {
+    buffer: Box<[RingCell<T>]>,
+    mask: usize,
+    capacity: usize,
+    enqueue_pos: AtomicUsize,
+    dequeue_pos: AtomicUsize,
+}
+
+unsafe impl<T: Send> Send for AtomicRingBuffer<T> {}
+unsafe impl<T: Send> Sync for AtomicRingBuffer<T> {}
