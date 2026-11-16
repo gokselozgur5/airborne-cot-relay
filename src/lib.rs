@@ -50,3 +50,5 @@ pub use json_cot_codec::{
 };
 pub mod multicast_rx;
 pub mod bloom_dedup;
+pub mod rate_limiter;
+pub use rate_limiter::{RateLimiterConfig, RateLimiterStats, TokenBucket};
