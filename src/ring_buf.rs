@@ -180,4 +180,33 @@ impl CotRingBuffer {
     pub fn pop(&self) -> Option<CotEvent> {
         self.inner.pop()
     }
+
+    /// Returns true if the buffer is at capacity.
+    pub fn is_full(&self) -> bool {
+        self.inner.is_full()
+    }
+
+    /// Enqueues an event, dropping the oldest event if full.
+    pub fn push_overwrite(&self, mut event: CotEvent) {
+        while let Err(ev) = self.inner.push(event) {
+            let _ = self.inner.pop();
+            self.dropped_count.fetch_add(1, Ordering::Relaxed);
+            event = ev;
+        }
+    }
+
+    /// Returns cumulative dropped event count from buffer overflow.
+    pub fn dropped_count(&self) -> usize {
+        self.dropped_count.load(Ordering::Relaxed)
+    }
+
+    /// Drains all available CoT events.
+    pub fn drain_all(&self) -> Vec<CotEvent> {
+        self.inner.drain()
+    }
+
+    /// Clears all events in the buffer.
+    pub fn clear(&self) {
+        self.inner.clear();
+    }
 }
