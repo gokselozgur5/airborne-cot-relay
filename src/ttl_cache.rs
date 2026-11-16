@@ -122,4 +122,26 @@ where
     pub fn stats(&self) -> CacheStats {
         self.stats
     }
+
+    /// Evicts all expired entries as of now_ms and returns count removed.
+    pub fn clean_expired(&mut self, now_ms: u64) -> usize {
+        let before = self.entries.len();
+        self.entries.retain(|_, entry| !entry.is_expired(now_ms));
+        let evicted = before.saturating_sub(self.entries.len());
+        self.stats.expirations = self.stats.expirations.saturating_add(evicted as u64);
+        evicted
+    }
+
+    /// Evicts the single oldest entry by insertion timestamp.
+    fn evict_oldest(&mut self) {
+        if let Some(oldest_key) = self
+            .entries
+            .iter()
+            .min_by_key(|(_, entry)| entry.inserted_at_ms)
+            .map(|(k, _)| k.clone())
+        {
+            self.entries.remove(&oldest_key);
+            self.stats.evictions = self.stats.evictions.saturating_add(1);
+        }
+    }
 }
