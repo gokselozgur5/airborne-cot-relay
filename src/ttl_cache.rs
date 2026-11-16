@@ -274,4 +274,17 @@ mod tests {
         assert_eq!(cache.peek(&"second", 300), Some(&2));
         assert_eq!(cache.peek(&"third", 300), Some(&3));
     }
+
+    #[test]
+    fn test_drain_expired_and_packet_cache() {
+        let mut cache: PacketTtlCache = TtlCache::with_ttl(100);
+        cache.insert("cot-001".to_string(), vec![1, 2, 3], 1_000);
+        cache.insert("cot-002".to_string(), vec![4, 5, 6], 1_050);
+        cache.insert("cot-003".to_string(), vec![7, 8, 9], 1_150);
+
+        let reaped = cache.drain_expired(1_120);
+        assert_eq!(reaped.len(), 2);
+        assert_eq!(cache.len(), 1);
+        assert_eq!(cache.peek(&"cot-003".to_string(), 1_120), Some(&vec![7, 8, 9]));
+    }
 }
