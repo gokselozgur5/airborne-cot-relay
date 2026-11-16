@@ -89,3 +89,25 @@ fn extract_xml_tag<'a>(xml: &'a str, tag_name: &str) -> Option<&'a str> {
     let end = rest.find('>')?;
     Some(&rest[..=end])
 }
+
+struct EventTagAttrs {
+    uid: String,
+    cot_type: String,
+    how: String,
+    time: String,
+    start: String,
+    stale: String,
+}
+
+fn parse_event_tag(event_tag: &str) -> Result<EventTagAttrs, JsonCotError> {
+    let uid = extract_xml_attr(event_tag, "uid")
+        .ok_or(JsonCotError::MissingField("uid"))?.to_string();
+    let cot_type = extract_xml_attr(event_tag, "type")
+        .ok_or(JsonCotError::MissingField("type"))?.to_string();
+    let how = extract_xml_attr(event_tag, "how").unwrap_or("m-g").to_string();
+    let time = extract_xml_attr(event_tag, "time")
+        .ok_or(JsonCotError::MissingField("time"))?.to_string();
+    let start = extract_xml_attr(event_tag, "start").unwrap_or(&time).to_string();
+    let stale = extract_xml_attr(event_tag, "stale").unwrap_or(&time).to_string();
+    Ok(EventTagAttrs { uid, cot_type, how, time, start, stale })
+}
