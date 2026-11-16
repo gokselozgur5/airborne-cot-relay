@@ -227,3 +227,22 @@ mod tests {
         assert!(rx.rejoin_group().is_ok());
         assert!(rx.is_joined());
     }
+
+    #[test]
+    fn test_multicast_rx_packet_reception() {
+        let group: Ipv4Addr = "239.255.0.3".parse().unwrap();
+        let temp = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let port = temp.local_addr().unwrap().port();
+        drop(temp);
+
+        let cfg = MulticastRxConfig::new(group, port)
+            .with_read_timeout(Duration::from_millis(200));
+        let rx = MulticastReceiver::bind(cfg).unwrap();
+
+        let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
+        sender.send_to(b"COT_MULTICAST_TEST", SocketAddr::from(([127, 0, 0, 1], port))).unwrap();
+
+        let (payload, _src) = rx.recv_datagram().unwrap();
+        assert_eq!(&payload, b"COT_MULTICAST_TEST");
+    }
+}
