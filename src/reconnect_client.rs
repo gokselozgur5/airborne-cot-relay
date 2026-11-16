@@ -131,3 +131,16 @@ impl ReconnectPolicy {
         candidate.min(self.max_backoff)
     }
 }
+
+/// Transmission and reconnection runtime metrics.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct StreamClientStats {
+    pub connect_attempts: usize,
+    pub successful_connects: usize,
+    pub disconnections: usize,
+    pub messages_enqueued: usize,
+    pub messages_sent: usize,
+    pub bytes_sent: usize,
+    pub messages_dropped: usize,
+    pub bytes_dropped: usize,
+}
