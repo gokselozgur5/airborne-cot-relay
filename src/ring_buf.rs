@@ -119,4 +119,18 @@ impl<T> AtomicRingBuffer<T> {
             }
         }
     }
+
+    /// Drains all available items into a vector.
+    pub fn drain(&self) -> Vec<T> {
+        let mut items = Vec::new();
+        while let Some(item) = self.pop() {
+            items.push(item);
+        }
+        items
+    }
+
+    /// Discards all items currently in the buffer.
+    pub fn clear(&self) {
+        while self.pop().is_some() {}
+    }
 }
