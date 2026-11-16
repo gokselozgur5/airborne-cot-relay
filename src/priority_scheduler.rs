@@ -168,4 +168,24 @@ impl PriorityPacketScheduler {
         }
         false
     }
+
+    /// Enqueues a packet at the specified priority tier, evicting lower-priority packets if full.
+    pub fn push(
+        &mut self,
+        payload: Vec<u8>,
+        priority: CotPriority,
+        timestamp_ms: u64,
+    ) -> Result<u64, SchedulerError> {
+        if self.current_count >= self.max_capacity && !self.evict_lowest_priority(priority) {
+            return Err(SchedulerError::QueueFull);
+        }
+        let seq = self.next_sequence;
+        self.next_sequence = self.next_sequence.wrapping_add(1);
+        let pkt = PrioritizedPacket::new(priority, seq, timestamp_ms, payload);
+        self.queues[priority.as_tier()].push_back(pkt);
+        self.current_count += 1;
+        self.stats.enqueued[priority.as_tier()] =
+            self.stats.enqueued[priority.as_tier()].saturating_add(1);
+        Ok(seq)
+    }
 }
