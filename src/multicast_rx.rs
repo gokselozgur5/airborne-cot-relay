@@ -38,3 +38,30 @@ pub struct MulticastRxConfig {
     pub read_timeout: Option<Duration>,
     pub buffer_size: usize,
 }
+
+impl MulticastRxConfig {
+    pub fn new(multicast_addr: Ipv4Addr, port: u16) -> Self {
+        Self {
+            multicast_addr,
+            interface_addr: Ipv4Addr::UNSPECIFIED,
+            port,
+            read_timeout: None,
+            buffer_size: 2048,
+        }
+    }
+
+    pub fn with_interface(mut self, interface_addr: Ipv4Addr) -> Self {
+        self.interface_addr = interface_addr;
+        self
+    }
+
+    pub fn with_read_timeout(mut self, timeout: Duration) -> Self {
+        self.read_timeout = Some(timeout);
+        self
+    }
+
+    pub fn with_buffer_size(mut self, size: usize) -> Self {
+        self.buffer_size = size;
+        self
+    }
+}
