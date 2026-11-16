@@ -22,6 +22,8 @@ pub mod output;
 pub mod pipeline;
 pub use pipeline::Pipeline;
 pub mod resilience;
+pub mod ring_buf;
+pub use ring_buf::{AtomicRingBuffer, CotRingBuffer};
 pub mod runtime;
 pub mod track_filter;
 
