@@ -144,3 +144,21 @@ impl MulticastReceiver {
         Ok(())
     }
 }
+
+impl MulticastReceiver {
+    pub fn local_addr(&self) -> Result<SocketAddr, MulticastRxError> {
+        self.socket.local_addr().map_err(MulticastRxError::Io)
+    }
+
+    pub fn socket(&self) -> &UdpSocket {
+        &self.socket
+    }
+
+    pub fn config(&self) -> &MulticastRxConfig {
+        &self.config
+    }
+
+    pub fn is_joined(&self) -> bool {
+        self.joined
+    }
+}
