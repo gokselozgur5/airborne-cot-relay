@@ -102,4 +102,24 @@ where
             ..TtlConfig::default()
         })
     }
+
+    /// Returns the number of stored entries (including uncollected expired ones).
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Returns true if the cache contains no entries.
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
+    /// Returns configured maximum capacity.
+    pub fn capacity(&self) -> usize {
+        self.config.max_capacity
+    }
+
+    /// Returns current cache operation statistics.
+    pub fn stats(&self) -> CacheStats {
+        self.stats
+    }
 }
