@@ -274,4 +274,17 @@ mod tests {
         cot_buf.clear();
         assert!(cot_buf.is_empty());
     }
+
+    #[test]
+    fn test_cot_ring_buffer_push_overwrite() {
+        let cot_buf = CotRingBuffer::new(2);
+        cot_buf.push_overwrite(make_test_cot("cot-1"));
+        cot_buf.push_overwrite(make_test_cot("cot-2"));
+        cot_buf.push_overwrite(make_test_cot("cot-3"));
+        assert_eq!(cot_buf.dropped_count(), 1);
+        let events = cot_buf.drain_all();
+        assert_eq!(events.len(), 2);
+        assert_eq!(events[0].uid, "cot-2");
+        assert_eq!(events[1].uid, "cot-3");
+    }
 }
