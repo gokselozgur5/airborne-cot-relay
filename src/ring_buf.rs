@@ -243,4 +243,21 @@ mod tests {
         buf.clear();
         assert!(buf.is_empty());
     }
+
+    fn make_test_cot(uid: &str) -> CotEvent {
+        CotEvent {
+            uid: uid.to_string(),
+            cot_type: "a-f-G-U-C".to_string(),
+            how: "m-g".to_string(),
+            time_ms: 1000,
+            stale_ms: 2000,
+            lat_deg: 35.0,
+            lon_deg: 42.0,
+            hae_m: 100.0,
+            ce_m: 5.0,
+            le_m: 10.0,
+            course_deg: 180.0,
+            speed_mps: 25.0,
+        }
+    }
 }
