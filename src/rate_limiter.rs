@@ -123,4 +123,14 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(30));
         assert!(bucket.try_acquire(1.0));
     }
+
+    #[test]
+    fn test_token_bucket_reset() {
+        let mut bucket = TokenBucket::new(3.0, 1.0);
+        assert!(bucket.try_acquire(3.0));
+        assert!(!bucket.try_acquire(1.0));
+        bucket.reset();
+        assert_eq!(bucket.stats(), RateLimiterStats::default());
+        assert!(bucket.try_acquire(3.0));
+    }
 }
