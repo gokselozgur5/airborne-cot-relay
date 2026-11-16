@@ -140,3 +140,19 @@ impl<T> Drop for AtomicRingBuffer<T> {
         while self.pop().is_some() {}
     }
 }
+
+/// Lock-free circular telemetry buffer dedicated to Cursor-on-Target (CoT) events.
+pub struct CotRingBuffer {
+    inner: AtomicRingBuffer<CotEvent>,
+    dropped_count: AtomicUsize,
+}
+
+impl CotRingBuffer {
+    /// Creates a new CotRingBuffer with the requested capacity.
+    pub fn new(capacity: usize) -> Self {
+        Self {
+            inner: AtomicRingBuffer::new(capacity),
+            dropped_count: AtomicUsize::new(0),
+        }
+    }
+}
