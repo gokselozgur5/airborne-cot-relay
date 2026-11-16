@@ -106,3 +106,20 @@ impl ExporterConfig {
         }
     }
 }
+
+/// Prometheus telemetry metrics exporter engine.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct PrometheusExporter {
+    config: ExporterConfig,
+    custom_families: Vec<MetricFamily>,
+}
+
+impl PrometheusExporter {
+    /// Creates a new exporter with given configuration.
+    pub fn new(config: ExporterConfig) -> Self {
+        Self {
+            config,
+            custom_families: Vec::new(),
+        }
+    }
+}
