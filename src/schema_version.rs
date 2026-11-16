@@ -216,3 +216,25 @@ fn strip_flow_tags_element(xml: &str) -> String {
     out
 }
 
+impl DowngradeTransformer {
+    /// Transforms XML payload to the target schema version.
+    pub fn transform(&self, xml: &str) -> Result<String, SchemaVersionError> {
+        let current_ver = CotSchemaVersion::detect_from_xml(xml)?;
+        if current_ver <= self.target_version && !self.strip_flow_tags {
+            return Ok(xml.to_string());
+        }
+        let s = xml
+            .find("<event")
+            .ok_or(SchemaVersionError::MalformedXml("missing event tag"))?;
+        let e = xml[s..]
+            .find('>')
+            .ok_or(SchemaVersionError::MalformedXml("unclosed event tag"))?
+            + s;
+        let (before, tag, after) = (&xml[..s], &xml[s..=e], &xml[e + 1..]);
+        let new_tag = if let Some(vp) = tag.find("version=\"") {
+            let vs = vp + "version=\"".len();
+            let ve = tag[vs..]
+                .find('"')
+                .ok_or(SchemaVersionError::MalformedXml("unclosed version attr"))?
+                + vs;
+            format!(
