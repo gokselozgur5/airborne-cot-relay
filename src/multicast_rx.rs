@@ -87,3 +87,14 @@ pub struct MulticastReceiver {
     config: MulticastRxConfig,
     joined: bool,
 }
+
+impl MulticastReceiver {
+    fn bind_socket(config: &MulticastRxConfig) -> io::Result<UdpSocket> {
+        let bind_addr = SocketAddr::from(([0, 0, 0, 0], config.port));
+        let socket = UdpSocket::bind(bind_addr)?;
+        if let Some(timeout) = config.read_timeout {
+            socket.set_read_timeout(Some(timeout))?;
+        }
+        Ok(socket)
+    }
+}
