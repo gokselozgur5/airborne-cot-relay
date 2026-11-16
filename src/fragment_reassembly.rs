@@ -333,4 +333,21 @@ mod tests {
         assert_eq!(frags[2].payload, b"ghij");
         assert_eq!(fragment_payload(1, data, 8), Err(ReassemblyError::MtuTooSmall));
     }
+
+    #[test]
+    fn test_reassembler_in_order_and_single() {
+        let mut reassembler = FragmentReassembler::new(10, 1000);
+        let single = fragment_payload(1, b"hello", 64).unwrap();
+        let res = reassembler.process_fragment(single[0].clone(), 100).unwrap();
+        assert_eq!(res, Some(b"hello".to_vec()));
+        let multi = fragment_payload(2, b"longer cot telemetry message", 16).unwrap();
+        assert_eq!(reassembler.process_fragment(multi[0].clone(), 100).unwrap(), None);
+        assert_eq!(reassembler.in_flight_count(), 1);
+        let mut final_res = None;
+        for frag in multi.into_iter().skip(1) {
+            final_res = reassembler.process_fragment(frag, 100).unwrap();
+        }
+        assert_eq!(final_res, Some(b"longer cot telemetry message".to_vec()));
+        assert_eq!(reassembler.in_flight_count(), 0);
+    }
 }
