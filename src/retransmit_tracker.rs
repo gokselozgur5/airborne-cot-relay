@@ -202,3 +202,21 @@ impl RetransmitTracker {
                 }
             }
         }
+        for seq in expired_keys {
+            self.records.remove(&seq);
+            self.stats.packets_dropped_max_retries += 1;
+        }
+
+        self.stats.retransmissions_scheduled += to_retransmit.len() as u64;
+        to_retransmit
+    }
+
+    pub fn is_acked_by(&self, seq: u64, receiver_id: &str) -> bool {
+        self.records.get(&seq).map_or(false, |r| r.acks.contains(receiver_id))
+    }
+
+    pub fn is_fully_acked(&self, seq: u64, expected: &[String]) -> bool {
+        self.records.get(&seq).map_or(false, |r| {
+            expected.iter().all(|recv| r.acks.contains(recv))
+        })
+    }
