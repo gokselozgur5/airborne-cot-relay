@@ -227,3 +227,26 @@ impl PayloadFragmenter {
         self.fragment_with_id(msg_id, payload)
     }
 
+    pub fn fragment_with_id(
+        &self,
+        msg_id: u32,
+        payload: &[u8],
+    ) -> Result<Vec<FragmentPacket>, FragmentationError> {
+        if payload.len() > self.config.max_payload_size {
+            return Err(FragmentationError::PayloadTooLarge);
+        }
+        let max_chunk = self.config.mtu - HEADER_SIZE;
+        let total_fragments = if payload.is_empty() {
+            1
+        } else {
+            (payload.len() + max_chunk - 1) / max_chunk
+        };
+
+        if total_fragments > u16::MAX as usize {
+            return Err(FragmentationError::PayloadTooLarge);
+        }
+
+        let total_u16 = total_fragments as u16;
+        let mut packets = Vec::with_capacity(total_fragments);
+
+        if payload.is_empty() {
