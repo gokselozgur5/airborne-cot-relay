@@ -477,3 +477,17 @@ impl TelemetryRingRecorder {
         Ok(())
     }
 }
+
+impl TelemetryRingRecorder {
+    fn format_text_header(report: &CrashDumpReport) -> String {
+        format!(
+            "=== AIRBORNE COT RELAY CRASH DUMP ===\nTimestamp:    {} ms\nFault Code:   0x{:08X}\nCrash Reason: {}\nRecorded:     {} (overwritten: {})\nTrace Entries: {}\n--- TELEMETRY TRACE ---\n",
+            report.timestamp_ms,
+            report.fault_code,
+            report.reason,
+            report.total_recorded,
+            report.total_overwritten,
+            report.records.len(),
+        )
+    }
+}
