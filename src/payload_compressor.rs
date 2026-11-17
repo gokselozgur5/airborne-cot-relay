@@ -576,3 +576,25 @@ pub fn deflate_compress(input: &[u8]) -> Vec<u8> {
     writer.flush_byte();
     writer.buf
 }
+
+fn decode_fixed_huffman_sym(reader: &mut BitReader<'_>) -> Result<u16, CompressorError> {
+    let b7 = reader.read_bits(7)?;
+    let b7_rev = rev_bits(b7, 7);
+    if b7_rev <= 23 {
+        Ok(256 + b7_rev as u16)
+    } else {
+        let b8_bit = reader.read_bits(1)?;
+        let b8 = (b8_bit << 7) | b7;
+        let b8_rev = rev_bits(b8, 8);
+        if (0x30..=0xbf).contains(&b8_rev) {
+            Ok((b8_rev - 0x30) as u16)
+        } else if (0xc0..=0xc7).contains(&b8_rev) {
+            Ok((280 + (b8_rev - 0xc0)) as u16)
+        } else {
+            let b9_bit = reader.read_bits(1)?;
+            let b9 = (b9_bit << 8) | b8;
+            let b9_rev = rev_bits(b9, 9);
+            Ok((144 + (b9_rev - 0x190)) as u16)
+        }
+    }
+}
