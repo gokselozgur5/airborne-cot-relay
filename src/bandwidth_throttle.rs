@@ -91,3 +91,25 @@ impl ThrottleConfig {
         self
     }
 }
+
+/// Operational statistics for the bandwidth throttle.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct ThrottleStats {
+    pub packets_admitted: u64,
+    pub packets_dropped: u64,
+    pub bytes_admitted: u64,
+    pub bytes_dropped: u64,
+    pub admitted_by_priority: [u64; 5],
+    pub dropped_by_priority: [u64; 5],
+    pub congestion_transitions: u64,
+}
+
+/// Adaptive bandwidth throttle and CoT message priority filter.
+#[derive(Debug, Clone)]
+pub struct BandwidthThrottle {
+    config: ThrottleConfig,
+    state: CongestionState,
+    token_balance: f64,
+    last_update: Instant,
+    stats: ThrottleStats,
+}
