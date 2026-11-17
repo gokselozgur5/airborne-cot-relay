@@ -295,3 +295,24 @@ impl TelemetryRingRecorder {
         inner.buffer.front().cloned()
     }
 }
+
+impl TelemetryRingRecorder {
+    /// Extract a snapshot of all active records in chronological order.
+    pub fn snapshot(&self) -> Vec<TelemetryRecord> {
+        let inner = match self.inner.read() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        inner.buffer.iter().cloned().collect()
+    }
+
+    /// Return the most recent N records in chronological order.
+    pub fn get_recent(&self, count: usize) -> Vec<TelemetryRecord> {
+        let inner = match self.inner.read() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        let skip = inner.buffer.len().saturating_sub(count);
+        inner.buffer.iter().skip(skip).cloned().collect()
+    }
+}
