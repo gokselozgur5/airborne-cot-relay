@@ -98,3 +98,8 @@ pub mod cot_signer;
 pub use cot_signer::{
     bytes_to_hex, constant_time_compare, hmac_sha256, sha256,
 };
+pub use cot_signer::{
+    CotSignatureValidator, CotSigner, CotSignerConfig, CotSignerError,
+    CotSignerStats, CotValidatorStats, SignedCotFrame,
+    COT_HEADER_LEN, COT_SIG_MAGIC, COT_SIG_VERSION,
+};
