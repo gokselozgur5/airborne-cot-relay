@@ -31,3 +31,16 @@ impl PlatformOperationalState {
         matches!(self, Self::Nominal | Self::Standby)
     }
 }
+
+/// Airborne platform status and health metrics.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PlatformMetrics {
+    pub callsign: String,
+    pub state: PlatformOperationalState,
+    pub battery_pct: f32,
+    pub battery_voltage_v: f32,
+    pub cpu_temp_c: f32,
+    pub cpu_load_pct: f32,
+    pub uptime_secs: u64,
+    pub pose: Option<PlatformPose>,
+}
