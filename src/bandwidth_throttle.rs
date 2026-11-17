@@ -216,3 +216,15 @@ impl BandwidthThrottle {
         self.admit_token_budget(priority, payload_bytes)
     }
 }
+
+impl BandwidthThrottle {
+    fn calculate_wait_ms(&self, deficit: f64) -> u64 {
+        let bytes_per_sec = (self.effective_bandwidth_bps() as f64) / 8.0;
+        let wait_secs = if bytes_per_sec > 0.0 {
+            deficit / bytes_per_sec
+        } else {
+            1.0
+        };
+        (wait_secs * 1000.0).ceil() as u64
+    }
+}
