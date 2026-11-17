@@ -677,3 +677,17 @@ impl CotPayloadCompressor {
         self.stats = CompressorStats::default();
     }
 }
+
+impl CotPayloadCompressor {
+    fn should_bypass(&self, len: usize) -> bool {
+        len < self.config.min_compress_bytes || self.config.algorithm == CompressionAlgorithm::None
+    }
+
+    fn execute_compression(&self, payload: &[u8]) -> Vec<u8> {
+        match self.config.algorithm {
+            CompressionAlgorithm::Snappy => snappy_compress(payload),
+            CompressionAlgorithm::Deflate => deflate_compress(payload),
+            CompressionAlgorithm::None => payload.to_vec(),
+        }
+    }
+}
