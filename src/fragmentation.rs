@@ -268,3 +268,19 @@ impl PayloadFragmenter {
 
 /// Configuration settings for the reassembly engine.
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ReassemblyConfig {
+    pub session_timeout_ms: u64,
+    pub max_concurrent_sessions: usize,
+}
+
+impl Default for ReassemblyConfig {
+    fn default() -> Self {
+        Self {
+            session_timeout_ms: 5000,
+            max_concurrent_sessions: 128,
+        }
+    }
+}
+
+/// Tracking buffer for an in-flight fragmented message.
+#[derive(Debug, Clone)]
