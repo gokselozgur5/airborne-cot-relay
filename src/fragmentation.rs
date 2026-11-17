@@ -420,3 +420,26 @@ impl ReassemblyEngine {
         self.process_packet(&packet, now_ms)
     }
 
+    pub fn query_missing(&self, msg_id: u32) -> Option<Vec<u16>> {
+        self.sessions.get(&msg_id).map(|s| s.missing_indices())
+    }
+
+    pub fn prune_expired(&mut self, now_ms: u64) -> usize {
+        let timeout = self.config.session_timeout_ms;
+        let initial_count = self.sessions.len();
+        self.sessions
+            .retain(|_, s| now_ms.saturating_sub(s.last_updated_ms) <= timeout);
+        let pruned = initial_count - self.sessions.len();
+        self.stats.expired_sessions += pruned as u64;
+        pruned
+    }
+
+    pub fn stats(&self) -> &FragmentationStats {
+        &self.stats
+    }
+
+    pub fn active_session_count(&self) -> usize {
+        self.sessions.len()
+    }
+}
+
