@@ -576,4 +576,17 @@ mod tests {
         assert_eq!(recent[0].sequence, 3);
         assert_eq!(recent[1].sequence, 4);
     }
+
+    #[test]
+    fn test_get_time_range() {
+        let recorder = TelemetryRingRecorder::new(10);
+        for i in 1..=5 {
+            let pose = sample_pose(0.0, 0.0);
+            recorder.record_pose(i, i * 100, pose, 24.0, 40.0, 100, 0);
+        }
+        let in_range = recorder.get_time_range(200, 400);
+        assert_eq!(in_range.len(), 3);
+        assert_eq!(in_range[0].timestamp_ms, 200);
+        assert_eq!(in_range[2].timestamp_ms, 400);
+    }
 }
