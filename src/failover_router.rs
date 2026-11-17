@@ -80,3 +80,16 @@ impl NetworkInterface {
         }
     }
 }
+
+impl NetworkInterface {
+    pub fn with_priority(mut self, priority: u32) -> Self {
+        self.priority = priority;
+        self
+    }
+
+    pub fn with_thresholds(mut self, fail: u32, recover: u32) -> Self {
+        self.failure_threshold = fail.max(1);
+        self.recovery_threshold = recover.max(1);
+        self
+    }
+}
