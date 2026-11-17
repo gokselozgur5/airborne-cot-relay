@@ -318,3 +318,22 @@ impl HeartbeatGenerator {
         )
     }
 }
+
+impl HeartbeatGenerator {
+    /// Format full Cursor-on-Target XML event string.
+    pub fn render_cot_xml(&self, now_ms: u64, stale_ms: u64) -> String {
+        let time_str = format_iso8601_utc(now_ms as i64);
+        let stale_str = format_iso8601_utc(stale_ms as i64);
+        let point = self.render_point_xml();
+        let detail = self.render_detail_xml();
+        format!(
+            r#"<event version="2.0" uid="{uid}" type="{cot_type}" how="m-g" time="{t}" start="{t}" stale="{s}">{point}{detail}</event>"#,
+            uid = escape_xml_attr(&self.config.uid),
+            cot_type = escape_xml_attr(&self.config.cot_type),
+            t = time_str,
+            s = stale_str,
+            point = point,
+            detail = detail,
+        )
+    }
+}
