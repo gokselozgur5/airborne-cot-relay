@@ -71,15 +71,18 @@ pub mod retransmit_tracker;
 pub use retransmit_tracker::{
     PacketRecord, RbtConfig, RetransmitTracker, TrackerError, TrackerStats,
 };
-
 pub mod multicast_listener;
 pub use multicast_listener::{
     DropPolicy, DroppingStats, DroppingStatsSnapshot, MulticastListener,
     MulticastListenerConfig, MulticastListenerError, MulticastPacket,
 };
-
 pub mod heartbeat;
 pub use heartbeat::{
     HeartbeatConfig, HeartbeatGenerator, HeartbeatRecord, PlatformMetrics,
     PlatformOperationalState, RadioMetrics,
+};
+pub mod dedup_cache;
+pub use dedup_cache::{
+    CotDedupCache, DedupBloomFilter, DedupCacheConfig, DedupStats,
+};
 };
