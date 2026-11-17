@@ -268,3 +268,28 @@ impl HeartbeatGenerator {
         }
     }
 }
+
+impl HeartbeatGenerator {
+    /// Time remaining until next heartbeat is due in milliseconds.
+    pub fn time_until_next_ms(&self, now_ms: u64) -> u64 {
+        match self.last_generated_ms {
+            None => 0,
+            Some(last) => {
+                let elapsed = now_ms.saturating_sub(last);
+                self.config.interval_ms.saturating_sub(elapsed)
+            }
+        }
+    }
+
+    /// Render CoT point XML element based on platform pose.
+    fn render_point_xml(&self) -> String {
+        if let Some(ref p) = self.platform.pose {
+            format!(
+                r#"<point lat="{:.7}" lon="{:.7}" hae="{:.2}" ce="9999999" le="9999999"/>"#,
+                p.lat_deg, p.lon_deg, p.hae_m
+            )
+        } else {
+            r#"<point lat="0.0000000" lon="0.0000000" hae="0.00" ce="9999999" le="9999999"/>"#.to_string()
+        }
+    }
+}
