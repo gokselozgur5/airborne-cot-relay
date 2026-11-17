@@ -68,3 +68,6 @@ pub use priority_scheduler::{
     CotPriority, PrioritizedPacket, PriorityPacketScheduler, SchedulerError, SchedulerStats,
 };
 pub mod retransmit_tracker;
+pub use retransmit_tracker::{
+    PacketRecord, RbtConfig, RetransmitTracker, TrackerError, TrackerStats,
+};
