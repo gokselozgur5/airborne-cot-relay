@@ -214,3 +214,28 @@ impl CotDedupCache {
         }
         pruned
     }
+    /// Checks packet key against cache; records entry and returns true if unique.
+    pub fn check_and_insert(&mut self, key: &[u8], now_ms: u64) -> bool {
+        self.stats.total_checked += 1;
+        self.prune_expired(now_ms);
+
+        if self.bloom.contains(key) {
+            if let Some(entry) = self.entries.get_mut(key) {
+                if !entry.is_expired(now_ms) {
+                    entry.refresh(now_ms, self.config.sliding_window_ms);
+                    self.expiry_queue.push_back((entry.expires_at_ms, key.to_vec()));
+                    self.stats.duplicates_dropped += 1;
+                    return false;
+                }
+            }
+        }
+
+        self.evict_if_needed();
+        let entry = SlidingEntry::new(now_ms, self.config.sliding_window_ms);
+        let expires_at = entry.expires_at_ms;
+        self.bloom.insert(key);
+        self.entries.insert(key.to_vec(), entry);
+        self.expiry_queue.push_back((expires_at, key.to_vec()));
+        self.stats.unique_passed += 1;
+        true
+    }
