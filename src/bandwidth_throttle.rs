@@ -52,3 +52,25 @@ pub enum ThrottleDecision {
     Throttled { wait_ms: u64 },
     Dropped(DropReason),
 }
+
+/// Configuration settings for the adaptive bandwidth throttle.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ThrottleConfig {
+    pub max_bandwidth_bps: u64,
+    pub min_bandwidth_bps: u64,
+    pub burst_allowance_bytes: usize,
+    pub emergency_bypass: bool,
+    pub window_duration: Duration,
+}
+
+impl Default for ThrottleConfig {
+    fn default() -> Self {
+        Self {
+            max_bandwidth_bps: 64_000,
+            min_bandwidth_bps: 4_800,
+            burst_allowance_bytes: 4_096,
+            emergency_bypass: true,
+            window_duration: Duration::from_secs(1),
+        }
+    }
+}
