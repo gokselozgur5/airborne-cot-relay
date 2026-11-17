@@ -56,3 +56,20 @@ pub enum CompressorError {
     /// Decompressed payload is not valid UTF-8 string.
     InvalidUtf8,
 }
+
+impl std::fmt::Display for CompressorError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::InvalidAlgorithm(code) => write!(f, "invalid algorithm tag: {code}"),
+            Self::PayloadTooLarge { len, max } => {
+                write!(f, "payload length {len} exceeds max {max}")
+            }
+            Self::CorruptPayload(msg) => write!(f, "corrupt payload: {msg}"),
+            Self::DecompressionFailed(msg) => write!(f, "decompression failed: {msg}"),
+            Self::HeaderMismatch => write!(f, "invalid frame magic header"),
+            Self::InvalidUtf8 => write!(f, "decompressed payload is not valid utf-8"),
+        }
+    }
+}
+
+impl std::error::Error for CompressorError {}
