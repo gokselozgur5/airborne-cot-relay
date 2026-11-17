@@ -114,3 +114,20 @@ impl PacketRecord {
         }
     }
 }
+
+/// State machine tracking reliable broadcast retransmissions.
+#[derive(Debug, Clone)]
+pub struct RetransmitTracker {
+    config: RbtConfig,
+    records: HashMap<u64, PacketRecord>,
+    stats: TrackerStats,
+}
+
+impl RetransmitTracker {
+    pub fn new(config: RbtConfig) -> Self {
+        Self {
+            config,
+            records: HashMap::new(),
+            stats: TrackerStats::default(),
+        }
+    }
