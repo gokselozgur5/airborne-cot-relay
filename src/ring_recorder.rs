@@ -603,4 +603,18 @@ mod tests {
         assert!(csv.contains("seq,timestamp_ms"));
         assert!(csv.contains("37.770000,-122.410000"));
     }
+
+    #[test]
+    fn test_crash_dump_json_and_text() {
+        let recorder = TelemetryRingRecorder::new(5);
+        let pose = sample_pose(37.77, -122.41);
+        recorder.record_pose(1, 1000, pose, 22.8, 55.4, 88, 0x01);
+        let report = recorder.create_crash_dump("ALTITUDE_LOSS", 0x1234, 2000);
+        let json = recorder.dump_to_string(&report, DumpFormat::Json).unwrap();
+        assert!(json.contains("\"reason\":\"ALTITUDE_LOSS\""));
+        assert!(json.contains("\"fault_code\":4660"));
+        let txt = recorder.dump_to_string(&report, DumpFormat::Text).unwrap();
+        assert!(txt.contains("=== AIRBORNE COT RELAY CRASH DUMP ==="));
+        assert!(txt.contains("Fault Code:   0x00001234"));
+    }
 }
