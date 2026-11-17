@@ -552,3 +552,20 @@ mod tests {
         let payload = br#"<event version="2.0" uid="AIR-01"/>"#;
         let sig = signer.sign_raw(payload);
         let hex = signer.sign_raw_hex(payload);
+        assert_eq!(bytes_to_hex(&sig), hex);
+        assert_eq!(signer.stats().signatures_generated, 2);
+    }
+
+    #[test]
+    fn test_signed_frame_roundtrip() {
+        let key = b"mission-secret-payload-key-1".to_vec();
+        let cfg = CotSignerConfig {
+            key_id: 10,
+            secret_key: key.clone(),
+            max_clock_skew_secs: 60,
+        };
+        let mut signer = CotSigner::new(cfg);
+        let payload = br#"<event type="a-f-G" how="m-g"/>"#;
+        let now = 1700000000;
+        let frame = signer.create_signed_frame(payload, now);
+
