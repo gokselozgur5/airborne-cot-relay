@@ -364,3 +364,27 @@ impl CotSignatureValidator {
             max_clock_skew_secs,
             stats: CotValidatorStats::default(),
         }
+    }
+
+    pub fn add_key(&mut self, key_id: u32, key: Vec<u8>) {
+        self.keys.insert(key_id, key);
+    }
+
+    pub fn remove_key(&mut self, key_id: u32) -> Option<Vec<u8>> {
+        self.keys.remove(&key_id)
+    }
+
+    pub fn stats(&self) -> &CotValidatorStats {
+        &self.stats
+    }
+    pub fn verify_raw(
+        &mut self,
+        key_id: u32,
+        payload: &[u8],
+        expected_sig: &[u8; 32],
+    ) -> Result<(), CotSignerError> {
+        let key = match self.keys.get(&key_id) {
+            Some(k) => k,
+            None => {
+                self.stats.key_not_found += 1;
+                return Err(CotSignerError::KeyNotFound(key_id));
