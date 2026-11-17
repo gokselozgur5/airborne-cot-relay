@@ -519,3 +519,28 @@ impl TelemetryRingRecorder {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_pose(lat: f64, lon: f64) -> PlatformPose {
+        PlatformPose::new(1000, lat, lon, 500.0, 0.01, -0.02, 1.57)
+    }
+
+    #[test]
+    fn test_record_and_overwrite_oldest() {
+        let recorder = TelemetryRingRecorder::new(3);
+        assert!(recorder.is_empty());
+        for i in 1..=4 {
+            let pose = sample_pose(45.0 + i as f64, -120.0);
+            assert!(recorder.record_pose(i, i * 100, pose, 24.5, 42.0, 95, 0));
+        }
+        assert_eq!(recorder.len(), 3);
+        let stats = recorder.stats();
+        assert_eq!(stats.total_recorded, 4);
+        assert_eq!(stats.total_overwritten, 1);
+        assert_eq!(recorder.oldest().unwrap().sequence, 2);
+        assert_eq!(recorder.latest().unwrap().sequence, 4);
+    }
+}
