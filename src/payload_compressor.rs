@@ -268,3 +268,29 @@ fn find_snappy_match(input: &[u8], pos: usize, cand: usize) -> usize {
     }
     match_len
 }
+
+fn step_snappy_compress(
+    input: &[u8],
+    pos: &mut usize,
+    lit_start: &mut usize,
+    table: &mut [u32; 8192],
+    out: &mut Vec<u8>,
+) {
+    let p = *pos;
+    let chunk = u32::from_le_bytes([input[p], input[p + 1], input[p + 2], input[p + 3]]);
+    let hash = ((chunk.wrapping_mul(0x1e35a7bd)) >> 19) as usize & 8191;
+    let cand = table[hash] as usize;
+    table[hash] = p as u32;
+    if p > cand && (p - cand) <= 65535 && input[cand..cand + 4] == input[p..p + 4] {
+        let offset = p - cand;
+        let match_len = find_snappy_match(input, p, cand);
+        if p > *lit_start {
+            emit_snappy_literal(&input[*lit_start..p], out);
+        }
+        emit_snappy_copy(offset, match_len, out);
+        *pos += match_len;
+        *lit_start = *pos;
+    } else {
+        *pos += 1;
+    }
+}
