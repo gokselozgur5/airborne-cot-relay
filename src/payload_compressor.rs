@@ -294,3 +294,22 @@ fn step_snappy_compress(
         *pos += 1;
     }
 }
+
+/// Compresses payload into Snappy raw block format.
+pub fn snappy_compress(input: &[u8]) -> Vec<u8> {
+    let mut out = Vec::with_capacity(input.len() / 2 + 16);
+    encode_varint_u32(input.len() as u32, &mut out);
+    if input.is_empty() {
+        return out;
+    }
+    let mut table = [0u32; 8192];
+    let mut pos = 0;
+    let mut lit_start = 0;
+    while pos + 4 <= input.len() {
+        step_snappy_compress(input, &mut pos, &mut lit_start, &mut table, &mut out);
+    }
+    if lit_start < input.len() {
+        emit_snappy_literal(&input[lit_start..], &mut out);
+    }
+    out
+}
