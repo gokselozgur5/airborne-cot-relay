@@ -239,3 +239,25 @@ impl CotDedupCache {
         self.stats.unique_passed += 1;
         true
     }
+    /// Checks whether key is duplicate without mutating entry or sliding timestamp.
+    pub fn is_duplicate(&self, key: &[u8], now_ms: u64) -> bool {
+        if !self.bloom.contains(key) {
+            return false;
+        }
+        self.entries.get(key).map_or(false, |e| !e.is_expired(now_ms))
+    }
+
+    /// Convenience wrapper for string keys.
+    pub fn check_and_insert_str(&mut self, key: &str, now_ms: u64) -> bool {
+        self.check_and_insert(key.as_bytes(), now_ms)
+    }
+
+    /// Convenience helper for CoT UID and millisecond timestamp combinations.
+    pub fn check_and_insert_uid_time(&mut self, uid: &str, time_ms: u64, now_ms: u64) -> bool {
+        let mut key = Vec::with_capacity(uid.len() + 9);
+        key.extend_from_slice(uid.as_bytes());
+        key.push(b':');
+        key.extend_from_slice(&time_ms.to_be_bytes());
+        self.check_and_insert(&key, now_ms)
+    }
+}
