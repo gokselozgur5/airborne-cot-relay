@@ -102,3 +102,26 @@ impl FragmentHeader {
         })
     }
 
+    pub fn encode(&self) -> [u8; HEADER_SIZE] {
+        let mut buf = [0u8; HEADER_SIZE];
+        buf[0..4].copy_from_slice(&self.magic);
+        buf[4] = self.version;
+        buf[5] = self.flags;
+        buf[6..10].copy_from_slice(&self.msg_id.to_be_bytes());
+        buf[10..12].copy_from_slice(&self.seq_index.to_be_bytes());
+        buf[12..14].copy_from_slice(&self.total_fragments.to_be_bytes());
+        buf[14..16].copy_from_slice(&self.checksum.to_be_bytes());
+        buf
+    }
+
+    pub fn decode(bytes: &[u8]) -> Result<Self, FragmentationError> {
+        if bytes.len() < HEADER_SIZE {
+            return Err(FragmentationError::PacketTooShort);
+        }
+        let magic = [bytes[0], bytes[1], bytes[2], bytes[3]];
+        if magic != MAGIC_BYTES {
+            return Err(FragmentationError::InvalidMagic);
+        }
+        let version = bytes[4];
+        if version != PROTOCOL_VERSION {
+            return Err(FragmentationError::UnsupportedVersion);
