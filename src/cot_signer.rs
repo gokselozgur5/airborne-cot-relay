@@ -638,3 +638,22 @@ mod tests {
         });
         let frame = signer.create_signed_frame(b"cot", 1000);
 
+        let mut validator = CotSignatureValidator::new(30);
+        validator.add_key(5, key);
+
+        let err_exp = validator.verify_frame(&frame, 1050).unwrap_err();
+        assert_eq!(
+            err_exp,
+            CotSignerError::TimestampExpired {
+                age_secs: 50,
+                max_skew_secs: 30
+            }
+        );
+
+        let err_fut = validator.verify_frame(&frame, 950).unwrap_err();
+        assert_eq!(
+            err_fut,
+            CotSignerError::TimestampInFuture {
+                diff_secs: 50,
+                max_skew_secs: 30
+            }
