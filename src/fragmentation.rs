@@ -326,3 +326,18 @@ impl InFlightSession {
         missing
     }
 
+    pub fn assemble(self) -> Vec<u8> {
+        let mut total_len = 0;
+        for frag in self.received_fragments.values() {
+            total_len += frag.len();
+        }
+        let mut payload = Vec::with_capacity(total_len);
+        for (_, frag) in self.received_fragments {
+            payload.extend_from_slice(&frag);
+        }
+        payload
+    }
+}
+
+/// Diagnostic counters for the fragmentation and reassembly engine.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
