@@ -388,3 +388,22 @@ impl CotSignatureValidator {
             None => {
                 self.stats.key_not_found += 1;
                 return Err(CotSignerError::KeyNotFound(key_id));
+            }
+        };
+
+        let computed = hmac_sha256(key, payload);
+        if constant_time_compare(&computed, expected_sig) {
+            self.stats.valid_signatures += 1;
+            Ok(())
+        } else {
+            self.stats.invalid_signatures += 1;
+            Err(CotSignerError::InvalidSignature)
+        }
+    }
+    pub fn verify_frame(
+        &mut self,
+        frame_bytes: &[u8],
+        current_time_secs: u64,
+    ) -> Result<SignedCotFrame, CotSignerError> {
+        self.stats.frames_processed += 1;
+
