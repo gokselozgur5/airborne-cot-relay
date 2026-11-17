@@ -307,3 +307,20 @@ mod tests {
         assert_eq!(tracker.tracked_count(), 0);
         assert_eq!(tracker.stats().packets_dropped_max_retries, 1);
     }
+    #[test]
+    fn test_prune_and_capacity() {
+        let cfg = RbtConfig::new(500, 3, 2, true);
+        let mut tracker = RetransmitTracker::new(cfg);
+        tracker.track_packet(1, vec![1], 100).unwrap();
+        tracker.track_packet(2, vec![2], 100).unwrap();
+
+        let err = tracker.track_packet(3, vec![3], 100);
+        assert_eq!(err, Err(TrackerError::CapacityExceeded(2)));
+
+        tracker.process_ack(1, "node-1");
+        assert_eq!(tracker.prune_acknowledged(1), 1);
+        assert_eq!(tracker.tracked_count(), 1);
+
+        assert!(tracker.track_packet(3, vec![3], 100).is_ok());
+    }
+}
