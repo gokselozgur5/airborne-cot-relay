@@ -20,3 +20,17 @@ pub const DEFAULT_MTU: usize = 1400;
 
 /// Errors produced during fragmentation and reassembly operations.
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub enum FragmentationError {
+    PacketTooShort,
+    InvalidMagic,
+    UnsupportedVersion,
+    InvalidTotalFragments,
+    IndexOutOfBounds,
+    MtuTooSmall,
+    ChecksumMismatch,
+    CapacityExceeded,
+    PayloadTooLarge,
+}
+
+impl std::error::Error for FragmentationError {}
+
