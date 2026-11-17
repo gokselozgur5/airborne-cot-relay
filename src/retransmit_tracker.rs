@@ -160,3 +160,14 @@ impl RetransmitTracker {
         }
         false
     }
+    pub fn process_nack(&mut self, seq: u64, receiver_id: &str) -> bool {
+        if let Some(record) = self.records.get_mut(&seq) {
+            record.nacks.insert(receiver_id.to_string());
+            self.stats.nacks_received += 1;
+            if self.config.nack_immediate {
+                record.force_retransmit = true;
+            }
+            return true;
+        }
+        false
+    }
