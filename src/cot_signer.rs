@@ -113,3 +113,18 @@ pub fn sha256(data: &[u8]) -> [u8; 32] {
     let bit_len = (data.len() as u64).wrapping_mul(8);
     let mut offset = 0;
 
+    while offset + 64 <= data.len() {
+        let mut block = [0u8; 64];
+        block.copy_from_slice(&data[offset..offset + 64]);
+        sha256_block(&mut state, &block);
+        offset += 64;
+    }
+    let rem = &data[offset..];
+    let mut buf = Vec::with_capacity(128);
+    buf.extend_from_slice(rem);
+    buf.push(0x80);
+    while (buf.len() + 8) % 64 != 0 {
+        buf.push(0x00);
+    }
+    buf.extend_from_slice(&bit_len.to_be_bytes());
+
