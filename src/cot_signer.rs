@@ -193,3 +193,18 @@ pub const COT_SIG_MAGIC: [u8; 4] = *b"CSIG";
 /// Version 1 framing header format.
 pub const COT_SIG_VERSION: u8 = 1;
 
+/// Fixed length of signed CoT binary header (53 bytes).
+pub const COT_HEADER_LEN: usize = 53;
+
+/// Errors encountered during signature generation or verification.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum CotSignerError {
+    FrameTooShort { actual: usize, expected: usize },
+    InvalidMagic([u8; 4]),
+    UnsupportedVersion(u8),
+    KeyNotFound(u32),
+    InvalidSignature,
+    PayloadLengthMismatch { expected: usize, actual: usize },
+    TimestampExpired { age_secs: u64, max_skew_secs: u64 },
+    TimestampInFuture { diff_secs: u64, max_skew_secs: u64 },
+}
