@@ -398,4 +398,29 @@ mod tests {
         );
         assert_eq!(r.route(b"valid"), Err(RouterError::NoHealthyInterface));
     }
+
+    #[test]
+    fn test_router_stats_tracking_and_reset() {
+        let mut r = FailoverRouter::new(RouterConfig::default());
+        let a1 = "127.0.0.1:8001".parse().unwrap();
+        let a2 = "127.0.0.1:8002".parse().unwrap();
+        r.add_interface(NetworkInterface::new("b1", "bcast", RouteKind::Broadcast, a1));
+        r.add_interface(NetworkInterface::new("u1", "ucast", RouteKind::Unicast, a2));
+
+        r.route(b"hello").unwrap();
+        r.record_success("b1", 5);
+        r.get_interface_mut("b1").unwrap().healthy = false;
+        r.route(b"world!").unwrap();
+
+        assert_eq!(r.stats().packets_received, 2);
+        assert_eq!(r.stats().packets_routed, 2);
+        assert_eq!(r.stats().broadcast_dispatched, 1);
+        assert_eq!(r.stats().unicast_dispatched, 1);
+        assert_eq!(r.stats().failover_events, 1);
+        assert_eq!(r.stats().total_bytes_routed, 11);
+
+        r.reset_stats();
+        assert_eq!(r.stats().packets_routed, 0);
+        assert_eq!(r.stats().total_bytes_routed, 0);
+    }
 }
