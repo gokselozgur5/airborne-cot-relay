@@ -85,4 +85,9 @@ pub mod dedup_cache;
 pub use dedup_cache::{
     CotDedupCache, DedupBloomFilter, DedupCacheConfig, DedupStats,
 };
+
+pub mod payload_compressor;
+pub use payload_compressor::{
+    CompressedPayload, CompressionAlgorithm, CompressorConfig, CompressorError, CompressorStats,
+    CotPayloadCompressor,
 };
