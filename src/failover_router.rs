@@ -324,4 +324,25 @@ mod tests {
         assert_eq!(iface.bytes_sent, 200);
         assert_eq!(iface.packets_sent, 2);
     }
+
+    #[test]
+    fn test_priority_primary_selection() {
+        let mut r = FailoverRouter::new(RouterConfig {
+            policy: FailoverPolicy::PriorityPrimary,
+            max_payload_size: 1024,
+        });
+        let a1 = "127.0.0.1:8001".parse().unwrap();
+        let a2 = "127.0.0.1:8002".parse().unwrap();
+        r.add_interface(NetworkInterface::new("p1", "main", RouteKind::Broadcast, a1).with_priority(5));
+        r.add_interface(NetworkInterface::new("p2", "bak", RouteKind::Unicast, a2).with_priority(20));
+
+        let dec = r.route(b"cot1").unwrap();
+        assert_eq!(dec.interface_id, "p1");
+        assert!(!dec.is_failover);
+
+        r.get_interface_mut("p1").unwrap().healthy = false;
+        let dec2 = r.route(b"cot2").unwrap();
+        assert_eq!(dec2.interface_id, "p2");
+        assert!(dec2.is_failover);
+    }
 }
