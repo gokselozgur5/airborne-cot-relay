@@ -629,4 +629,25 @@ mod tests {
         assert!(recorder.is_empty());
         assert_eq!(recorder.stats().total_recorded, 0);
     }
+
+    #[test]
+    fn test_multithreaded_recording() {
+        use std::sync::Arc;
+        let recorder = Arc::new(TelemetryRingRecorder::new(100));
+        let mut handles = Vec::new();
+        for t in 0..4 {
+            let rec = Arc::clone(&recorder);
+            handles.push(std::thread::spawn(move || {
+                for i in 0..25 {
+                    let seq = (t * 25 + i) as u64;
+                    rec.record_pose(seq, seq * 10, sample_pose(0.0, 0.0), 24.0, 40.0, 90, 0);
+                }
+            }));
+        }
+        for h in handles {
+            h.join().unwrap();
+        }
+        assert_eq!(recorder.len(), 100);
+        assert_eq!(recorder.stats().total_recorded, 100);
+    }
 }
