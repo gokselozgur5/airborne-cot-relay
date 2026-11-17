@@ -423,4 +423,21 @@ mod tests {
         assert_eq!(r.stats().packets_routed, 0);
         assert_eq!(r.stats().total_bytes_routed, 0);
     }
+
+    #[test]
+    fn test_interface_mutation_and_counts() {
+        let mut r = FailoverRouter::new(RouterConfig::default());
+        let a = "127.0.0.1:8001".parse().unwrap();
+        r.add_interface(NetworkInterface::new("eth0", "lan", RouteKind::Broadcast, a));
+        assert_eq!(r.healthy_count(), 1);
+        assert_eq!(r.interfaces().len(), 1);
+
+        assert!(r.set_enabled("eth0", false));
+        assert_eq!(r.healthy_count(), 0);
+        assert!(!r.set_enabled("nonexistent", true));
+
+        assert!(r.remove_interface("eth0"));
+        assert_eq!(r.interfaces().len(), 0);
+        assert!(!r.remove_interface("eth0"));
+    }
 }
