@@ -255,3 +255,19 @@ mod tests {
         assert!(tracker.is_acked_by(1, "node-1"));
         assert!(!tracker.is_acked_by(1, "node-2"));
     }
+    #[test]
+    fn test_nack_immediate_retransmit() {
+        let mut tracker = RetransmitTracker::new(RbtConfig::default());
+        tracker.track_packet(42, vec![1, 2, 3], 1000).unwrap();
+
+        let pending = tracker.get_pending_retransmissions(1100);
+        assert!(pending.is_empty());
+
+        assert!(tracker.process_nack(42, "node-9"));
+        assert_eq!(tracker.stats().nacks_received, 1);
+
+        let pending = tracker.get_pending_retransmissions(1150);
+        assert_eq!(pending.len(), 1);
+        assert_eq!(pending[0].0, 42);
+        assert_eq!(pending[0].1, vec![1, 2, 3]);
+    }
