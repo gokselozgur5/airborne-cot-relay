@@ -416,3 +416,25 @@ mod tests {
 
         let cfg = cfg.with_ring_capacity(2);
         let mut listener_cfg = cfg.clone();
+        listener_cfg.port = port;
+        let listener = MulticastListener::bind(listener_cfg).unwrap();
+
+        let src: SocketAddr = "127.0.0.1:8000".parse().unwrap();
+        assert!(listener.enqueue(MulticastPacket::new(b"p1".to_vec(), src)).is_ok());
+        assert!(listener.enqueue(MulticastPacket::new(b"p2".to_vec(), src)).is_ok());
+        // Ring buffer with cap 2 (rounded to power of 2: 2) is full
+        let p3_res = listener.enqueue(MulticastPacket::new(b"p3".to_vec(), src));
+        assert!(p3_res.is_err());
+        assert_eq!(listener.stats().dropped_overflow, 1);
+    }
+
+    #[test]
+    fn test_listener_socket_reception() {
+        let group: Ipv4Addr = "239.255.10.3".parse().unwrap();
+        let temp = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let port = temp.local_addr().unwrap().port();
+        drop(temp);
+
+        let cfg = MulticastListenerConfig::new(group, port)
+            .with_read_timeout(Duration::from_millis(50))
+            .with_nonblocking(true);
