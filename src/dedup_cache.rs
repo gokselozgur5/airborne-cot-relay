@@ -261,3 +261,20 @@ impl CotDedupCache {
         self.check_and_insert(&key, now_ms)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bloom_filter_basic() {
+        let mut bloom = DedupBloomFilter::new(512, 4);
+        assert_eq!(bloom.count_ones(), 0);
+        assert!(!bloom.contains(b"alpha"));
+        bloom.insert(b"alpha");
+        assert!(bloom.contains(b"alpha"));
+        assert!(!bloom.contains(b"beta"));
+        bloom.clear();
+        assert_eq!(bloom.count_ones(), 0);
+        assert!(!bloom.contains(b"alpha"));
+    }
