@@ -160,3 +160,19 @@ pub fn bytes_to_hex(bytes: &[u8]) -> String {
         s.push(HEX[(b >> 4) as usize] as char);
         s.push(HEX[(b & 0x0f) as usize] as char);
     }
+    s
+}
+
+/// Compute RFC 2104 HMAC-SHA256 message authentication code.
+pub fn hmac_sha256(key: &[u8], message: &[u8]) -> [u8; 32] {
+    let mut k_pad = [0u8; 64];
+    if key.len() > 64 {
+        let kh = sha256(key);
+        k_pad[..32].copy_from_slice(&kh);
+    } else {
+        k_pad[..key.len()].copy_from_slice(key);
+    }
+    let mut inner_buf = Vec::with_capacity(64 + message.len());
+    for b in k_pad.iter() {
+        inner_buf.push(b ^ 0x36);
+    }
