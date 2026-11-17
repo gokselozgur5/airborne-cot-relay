@@ -36,3 +36,19 @@ impl CongestionState {
         }
     }
 }
+
+/// Reason a packet was dropped or rejected by the bandwidth throttle.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DropReason {
+    BelowPriorityFloor,
+    BandwidthExhausted,
+    EmergencyPreempted,
+}
+
+/// Decision made when admitting a CoT message.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ThrottleDecision {
+    Admitted,
+    Throttled { wait_ms: u64 },
+    Dropped(DropReason),
+}
