@@ -621,3 +621,25 @@ fn decode_deflate_copy(reader: &mut BitReader<'_>, out: &mut Vec<u8>, sym: u16) 
     }
     Ok(())
 }
+
+/// Decompresses RFC 1951 Deflate stream payload into uncompressed bytes.
+pub fn deflate_decompress(input: &[u8]) -> Result<Vec<u8>, CompressorError> {
+    let mut reader = BitReader::new(input);
+    let _bfinal = reader.read_bits(1)?;
+    let btype = reader.read_bits(2)?;
+    if btype != 1 {
+        return Err(CompressorError::CorruptPayload("unsupported deflate btype"));
+    }
+    let mut out = Vec::new();
+    loop {
+        let sym = decode_fixed_huffman_sym(&mut reader)?;
+        if sym == 256 {
+            break;
+        } else if sym < 256 {
+            out.push(sym as u8);
+        } else {
+            decode_deflate_copy(&mut reader, &mut out, sym)?;
+        }
+    }
+    Ok(out)
+}
