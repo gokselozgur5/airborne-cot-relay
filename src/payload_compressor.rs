@@ -184,3 +184,18 @@ pub struct CompressorStats {
     /// Total count of payloads bypassed due to threshold.
     pub payloads_bypassed: u64,
 }
+
+impl CompressorStats {
+    /// Returns overall compression ratio.
+    pub fn overall_ratio(&self) -> f64 {
+        if self.total_raw_bytes == 0 {
+            return 1.0;
+        }
+        self.total_compressed_bytes as f64 / self.total_raw_bytes as f64
+    }
+
+    /// Returns bandwidth percentage saved.
+    pub fn savings_percent(&self) -> f64 {
+        (1.0 - self.overall_ratio()) * 100.0
+    }
+}
