@@ -228,3 +228,21 @@ impl fmt::Display for CotSignerError {
                     "payload len mismatch: header claims {expected}, got {actual}"
                 )
             }
+            Self::TimestampExpired {
+                age_secs,
+                max_skew_secs,
+            } => {
+                write!(
+                    f,
+                    "message expired: age {age_secs}s exceeds max skew {max_skew_secs}s"
+                )
+            }
+            Self::TimestampInFuture {
+                diff_secs,
+                max_skew_secs,
+            } => {
+                write!(
+                    f,
+                    "message timestamp in future by {diff_secs}s exceeds {max_skew_secs}s"
+                )
+            }
