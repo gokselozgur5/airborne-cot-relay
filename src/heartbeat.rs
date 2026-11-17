@@ -293,3 +293,28 @@ impl HeartbeatGenerator {
         }
     }
 }
+
+impl HeartbeatGenerator {
+    /// Render detail XML tag with platform health and radio metrics.
+    fn render_detail_xml(&self) -> String {
+        format!(
+            r#"<detail><contact callsign="{callsign}"/><status state="{state}" battery="{bat:.1}" v="{v:.2}" temp="{temp:.1}" cpu="{cpu:.1}" uptime="{up}"/><radio rssi="{rssi}" snr="{snr:.1}" pwr="{pwr}" tx_pkts="{tx_p}" rx_pkts="{rx_p}" tx_err="{tx_e}" rx_err="{rx_e}" q="{q}" conn="{conn}"/></detail>"#,
+            callsign = escape_xml_attr(&self.platform.callsign),
+            state = self.platform.state.as_str(),
+            bat = self.platform.battery_pct,
+            v = self.platform.battery_voltage_v,
+            temp = self.platform.cpu_temp_c,
+            cpu = self.platform.cpu_load_pct,
+            up = self.platform.uptime_secs,
+            rssi = self.radio.rssi_dbm,
+            snr = self.radio.snr_db,
+            pwr = self.radio.tx_power_dbm,
+            tx_p = self.radio.tx_packets,
+            rx_p = self.radio.rx_packets,
+            tx_e = self.radio.tx_errors,
+            rx_e = self.radio.rx_errors,
+            q = self.radio.link_quality_pct,
+            conn = if self.radio.is_connected { "1" } else { "0" },
+        )
+    }
+}
