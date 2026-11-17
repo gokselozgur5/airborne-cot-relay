@@ -780,3 +780,14 @@ mod tests {
         let decompressed = deflate_decompress(&compressed).unwrap();
         assert_eq!(decompressed, SAMPLE_COT.as_bytes());
     }
+
+    #[test]
+    fn test_compressor_engine_snappy() {
+        let mut comp = CotPayloadCompressor::new(CompressorConfig::default());
+        let payload = comp.compress_cot_xml(SAMPLE_COT).unwrap();
+        assert!(payload.is_compressed());
+        assert_eq!(payload.algorithm, CompressionAlgorithm::Snappy);
+        assert!(payload.ratio() < 1.0);
+        let xml = comp.decompress_cot_xml(&payload).unwrap();
+        assert_eq!(xml, SAMPLE_COT);
+    }
