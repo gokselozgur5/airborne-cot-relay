@@ -240,3 +240,28 @@ impl FailoverRouter {
         Ok(())
     }
 }
+
+impl FailoverRouter {
+    pub fn route(&mut self, payload: &[u8]) -> Result<RoutingDecision, RouterError> {
+        self.validate_payload(payload)?;
+        let (idx, is_fo) = self.select_index().map_err(|e| {
+            self.stats.packets_dropped = self.stats.packets_dropped.saturating_add(1);
+            e
+        })?;
+        let iface = &self.interfaces[idx];
+        if is_fo { self.stats.failover_events = self.stats.failover_events.saturating_add(1); }
+        match iface.kind {
+            RouteKind::Broadcast => self.stats.broadcast_dispatched += 1,
+            RouteKind::Unicast => self.stats.unicast_dispatched += 1,
+        }
+        self.stats.packets_routed += 1;
+        self.stats.total_bytes_routed += payload.len() as u64;
+        Ok(RoutingDecision {
+            interface_id: iface.id.clone(),
+            kind: iface.kind,
+            destination: iface.destination,
+            payload_len: payload.len(),
+            is_failover: is_fo,
+        })
+    }
+}
