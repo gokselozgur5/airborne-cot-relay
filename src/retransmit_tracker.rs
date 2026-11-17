@@ -67,3 +67,22 @@ impl fmt::Display for TrackerError {
         }
     }
 }
+
+impl std::error::Error for TrackerError {}
+
+/// Operational statistics for the retransmission tracker.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct TrackerStats {
+    /// Total broadcast packets submitted for tracking.
+    pub packets_tracked: u64,
+    /// Total unique ACKs received.
+    pub acks_received: u64,
+    /// Total NACKs received.
+    pub nacks_received: u64,
+    /// Total retransmission events scheduled.
+    pub retransmissions_scheduled: u64,
+    /// Packets dropped after exceeding maximum retries.
+    pub packets_dropped_max_retries: u64,
+    /// Packets pruned after full acknowledgment.
+    pub packets_completed: u64,
+}
