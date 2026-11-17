@@ -402,3 +402,23 @@ impl TelemetryRingRecorder {
         )
     }
 }
+
+impl TelemetryRingRecorder {
+    fn write_csv<W: Write>(
+        &self,
+        report: &CrashDumpReport,
+        writer: &mut W,
+    ) -> Result<(), CrashDumpError> {
+        writeln!(
+            writer,
+            "seq,timestamp_ms,lat,lon,hae,roll,pitch,yaw,battery_v,cpu_c,link_pct,err_flags"
+        )
+        .map_err(|e| CrashDumpError::Io(e.to_string()))?;
+        for r in &report.records {
+            writer
+                .write_all(Self::format_csv_row(r).as_bytes())
+                .map_err(|e| CrashDumpError::Io(e.to_string()))?;
+        }
+        Ok(())
+    }
+}
