@@ -466,3 +466,24 @@ mod tests {
         assert_eq!(crc1, crc16_ccitt(data1));
     }
 
+    #[test]
+    fn test_packet_from_bytes_crc_mismatch() {
+        let header = FragmentHeader::new(10, 0, 1, 0x1234).unwrap();
+        let mut raw = header.encode().to_vec();
+        raw.extend_from_slice(b"some data");
+        let result = FragmentPacket::from_bytes(&raw);
+        assert_eq!(result, Err(FragmentationError::ChecksumMismatch));
+    }
+
+    #[test]
+    fn test_header_validation_errors() {
+        assert_eq!(
+            FragmentHeader::new(1, 0, 0, 0),
+            Err(FragmentationError::InvalidTotalFragments)
+        );
+        assert_eq!(
+            FragmentHeader::new(1, 3, 3, 0),
+            Err(FragmentationError::IndexOutOfBounds)
+        );
+    }
+
