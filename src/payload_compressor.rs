@@ -446,3 +446,20 @@ impl<'a> BitReader<'a> {
         Self { data, pos: 0, bit_buf: 0, bits: 0 }
     }
 }
+
+impl<'a> BitReader<'a> {
+    fn read_bits(&mut self, count: u8) -> Result<u32, CompressorError> {
+        while self.bits < count {
+            if self.pos >= self.data.len() {
+                return Err(CompressorError::CorruptPayload("unexpected eof in bitstream"));
+            }
+            self.bit_buf |= (self.data[self.pos] as u32) << self.bits;
+            self.pos += 1;
+            self.bits += 8;
+        }
+        let val = self.bit_buf & ((1 << count) - 1);
+        self.bit_buf >>= count;
+        self.bits -= count;
+        Ok(val)
+    }
+}
