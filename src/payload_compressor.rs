@@ -833,3 +833,9 @@ mod tests {
         let mut comp = CotPayloadCompressor::new(config);
         assert!(matches!(comp.compress(SAMPLE_COT.as_bytes()), Err(CompressorError::PayloadTooLarge { .. })));
     }
+
+    #[test]
+    fn test_corrupt_snappy_decompression() {
+        let corrupt = vec![0x10, 0x01, 0xff, 0xff];
+        assert!(snappy_decompress(&corrupt).is_err());
+    }
