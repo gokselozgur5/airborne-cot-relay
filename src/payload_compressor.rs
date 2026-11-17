@@ -171,3 +171,16 @@ impl CompressedPayload {
         Ok(Self { algorithm, uncompressed_len, data })
     }
 }
+
+/// Statistics tracking cumulative compression throughput and bandwidth savings.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct CompressorStats {
+    /// Cumulative uncompressed input bytes processed.
+    pub total_raw_bytes: u64,
+    /// Cumulative compressed output bytes emitted.
+    pub total_compressed_bytes: u64,
+    /// Total count of payloads compressed.
+    pub payloads_compressed: u64,
+    /// Total count of payloads bypassed due to threshold.
+    pub payloads_bypassed: u64,
+}
