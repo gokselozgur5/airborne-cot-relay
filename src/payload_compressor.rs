@@ -745,3 +745,16 @@ impl CotPayloadCompressor {
         }
     }
 }
+
+impl CotPayloadCompressor {
+    /// Compresses a Cursor-on-Target XML string into a compressed payload.
+    pub fn compress_cot_xml(&mut self, xml: &str) -> Result<CompressedPayload, CompressorError> {
+        self.compress(xml.as_bytes())
+    }
+
+    /// Decompresses payload into a valid UTF-8 Cursor-on-Target XML string.
+    pub fn decompress_cot_xml(&self, compressed: &CompressedPayload) -> Result<String, CompressorError> {
+        let bytes = self.decompress(compressed)?;
+        String::from_utf8(bytes).map_err(|_| CompressorError::InvalidUtf8)
+    }
+}
