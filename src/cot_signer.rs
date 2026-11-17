@@ -588,3 +588,22 @@ mod tests {
         let payload = b"legitimate-cot-telemetry";
         let mut frame = signer.create_signed_frame(payload, 1000);
 
+        frame[COT_HEADER_LEN] ^= 0x01; // tamper payload
+
+        let mut validator = CotSignatureValidator::new(60);
+        validator.add_key(1, key);
+        let err = validator.verify_frame(&frame, 1000).unwrap_err();
+        assert_eq!(err, CotSignerError::InvalidSignature);
+    }
+
+    #[test]
+    fn test_tampered_signature_rejected() {
+        let key = b"mission-key-beta".to_vec();
+        let mut signer = CotSigner::new(CotSignerConfig {
+            key_id: 2,
+            secret_key: key.clone(),
+            max_clock_skew_secs: 60,
+        });
+        let mut frame = signer.create_signed_frame(b"telemetry", 2000);
+        frame[25] ^= 0xff; // tamper signature byte
+
