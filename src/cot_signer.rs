@@ -687,3 +687,22 @@ mod tests {
             CotSignerError::UnsupportedVersion(9)
         );
     }
+
+    #[test]
+    fn test_signer_and_validator_stats() {
+        let key = b"stats-key".to_vec();
+        let mut signer = CotSigner::new(CotSignerConfig {
+            key_id: 1,
+            secret_key: key.clone(),
+            max_clock_skew_secs: 60,
+        });
+        let frame = signer.create_signed_frame(b"stats-payload", 1000);
+        assert_eq!(signer.stats().signatures_generated, 1);
+        assert_eq!(signer.stats().frames_packaged, 1);
+
+        let mut validator = CotSignatureValidator::new(60);
+        validator.add_key(1, key);
+        validator.verify_frame(&frame, 1000).unwrap();
+        assert_eq!(validator.stats().frames_processed, 1);
+        assert_eq!(validator.stats().valid_signatures, 1);
+    }
