@@ -207,3 +207,19 @@ fn encode_varint_u32(mut val: u32, out: &mut Vec<u8>) {
     }
     out.push(val as u8);
 }
+
+fn decode_varint_u32(input: &[u8]) -> Result<(u32, usize), CompressorError> {
+    let mut val: u32 = 0;
+    let mut shift = 0;
+    for (i, &b) in input.iter().enumerate() {
+        if shift >= 32 {
+            return Err(CompressorError::CorruptPayload("varint overflow"));
+        }
+        val |= ((b & 0x7f) as u32) << shift;
+        if (b & 0x80) == 0 {
+            return Ok((val, i + 1));
+        }
+        shift += 7;
+    }
+    Err(CompressorError::CorruptPayload("truncated varint"))
+}
