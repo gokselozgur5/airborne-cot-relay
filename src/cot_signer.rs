@@ -328,3 +328,23 @@ impl CotSigner {
         let sig = self.sign_raw(payload);
         bytes_to_hex(&sig)
     }
+    pub fn create_signed_frame(&mut self, payload: &[u8], timestamp: u64) -> Vec<u8> {
+        let mut to_sign = Vec::with_capacity(12 + payload.len());
+        to_sign.extend_from_slice(&self.config.key_id.to_be_bytes());
+        to_sign.extend_from_slice(&timestamp.to_be_bytes());
+        to_sign.extend_from_slice(payload);
+
+        let signature = hmac_sha256(&self.config.secret_key, &to_sign);
+        self.stats.signatures_generated += 1;
+        self.stats.frames_packaged += 1;
+
+        let mut frame = Vec::with_capacity(COT_HEADER_LEN + payload.len());
+        frame.extend_from_slice(&COT_SIG_MAGIC);
+        frame.push(COT_SIG_VERSION);
+        frame.extend_from_slice(&self.config.key_id.to_be_bytes());
+        frame.extend_from_slice(&timestamp.to_be_bytes());
+        frame.extend_from_slice(&signature);
+        frame.extend_from_slice(&(payload.len() as u32).to_be_bytes());
+        frame.extend_from_slice(payload);
+        frame
+    }
