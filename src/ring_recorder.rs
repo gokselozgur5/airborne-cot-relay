@@ -275,3 +275,23 @@ impl TelemetryRingRecorder {
         }
     }
 }
+
+impl TelemetryRingRecorder {
+    /// Fetch the newest recorded telemetry sample.
+    pub fn latest(&self) -> Option<TelemetryRecord> {
+        let inner = match self.inner.read() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        inner.buffer.back().cloned()
+    }
+
+    /// Fetch the oldest recorded telemetry sample currently retained.
+    pub fn oldest(&self) -> Option<TelemetryRecord> {
+        let inner = match self.inner.read() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        inner.buffer.front().cloned()
+    }
+}
