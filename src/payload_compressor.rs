@@ -414,3 +414,22 @@ impl BitWriter {
         Self { buf: Vec::new(), bit_buf: 0, bits: 0 }
     }
 }
+
+impl BitWriter {
+    fn write_bits(&mut self, val: u32, count: u8) {
+        self.bit_buf |= (val & ((1 << count) - 1)) << self.bits;
+        self.bits += count;
+        while self.bits >= 8 {
+            self.buf.push(self.bit_buf as u8);
+            self.bit_buf >>= 8;
+            self.bits -= 8;
+        }
+    }
+    fn flush_byte(&mut self) {
+        if self.bits > 0 {
+            self.buf.push(self.bit_buf as u8);
+            self.bit_buf = 0;
+            self.bits = 0;
+        }
+    }
+}
