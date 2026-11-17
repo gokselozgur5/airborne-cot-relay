@@ -820,3 +820,9 @@ mod tests {
         let parsed = CompressedPayload::from_framed_bytes(&framed).unwrap();
         assert_eq!(parsed, payload);
     }
+
+    #[test]
+    fn test_framed_bad_header() {
+        let bad = vec![0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x05, 0x01];
+        assert_eq!(CompressedPayload::from_framed_bytes(&bad), Err(CompressorError::HeaderMismatch));
+    }
