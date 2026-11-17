@@ -278,3 +278,13 @@ mod tests {
         assert_eq!(bloom.count_ones(), 0);
         assert!(!bloom.contains(b"alpha"));
     }
+    #[test]
+    fn test_cache_insert_and_duplicate() {
+        let mut cache = CotDedupCache::new();
+        assert!(cache.check_and_insert(b"cot-packet-1", 1000));
+        assert_eq!(cache.len(), 1);
+        assert!(!cache.check_and_insert(b"cot-packet-1", 1500));
+        assert_eq!(cache.stats().duplicates_dropped, 1);
+        assert_eq!(cache.stats().unique_passed, 1);
+        assert!(cache.is_duplicate(b"cot-packet-1", 1600));
+    }
