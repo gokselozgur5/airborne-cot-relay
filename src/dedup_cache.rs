@@ -157,3 +157,22 @@ impl CotDedupCache {
             stats: DedupStats::default(),
         }
     }
+    /// Returns number of items currently in cache.
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Returns true if cache contains no entries.
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
+    /// Returns operational statistics.
+    pub fn stats(&self) -> DedupStats {
+        self.stats
+    }
+
+    /// Returns reference to internal bloom filter.
+    pub fn bloom(&self) -> &DedupBloomFilter {
+        &self.bloom
+    }
