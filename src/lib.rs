@@ -109,3 +109,9 @@ pub use ring_recorder::{
     CrashDumpError, CrashDumpReport, DumpFormat, OverwriteMode, RecorderStats, RingRecorderConfig,
     TelemetryRecord, TelemetryRingRecorder,
 };
+
+pub mod failover_router;
+pub use failover_router::{
+    FailoverPolicy, FailoverRouter, NetworkInterface, RouteKind, RouterConfig, RouterError,
+    RouterStats, RoutingDecision,
+};
