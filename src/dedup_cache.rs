@@ -176,3 +176,19 @@ impl CotDedupCache {
     pub fn bloom(&self) -> &DedupBloomFilter {
         &self.bloom
     }
+    fn evict_if_needed(&mut self) {
+        if self.entries.len() >= self.config.max_capacity {
+            if let Some((_, oldest_key)) = self.expiry_queue.pop_front() {
+                if self.entries.remove(&oldest_key).is_some() {
+                    self.stats.evictions += 1;
+                }
+            }
+        }
+    }
+
+    /// Clears all entries, queues, and resets bloom filter.
+    pub fn clear(&mut self) {
+        self.bloom.clear();
+        self.entries.clear();
+        self.expiry_queue.clear();
+    }
