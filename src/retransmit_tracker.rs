@@ -131,3 +131,22 @@ impl RetransmitTracker {
             stats: TrackerStats::default(),
         }
     }
+    pub fn stats(&self) -> &TrackerStats {
+        &self.stats
+    }
+
+    pub fn tracked_count(&self) -> usize {
+        self.records.len()
+    }
+
+    pub fn track_packet(&mut self, seq: u64, payload: Vec<u8>, now_ms: u64) -> Result<(), TrackerError> {
+        if self.records.contains_key(&seq) {
+            return Err(TrackerError::DuplicateSequence(seq));
+        }
+        if self.records.len() >= self.config.max_tracked_packets {
+            return Err(TrackerError::CapacityExceeded(self.config.max_tracked_packets));
+        }
+        self.records.insert(seq, PacketRecord::new(seq, payload, now_ms));
+        self.stats.packets_tracked += 1;
+        Ok(())
+    }
