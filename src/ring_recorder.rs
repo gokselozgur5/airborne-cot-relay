@@ -355,3 +355,30 @@ impl TelemetryRingRecorder {
         }
     }
 }
+
+impl TelemetryRingRecorder {
+    /// Export a crash dump report into a string in the specified format.
+    pub fn dump_to_string(
+        &self,
+        report: &CrashDumpReport,
+        format: DumpFormat,
+    ) -> Result<String, CrashDumpError> {
+        let mut buffer = Vec::new();
+        self.dump_to_writer(report, format, &mut buffer)?;
+        String::from_utf8(buffer).map_err(|e| CrashDumpError::Formatting(e.to_string()))
+    }
+
+    /// Write crash dump report to an arbitrary output stream.
+    pub fn dump_to_writer<W: Write>(
+        &self,
+        report: &CrashDumpReport,
+        format: DumpFormat,
+        writer: &mut W,
+    ) -> Result<(), CrashDumpError> {
+        match format {
+            DumpFormat::Json => self.write_json(report, writer),
+            DumpFormat::Csv => self.write_csv(report, writer),
+            DumpFormat::Text => self.write_text(report, writer),
+        }
+    }
+}
