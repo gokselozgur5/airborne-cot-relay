@@ -316,3 +316,19 @@ impl TelemetryRingRecorder {
         inner.buffer.iter().skip(skip).cloned().collect()
     }
 }
+
+impl TelemetryRingRecorder {
+    /// Return all records with timestamps within `[start_ms, end_ms]`.
+    pub fn get_time_range(&self, start_ms: u64, end_ms: u64) -> Vec<TelemetryRecord> {
+        let inner = match self.inner.read() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        inner
+            .buffer
+            .iter()
+            .filter(|r| r.timestamp_ms >= start_ms && r.timestamp_ms <= end_ms)
+            .cloned()
+            .collect()
+    }
+}
