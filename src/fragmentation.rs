@@ -303,3 +303,26 @@ impl InFlightSession {
         }
     }
 
+    pub fn insert_fragment(&mut self, seq_index: u16, data: Vec<u8>, now_ms: u64) -> bool {
+        self.last_updated_ms = now_ms;
+        if self.received_fragments.contains_key(&seq_index) {
+            return false;
+        }
+        self.received_fragments.insert(seq_index, data);
+        true
+    }
+
+    pub fn is_complete(&self) -> bool {
+        self.received_fragments.len() == self.total_fragments as usize
+    }
+
+    pub fn missing_indices(&self) -> Vec<u16> {
+        let mut missing = Vec::new();
+        for idx in 0..self.total_fragments {
+            if !self.received_fragments.contains_key(&idx) {
+                missing.push(idx);
+            }
+        }
+        missing
+    }
+
