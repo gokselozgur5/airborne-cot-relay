@@ -128,3 +128,20 @@ pub fn sha256(data: &[u8]) -> [u8; 32] {
     }
     buf.extend_from_slice(&bit_len.to_be_bytes());
 
+    for chunk in buf.chunks_exact(64) {
+        let mut block = [0u8; 64];
+        block.copy_from_slice(chunk);
+        sha256_block(&mut state, &block);
+    }
+    let mut out = [0u8; 32];
+    for (i, word) in state.iter().enumerate() {
+        out[i * 4..i * 4 + 4].copy_from_slice(&word.to_be_bytes());
+    }
+    out
+}
+
+/// Constant-time slice equality comparison against timing side channels.
+pub fn constant_time_compare(a: &[u8], b: &[u8]) -> bool {
+    if a.len() != b.len() {
+        return false;
+    }
