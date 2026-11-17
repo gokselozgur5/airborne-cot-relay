@@ -246,3 +246,18 @@ impl fmt::Display for CotSignerError {
                     "message timestamp in future by {diff_secs}s exceeds {max_skew_secs}s"
                 )
             }
+        }
+    }
+}
+
+impl std::error::Error for CotSignerError {}
+
+/// Verified or packaged signed CoT wire frame.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SignedCotFrame {
+    pub key_id: u32,
+    pub timestamp: u64,
+    pub signature: [u8; 32],
+    pub payload: Vec<u8>,
+}
+
