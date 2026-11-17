@@ -46,3 +46,24 @@ impl RbtConfig {
         }
     }
 }
+
+/// Errors originating from tracker operations.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TrackerError {
+    /// Tracker capacity exceeded.
+    CapacityExceeded(usize),
+    /// Sequence number already tracked.
+    DuplicateSequence(u64),
+    /// Sequence number not found in tracker.
+    PacketNotFound(u64),
+}
+
+impl fmt::Display for TrackerError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::CapacityExceeded(c) => write!(f, "tracker capacity exceeded: {}", c),
+            Self::DuplicateSequence(s) => write!(f, "sequence {} already tracked", s),
+            Self::PacketNotFound(s) => write!(f, "sequence {} not found", s),
+        }
+    }
+}
