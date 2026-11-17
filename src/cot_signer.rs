@@ -312,3 +312,19 @@ impl CotSigner {
         }
     }
 
+    pub fn key_id(&self) -> u32 {
+        self.config.key_id
+    }
+
+    pub fn stats(&self) -> &CotSignerStats {
+        &self.stats
+    }
+    pub fn sign_raw(&mut self, payload: &[u8]) -> [u8; 32] {
+        self.stats.signatures_generated += 1;
+        hmac_sha256(&self.config.secret_key, payload)
+    }
+
+    pub fn sign_raw_hex(&mut self, payload: &[u8]) -> String {
+        let sig = self.sign_raw(payload);
+        bytes_to_hex(&sig)
+    }
