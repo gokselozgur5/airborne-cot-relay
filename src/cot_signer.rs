@@ -81,3 +81,19 @@ fn sha256_block(state: &mut [u32; 8], block: &[u8; 64]) {
     let mut g = state[6];
     let mut h = state[7];
 
+    for t in 0..64 {
+        let t1 = h
+            .wrapping_add(sigma1(e))
+            .wrapping_add(ch(e, f, g))
+            .wrapping_add(K256[t])
+            .wrapping_add(w[t]);
+        let t2 = sigma0(a).wrapping_add(maj(a, b, c));
+        h = g;
+        g = f;
+        f = e;
+        e = d.wrapping_add(t1);
+        d = c;
+        c = b;
+        b = a;
+        a = t1.wrapping_add(t2);
+    }
