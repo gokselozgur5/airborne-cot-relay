@@ -202,3 +202,28 @@ impl Default for FragmenterConfig {
 
 /// Engine responsible for fragmenting large CoT payloads into MTU-compliant packets.
 #[derive(Debug, Clone)]
+pub struct PayloadFragmenter {
+    config: FragmenterConfig,
+    next_msg_id: u32,
+}
+
+impl PayloadFragmenter {
+    pub fn new(config: FragmenterConfig) -> Result<Self, FragmentationError> {
+        if config.mtu < MIN_MTU {
+            return Err(FragmentationError::MtuTooSmall);
+        }
+        Ok(Self {
+            config,
+            next_msg_id: 1,
+        })
+    }
+
+    pub fn fragment(&mut self, payload: &[u8]) -> Result<Vec<FragmentPacket>, FragmentationError> {
+        let msg_id = self.next_msg_id;
+        self.next_msg_id = self.next_msg_id.wrapping_add(1);
+        if self.next_msg_id == 0 {
+            self.next_msg_id = 1;
+        }
+        self.fragment_with_id(msg_id, payload)
+    }
+
