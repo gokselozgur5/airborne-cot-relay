@@ -222,3 +222,21 @@ impl FailoverRouter {
         }
     }
 }
+
+impl FailoverRouter {
+    fn validate_payload(&mut self, payload: &[u8]) -> Result<(), RouterError> {
+        self.stats.packets_received = self.stats.packets_received.saturating_add(1);
+        if payload.is_empty() {
+            self.stats.packets_dropped = self.stats.packets_dropped.saturating_add(1);
+            return Err(RouterError::EmptyPayload);
+        }
+        if payload.len() > self.config.max_payload_size {
+            self.stats.packets_dropped = self.stats.packets_dropped.saturating_add(1);
+            return Err(RouterError::PayloadTooLarge {
+                size: payload.len(),
+                limit: self.config.max_payload_size,
+            });
+        }
+        Ok(())
+    }
+}
