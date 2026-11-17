@@ -72,3 +72,23 @@ impl TelemetryRecord {
         }
     }
 }
+
+/// Supported output formats for telemetry crash dump export.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DumpFormat {
+    /// Structured JSON format with array of records.
+    Json,
+    /// Comma-separated values format with header row.
+    Csv,
+    /// Human-readable diagnostic text dump.
+    Text,
+}
+
+/// Buffer eviction policy when recorder capacity is exceeded.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum OverwriteMode {
+    /// Overwrite oldest recorded telemetry samples.
+    OverwriteOldest,
+    /// Reject new telemetry records when capacity is full.
+    RejectNew,
+}
