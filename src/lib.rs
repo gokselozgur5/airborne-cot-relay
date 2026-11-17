@@ -93,3 +93,8 @@ pub mod bandwidth_throttle;
 pub use bandwidth_throttle::{
     BandwidthThrottle, CongestionState, DropReason, ThrottleConfig, ThrottleDecision, ThrottleStats,
 };
+
+pub mod cot_signer;
+pub use cot_signer::{
+    bytes_to_hex, constant_time_compare, hmac_sha256, sha256,
+};
