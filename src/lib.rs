@@ -71,3 +71,9 @@ pub mod retransmit_tracker;
 pub use retransmit_tracker::{
     PacketRecord, RbtConfig, RetransmitTracker, TrackerError, TrackerStats,
 };
+
+pub mod multicast_listener;
+pub use multicast_listener::{
+    DropPolicy, DroppingStats, DroppingStatsSnapshot, MulticastListener,
+    MulticastListenerConfig, MulticastListenerError, MulticastPacket,
+};
