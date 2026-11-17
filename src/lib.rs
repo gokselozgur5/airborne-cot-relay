@@ -103,3 +103,9 @@ pub use cot_signer::{
     CotSignerStats, CotValidatorStats, SignedCotFrame,
     COT_HEADER_LEN, COT_SIG_MAGIC, COT_SIG_VERSION,
 };
+
+pub mod ring_recorder;
+pub use ring_recorder::{
+    CrashDumpError, CrashDumpReport, DumpFormat, OverwriteMode, RecorderStats, RingRecorderConfig,
+    TelemetryRecord, TelemetryRingRecorder,
+};
