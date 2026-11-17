@@ -20,3 +20,25 @@ pub struct MulticastPacket {
     pub received_at: Instant,
 }
 
+impl MulticastPacket {
+    pub fn new(data: Vec<u8>, source: SocketAddr) -> Self {
+        Self {
+            data,
+            source,
+            received_at: Instant::now(),
+        }
+    }
+
+    pub fn with_timestamp(data: Vec<u8>, source: SocketAddr, received_at: Instant) -> Self {
+        Self {
+            data,
+            source,
+            received_at,
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
