@@ -186,3 +186,19 @@ impl FragmentPacket {
 
 /// Configuration settings for the payload fragmenter.
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FragmenterConfig {
+    pub mtu: usize,
+    pub max_payload_size: usize,
+}
+
+impl Default for FragmenterConfig {
+    fn default() -> Self {
+        Self {
+            mtu: DEFAULT_MTU,
+            max_payload_size: 1024 * 1024,
+        }
+    }
+}
+
+/// Engine responsible for fragmenting large CoT payloads into MTU-compliant packets.
+#[derive(Debug, Clone)]
