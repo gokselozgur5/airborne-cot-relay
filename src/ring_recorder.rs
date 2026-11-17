@@ -201,3 +201,27 @@ impl TelemetryRingRecorder {
         true
     }
 }
+
+impl TelemetryRingRecorder {
+    /// Convenience helper to record a new pose with sensor metrics.
+    pub fn record_pose(
+        &self,
+        sequence: u64,
+        timestamp_ms: u64,
+        pose: PlatformPose,
+        battery_volts: f32,
+        cpu_temp_c: f32,
+        link_quality_pct: u8,
+        error_flags: u32,
+    ) -> bool {
+        self.record(TelemetryRecord::new(
+            sequence,
+            timestamp_ms,
+            pose,
+            battery_volts,
+            cpu_temp_c,
+            link_quality_pct,
+            error_flags,
+        ))
+    }
+}
