@@ -379,3 +379,27 @@ impl ReassemblyEngine {
         if !self.sessions.contains_key(&msg_id) {
             if self.sessions.len() >= self.config.max_concurrent_sessions {
                 return Err(FragmentationError::CapacityExceeded);
+            }
+            self.sessions
+                .insert(msg_id, InFlightSession::new(msg_id, total, now_ms));
+        }
+
+        let session = self.sessions.get_mut(&msg_id).unwrap();
+        if session.total_fragments != total {
+            return Err(FragmentationError::InvalidTotalFragments);
+        }
+
+        let inserted = session.insert_fragment(seq, packet.data.clone(), now_ms);
+        if !inserted {
+            self.stats.duplicate_fragments += 1;
+        }
+
+        if session.is_complete() {
+            let session = self.sessions.remove(&msg_id).unwrap();
+            self.stats.messages_completed += 1;
+            Ok(Some(session.assemble()))
+        } else {
+            Ok(None)
+        }
+    }
+
