@@ -672,3 +672,18 @@ mod tests {
             }
         );
 
+        let mut bad_magic = vec![0u8; 60];
+        bad_magic[0..4].copy_from_slice(b"BADM");
+        assert_eq!(
+            validator.verify_frame(&bad_magic, 100).unwrap_err(),
+            CotSignerError::InvalidMagic(*b"BADM")
+        );
+
+        let mut bad_ver = vec![0u8; 60];
+        bad_ver[0..4].copy_from_slice(b"CSIG");
+        bad_ver[4] = 9;
+        assert_eq!(
+            validator.verify_frame(&bad_ver, 100).unwrap_err(),
+            CotSignerError::UnsupportedVersion(9)
+        );
+    }
