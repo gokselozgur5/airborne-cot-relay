@@ -271,3 +271,20 @@ mod tests {
         assert_eq!(pending[0].0, 42);
         assert_eq!(pending[0].1, vec![1, 2, 3]);
     }
+    #[test]
+    fn test_selective_ack_flow() {
+        let mut tracker = RetransmitTracker::new(RbtConfig::default());
+        tracker.track_packet(101, vec![1], 1000).unwrap();
+        tracker.track_packet(102, vec![2], 1000).unwrap();
+        tracker.track_packet(103, vec![3], 1000).unwrap();
+
+        tracker.process_selective_ack("node-a", 103, &[102]);
+
+        assert!(tracker.is_acked_by(101, "node-a"));
+        assert!(!tracker.is_acked_by(102, "node-a"));
+        assert!(tracker.is_acked_by(103, "node-a"));
+
+        let pending = tracker.get_pending_retransmissions(1050);
+        assert_eq!(pending.len(), 1);
+        assert_eq!(pending[0].0, 102);
+    }
