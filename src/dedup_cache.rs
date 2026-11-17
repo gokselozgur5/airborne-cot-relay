@@ -40,3 +40,27 @@ pub struct DedupStats {
     /// Entries evicted due to capacity.
     pub evictions: u64,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct SlidingEntry {
+    last_seen_ms: u64,
+    expires_at_ms: u64,
+}
+
+impl SlidingEntry {
+    fn new(now_ms: u64, window_ms: u64) -> Self {
+        Self {
+            last_seen_ms: now_ms,
+            expires_at_ms: now_ms.saturating_add(window_ms),
+        }
+    }
+
+    fn refresh(&mut self, now_ms: u64, window_ms: u64) {
+        self.last_seen_ms = now_ms;
+        self.expires_at_ms = now_ms.saturating_add(window_ms);
+    }
+
+    fn is_expired(&self, now_ms: u64) -> bool {
+        now_ms >= self.expires_at_ms
+    }
+}
