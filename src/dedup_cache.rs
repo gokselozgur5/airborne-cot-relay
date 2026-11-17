@@ -223,7 +223,8 @@ impl CotDedupCache {
             if let Some(entry) = self.entries.get_mut(key) {
                 if !entry.is_expired(now_ms) {
                     entry.refresh(now_ms, self.config.sliding_window_ms);
-                    self.expiry_queue.push_back((entry.expires_at_ms, key.to_vec()));
+                    self.expiry_queue
+                        .push_back((entry.expires_at_ms, key.to_vec()));
                     self.stats.duplicates_dropped += 1;
                     return false;
                 }
@@ -244,7 +245,9 @@ impl CotDedupCache {
         if !self.bloom.contains(key) {
             return false;
         }
-        self.entries.get(key).map_or(false, |e| !e.is_expired(now_ms))
+        self.entries
+            .get(key)
+            .map_or(false, |e| !e.is_expired(now_ms))
     }
 
     /// Convenience wrapper for string keys.
