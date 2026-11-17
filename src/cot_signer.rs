@@ -297,3 +297,18 @@ pub struct CotValidatorStats {
     pub timestamp_future: u64,
     pub malformed_frames: u64,
 }
+
+/// Cursor-on-Target cryptographic signature generator.
+pub struct CotSigner {
+    config: CotSignerConfig,
+    stats: CotSignerStats,
+}
+
+impl CotSigner {
+    pub fn new(config: CotSignerConfig) -> Self {
+        Self {
+            config,
+            stats: CotSignerStats::default(),
+        }
+    }
+
