@@ -247,3 +247,31 @@ impl TelemetryRingRecorder {
         inner.buffer.len()
     }
 }
+
+impl TelemetryRingRecorder {
+    /// Check whether the ring recorder buffer is empty.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Maximum capacity of the ring buffer.
+    pub fn capacity(&self) -> usize {
+        self.config.capacity
+    }
+
+    /// Retrieve latest operational recorder statistics.
+    pub fn stats(&self) -> RecorderStats {
+        let inner = match self.inner.read() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        RecorderStats {
+            total_recorded: inner.total_recorded,
+            total_overwritten: inner.total_overwritten,
+            buffer_capacity: self.config.capacity,
+            current_len: inner.buffer.len(),
+            oldest_timestamp_ms: inner.buffer.front().map(|r| r.timestamp_ms),
+            newest_timestamp_ms: inner.buffer.back().map(|r| r.timestamp_ms),
+        }
+    }
+}
