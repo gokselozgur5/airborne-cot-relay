@@ -179,3 +179,25 @@ impl TelemetryRingRecorder {
         }
     }
 }
+
+impl TelemetryRingRecorder {
+    /// Record a telemetry sample into the circular buffer.
+    pub fn record(&self, record: TelemetryRecord) -> bool {
+        let mut inner = match self.inner.write() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        if inner.buffer.len() >= self.config.capacity {
+            match self.config.overwrite_mode {
+                OverwriteMode::OverwriteOldest => {
+                    inner.buffer.pop_front();
+                    inner.total_overwritten += 1;
+                }
+                OverwriteMode::RejectNew => return false,
+            }
+        }
+        inner.buffer.push_back(record);
+        inner.total_recorded += 1;
+        true
+    }
+}
