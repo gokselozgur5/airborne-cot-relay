@@ -357,3 +357,25 @@ pub struct ReassemblyEngine {
     stats: FragmentationStats,
 }
 
+impl ReassemblyEngine {
+    pub fn new(config: ReassemblyConfig) -> Self {
+        Self {
+            config,
+            sessions: HashMap::new(),
+            stats: FragmentationStats::default(),
+        }
+    }
+
+    pub fn process_packet(
+        &mut self,
+        packet: &FragmentPacket,
+        now_ms: u64,
+    ) -> Result<Option<Vec<u8>>, FragmentationError> {
+        self.stats.fragments_received += 1;
+        let msg_id = packet.header.msg_id;
+        let total = packet.header.total_fragments;
+        let seq = packet.header.seq_index;
+
+        if !self.sessions.contains_key(&msg_id) {
+            if self.sessions.len() >= self.config.max_concurrent_sessions {
+                return Err(FragmentationError::CapacityExceeded);
