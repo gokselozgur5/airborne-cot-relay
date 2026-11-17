@@ -315,4 +315,17 @@ mod tests {
         assert_eq!(throttle.stats().packets_dropped, 1);
         assert_eq!(throttle.stats().packets_admitted, 1);
     }
+
+    #[test]
+    fn test_link_conditions_state_transitions() {
+        let mut throttle = BandwidthThrottle::new(ThrottleConfig::default());
+        assert_eq!(throttle.state(), CongestionState::Optimal);
+        throttle.update_link_conditions(Duration::from_millis(500), 0.15);
+        assert_eq!(throttle.state(), CongestionState::Congested);
+        throttle.update_link_conditions(Duration::from_millis(1000), 0.30);
+        assert_eq!(throttle.state(), CongestionState::Critical);
+        throttle.update_link_conditions(Duration::from_millis(50), 0.001);
+        assert_eq!(throttle.state(), CongestionState::Optimal);
+        assert_eq!(throttle.stats().congestion_transitions, 3);
+    }
 }
