@@ -152,3 +152,21 @@ impl FragmentHeader {
 }
 
 /// Encapsulates a fragment header and partial payload data.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FragmentPacket {
+    pub header: FragmentHeader,
+    pub data: Vec<u8>,
+}
+
+impl FragmentPacket {
+    pub fn new(header: FragmentHeader, data: Vec<u8>) -> Self {
+        Self { header, data }
+    }
+
+    pub fn to_bytes(&self) -> Vec<u8> {
+        let mut out = Vec::with_capacity(HEADER_SIZE + self.data.len());
+        out.extend_from_slice(&self.header.encode());
+        out.extend_from_slice(&self.data);
+        out
+    }
+
