@@ -86,3 +86,16 @@ pub struct TrackerStats {
     /// Packets pruned after full acknowledgment.
     pub packets_completed: u64,
 }
+
+/// Record of an active broadcast packet.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PacketRecord {
+    pub seq: u64,
+    pub payload: Vec<u8>,
+    pub first_sent_ms: u64,
+    pub last_sent_ms: u64,
+    pub retransmit_count: u32,
+    pub acks: HashSet<String>,
+    pub nacks: HashSet<String>,
+    pub force_retransmit: bool,
+}
