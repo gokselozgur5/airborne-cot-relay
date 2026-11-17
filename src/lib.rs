@@ -39,17 +39,17 @@ pub mod track_filter;
 pub mod ttl_cache;
 pub use ttl_cache::{CacheEntry, CacheStats, PacketTtlCache, TtlCache, TtlConfig};
 
+pub mod frame_codec;
 pub mod relay_loop;
 pub mod xml_sanitize;
-pub mod frame_codec;
 pub use frame_codec::{Endianness, FrameCodecError, FrameDecoder, LengthField};
-pub mod udp_batch;
 pub mod json_cot_codec;
+pub mod udp_batch;
 pub use json_cot_codec::{
     cot_xml_to_json, json_to_cot_xml, CotEventDto, CotToJsonStream, JsonCotError, JsonToCotStream,
 };
-pub mod multicast_rx;
 pub mod bloom_dedup;
+pub mod multicast_rx;
 pub mod rate_limiter;
 pub use rate_limiter::{RateLimiterConfig, RateLimiterStats, TokenBucket};
 pub mod telemetry_snapshot;
@@ -60,8 +60,7 @@ pub use reconnect_client::{
 };
 pub mod schema_version;
 pub use schema_version::{
-    downgrade_cot_xml, CotSchemaVersion, DowngradeTransformer, SchemaNegotiator,
-    SchemaVersionError,
+    downgrade_cot_xml, CotSchemaVersion, DowngradeTransformer, SchemaNegotiator, SchemaVersionError,
 };
 pub mod priority_scheduler;
 pub use priority_scheduler::{
@@ -73,8 +72,8 @@ pub use retransmit_tracker::{
 };
 pub mod multicast_listener;
 pub use multicast_listener::{
-    DropPolicy, DroppingStats, DroppingStatsSnapshot, MulticastListener,
-    MulticastListenerConfig, MulticastListenerError, MulticastPacket,
+    DropPolicy, DroppingStats, DroppingStatsSnapshot, MulticastListener, MulticastListenerConfig,
+    MulticastListenerError, MulticastPacket,
 };
 pub mod heartbeat;
 pub use heartbeat::{
@@ -82,12 +81,15 @@ pub use heartbeat::{
     PlatformOperationalState, RadioMetrics,
 };
 pub mod dedup_cache;
-pub use dedup_cache::{
-    CotDedupCache, DedupBloomFilter, DedupCacheConfig, DedupStats,
-};
+pub use dedup_cache::{CotDedupCache, DedupBloomFilter, DedupCacheConfig, DedupStats};
 
 pub mod payload_compressor;
 pub use payload_compressor::{
     CompressedPayload, CompressionAlgorithm, CompressorConfig, CompressorError, CompressorStats,
     CotPayloadCompressor,
+};
+
+pub mod bandwidth_throttle;
+pub use bandwidth_throttle::{
+    BandwidthThrottle, CongestionState, DropReason, ThrottleConfig, ThrottleDecision, ThrottleStats,
 };
