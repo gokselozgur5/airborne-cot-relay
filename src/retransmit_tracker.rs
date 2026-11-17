@@ -29,3 +29,20 @@ impl Default for RbtConfig {
         }
     }
 }
+
+impl RbtConfig {
+    /// Creates a custom tracker configuration.
+    pub const fn new(
+        timeout_ms: u64,
+        max_retries: u32,
+        capacity: usize,
+        nack_immediate: bool,
+    ) -> Self {
+        Self {
+            retransmit_timeout_ms: timeout_ms,
+            max_retransmissions: max_retries,
+            max_tracked_packets: capacity,
+            nack_immediate,
+        }
+    }
+}
