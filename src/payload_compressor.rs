@@ -764,3 +764,11 @@ mod tests {
     use super::*;
 
     const SAMPLE_COT: &str = "<event version=\"2.0\" uid=\"AIR-01\" type=\"a-f-A-M-F\"><point lat=\"34.12\" lon=\"-118.65\"/><detail><track course=\"128.5\" speed=\"185.2\"/></detail></event>";
+
+    #[test]
+    fn test_snappy_roundtrip() {
+        let compressed = snappy_compress(SAMPLE_COT.as_bytes());
+        assert!(compressed.len() < SAMPLE_COT.len());
+        let decompressed = snappy_decompress(&compressed).unwrap();
+        assert_eq!(decompressed, SAMPLE_COT.as_bytes());
+    }
