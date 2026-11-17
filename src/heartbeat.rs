@@ -203,3 +203,14 @@ impl HeartbeatConfig {
         self
     }
 }
+
+/// Snapshot container of an emitted heartbeat event.
+#[derive(Debug, Clone, PartialEq)]
+pub struct HeartbeatRecord {
+    pub sequence: u64,
+    pub timestamp_ms: u64,
+    pub stale_ms: u64,
+    pub platform: PlatformMetrics,
+    pub radio: RadioMetrics,
+    pub cot_xml: String,
+}
