@@ -288,3 +288,16 @@ mod tests {
         assert_eq!(cache.stats().unique_passed, 1);
         assert!(cache.is_duplicate(b"cot-packet-1", 1600));
     }
+    #[test]
+    fn test_cache_sliding_expiration() {
+        let config = DedupCacheConfig {
+            sliding_window_ms: 1000,
+            ..Default::default()
+        };
+        let mut cache = CotDedupCache::with_config(config);
+        assert!(cache.check_and_insert(b"p1", 1000));
+        assert!(!cache.check_and_insert(b"p1", 1500));
+        assert!(!cache.check_and_insert(b"p1", 2400));
+        assert!(cache.check_and_insert(b"p1", 3500));
+        assert_eq!(cache.stats().unique_passed, 2);
+    }
