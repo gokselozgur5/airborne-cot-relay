@@ -443,3 +443,21 @@ impl CotSignatureValidator {
                 actual: payload.len(),
             });
         }
+        if current_time_secs >= timestamp {
+            let age = current_time_secs - timestamp;
+            if age > self.max_clock_skew_secs {
+                self.stats.timestamp_expired += 1;
+                return Err(CotSignerError::TimestampExpired {
+                    age_secs: age,
+                    max_skew_secs: self.max_clock_skew_secs,
+                });
+            }
+        } else {
+            let future_diff = timestamp - current_time_secs;
+            if future_diff > self.max_clock_skew_secs {
+                self.stats.timestamp_future += 1;
+                return Err(CotSignerError::TimestampInFuture {
+                    diff_secs: future_diff,
+                    max_skew_secs: self.max_clock_skew_secs,
+                });
+            }
