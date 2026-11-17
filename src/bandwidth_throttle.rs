@@ -15,3 +15,24 @@ pub enum CongestionState {
     Congested = 3,
     Critical = 4,
 }
+
+impl CongestionState {
+    pub fn bandwidth_factor(&self) -> f64 {
+        match self {
+            CongestionState::Optimal => 1.0,
+            CongestionState::Nominal => 0.85,
+            CongestionState::Constrained => 0.60,
+            CongestionState::Congested => 0.35,
+            CongestionState::Critical => 0.15,
+        }
+    }
+
+    pub fn min_allowed_priority(&self) -> CotPriority {
+        match self {
+            CongestionState::Optimal | CongestionState::Nominal => CotPriority::Low,
+            CongestionState::Constrained => CotPriority::Normal,
+            CongestionState::Congested => CotPriority::High,
+            CongestionState::Critical => CotPriority::Critical,
+        }
+    }
+}
