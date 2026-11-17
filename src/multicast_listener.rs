@@ -196,3 +196,25 @@ impl DroppingStats {
             dropped_error: self.dropped_error.load(Ordering::Relaxed),
         }
     }
+
+    pub fn reset(&self) {
+        self.received_packets.store(0, Ordering::Relaxed);
+        self.received_bytes.store(0, Ordering::Relaxed);
+        self.enqueued_packets.store(0, Ordering::Relaxed);
+        self.dropped_overflow.store(0, Ordering::Relaxed);
+        self.dropped_oversized.store(0, Ordering::Relaxed);
+        self.dropped_error.store(0, Ordering::Relaxed);
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct DroppingStatsSnapshot {
+    pub received_packets: u64,
+    pub received_bytes: u64,
+    pub enqueued_packets: u64,
+    pub dropped_overflow: u64,
+    pub dropped_oversized: u64,
+    pub dropped_error: u64,
+}
+
+impl DroppingStatsSnapshot {
