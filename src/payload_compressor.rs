@@ -114,3 +114,14 @@ impl CompressorConfig {
         self
     }
 }
+
+/// Compressed payload container with metadata and framed wire serialization.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CompressedPayload {
+    /// Algorithm used to encode payload bytes.
+    pub algorithm: CompressionAlgorithm,
+    /// Original uncompressed size in bytes.
+    pub uncompressed_len: usize,
+    /// Encoded payload data bytes.
+    pub data: Vec<u8>,
+}
