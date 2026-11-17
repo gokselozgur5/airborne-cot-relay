@@ -16,3 +16,17 @@ pub enum CrashDumpError {
     /// The recorder buffer is empty, no telemetry to dump.
     EmptyBuffer,
 }
+
+impl fmt::Display for CrashDumpError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Io(e) => write!(f, "crash dump io error: {}", e),
+            Self::Formatting(e) => {
+                write!(f, "crash dump formatting error: {}", e)
+            }
+            Self::EmptyBuffer => write!(f, "recorder buffer is empty"),
+        }
+    }
+}
+
+impl std::error::Error for CrashDumpError {}
