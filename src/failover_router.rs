@@ -345,4 +345,24 @@ mod tests {
         assert_eq!(dec2.interface_id, "p2");
         assert!(dec2.is_failover);
     }
+
+    #[test]
+    fn test_broadcast_with_unicast_failover() {
+        let mut r = FailoverRouter::new(RouterConfig::default());
+        let b_addr = "239.2.3.1:6969".parse().unwrap();
+        let u_addr = "10.0.0.5:8087".parse().unwrap();
+        r.add_interface(NetworkInterface::new("bcast", "bcast", RouteKind::Broadcast, b_addr));
+        r.add_interface(NetworkInterface::new("ucast", "ucast", RouteKind::Unicast, u_addr));
+
+        let d1 = r.route(b"cot_broadcast").unwrap();
+        assert_eq!(d1.interface_id, "bcast");
+        assert_eq!(d1.kind, RouteKind::Broadcast);
+        assert!(!d1.is_failover);
+
+        r.get_interface_mut("bcast").unwrap().healthy = false;
+        let d2 = r.route(b"cot_unicast").unwrap();
+        assert_eq!(d2.interface_id, "ucast");
+        assert_eq!(d2.kind, RouteKind::Unicast);
+        assert!(d2.is_failover);
+    }
 }
