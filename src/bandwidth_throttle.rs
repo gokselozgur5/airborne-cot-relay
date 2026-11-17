@@ -138,3 +138,21 @@ impl BandwidthThrottle {
         self.stats
     }
 }
+
+impl BandwidthThrottle {
+    pub fn effective_bandwidth_bps(&self) -> u64 {
+        let span = self
+            .config
+            .max_bandwidth_bps
+            .saturating_sub(self.config.min_bandwidth_bps);
+        let dynamic = (span as f64 * self.state.bandwidth_factor()) as u64;
+        self.config.min_bandwidth_bps.saturating_add(dynamic)
+    }
+
+    pub fn set_congestion_state(&mut self, state: CongestionState) {
+        if self.state != state {
+            self.state = state;
+            self.stats.congestion_transitions += 1;
+        }
+    }
+}
