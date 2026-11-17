@@ -261,3 +261,18 @@ pub struct SignedCotFrame {
     pub payload: Vec<u8>,
 }
 
+/// Configuration for CoT message signing.
+#[derive(Debug, Clone)]
+pub struct CotSignerConfig {
+    pub key_id: u32,
+    pub secret_key: Vec<u8>,
+    pub max_clock_skew_secs: u64,
+}
+
+impl Default for CotSignerConfig {
+    fn default() -> Self {
+        Self {
+            key_id: 1,
+            secret_key: Vec::new(),
+            max_clock_skew_secs: 300,
+        }
