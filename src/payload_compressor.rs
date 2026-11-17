@@ -560,3 +560,19 @@ fn step_deflate_compress(input: &[u8], pos: &mut usize, table: &mut [u32; 4096],
     writer.write_bits(c, l);
     *pos += 1;
 }
+
+/// Compresses payload into RFC 1951 Deflate stream format using Fixed Huffman.
+pub fn deflate_compress(input: &[u8]) -> Vec<u8> {
+    let mut writer = BitWriter::new();
+    writer.write_bits(1, 1);
+    writer.write_bits(1, 2);
+    let mut pos = 0;
+    let mut table = [0u32; 4096];
+    while pos < input.len() {
+        step_deflate_compress(input, &mut pos, &mut table, &mut writer);
+    }
+    let (c, l) = fixed_lit_code(256);
+    writer.write_bits(c, l);
+    writer.flush_byte();
+    writer.buf
+}
