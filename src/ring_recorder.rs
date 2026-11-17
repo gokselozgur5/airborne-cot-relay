@@ -558,4 +558,22 @@ mod tests {
         assert_eq!(recorder.len(), 2);
         assert_eq!(recorder.latest().unwrap().sequence, 2);
     }
+
+    #[test]
+    fn test_get_recent_and_snapshot_ordering() {
+        let recorder = TelemetryRingRecorder::new(5);
+        for i in 1..=4 {
+            let pose = sample_pose(10.0 * i as f64, 20.0 * i as f64);
+            recorder.record_pose(i, i * 1000, pose, 24.0, 40.0, 100, 0);
+        }
+        let snap = recorder.snapshot();
+        assert_eq!(snap.len(), 4);
+        assert_eq!(snap[0].sequence, 1);
+        assert_eq!(snap[3].sequence, 4);
+
+        let recent = recorder.get_recent(2);
+        assert_eq!(recent.len(), 2);
+        assert_eq!(recent[0].sequence, 3);
+        assert_eq!(recent[1].sequence, 4);
+    }
 }
