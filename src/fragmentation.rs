@@ -509,3 +509,24 @@ mod tests {
         assert!(fragments[0].data.is_empty());
     }
 
+    #[test]
+    fn test_multi_fragment_out_of_order() {
+        let config = FragmenterConfig {
+            mtu: 32,
+            max_payload_size: 1024,
+        };
+        let mut fragmenter = PayloadFragmenter::new(config).unwrap();
+        let payload = vec![0x42; 50];
+        let fragments = fragmenter.fragment(&payload).unwrap();
+        assert_eq!(fragments.len(), 4);
+
+        let mut engine = ReassemblyEngine::new(ReassemblyConfig::default());
+        assert_eq!(engine.process_packet(&fragments[2], 100).unwrap(), None);
+        assert_eq!(engine.process_packet(&fragments[0], 110).unwrap(), None);
+        assert_eq!(engine.process_packet(&fragments[0], 120).unwrap(), None);
+        assert_eq!(engine.process_packet(&fragments[3], 130).unwrap(), None);
+        let completed = engine.process_packet(&fragments[1], 140).unwrap();
+        assert_eq!(completed, Some(payload));
+        assert_eq!(engine.stats().duplicate_fragments, 1);
+    }
+
