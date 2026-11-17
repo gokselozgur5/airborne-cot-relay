@@ -85,3 +85,24 @@ impl DedupBloomFilter {
             num_hashes,
         }
     }
+    fn hash_pair(data: &[u8]) -> (u64, u64) {
+        let mut h1 = 0xcbf29ce484222325u64;
+        for &b in data {
+            h1 = (h1 ^ (b as u64)).wrapping_mul(0x100000001b3u64);
+        }
+        let mut h2 = 0x517cc1b727220a95u64;
+        for &b in data {
+            h2 = (h2 ^ (b as u64)).wrapping_mul(0x100000001b3u64);
+        }
+        (h1, if h2 == 0 { 1 } else { h2 })
+    }
+
+    /// Inserts raw byte key into bloom filter.
+    pub fn insert(&mut self, data: &[u8]) {
+        let (h1, h2) = Self::hash_pair(data);
+        for i in 0..self.num_hashes {
+            let comb = h1.wrapping_add((i as u64).wrapping_mul(h2));
+            let bit_idx = (comb % self.num_bits as u64) as usize;
+            self.bits[bit_idx / 64] |= 1u64 << (bit_idx % 64);
+        }
+    }
