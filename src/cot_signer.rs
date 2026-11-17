@@ -348,3 +348,19 @@ impl CotSigner {
         frame.extend_from_slice(payload);
         frame
     }
+}
+
+/// Cursor-on-Target cryptographic signature validator.
+pub struct CotSignatureValidator {
+    keys: HashMap<u32, Vec<u8>>,
+    max_clock_skew_secs: u64,
+    stats: CotValidatorStats,
+}
+
+impl CotSignatureValidator {
+    pub fn new(max_clock_skew_secs: u64) -> Self {
+        Self {
+            keys: HashMap::new(),
+            max_clock_skew_secs,
+            stats: CotValidatorStats::default(),
+        }
