@@ -244,3 +244,19 @@ fn emit_snappy_literal(lit: &[u8], out: &mut Vec<u8>) {
     }
     out.extend_from_slice(lit);
 }
+
+fn emit_snappy_copy(offset: usize, len: usize, out: &mut Vec<u8>) {
+    if (4..=11).contains(&len) && offset < 2048 {
+        let tag = 0x01 | (((len - 4) as u8) << 2) | (((offset >> 8) as u8 & 0x07) << 5);
+        out.push(tag);
+        out.push((offset & 0xff) as u8);
+    } else if offset <= 65535 {
+        let tag = 0x02 | (((len - 1) as u8) << 2);
+        out.push(tag);
+        out.extend_from_slice(&(offset as u16).to_le_bytes());
+    } else {
+        let tag = 0x03 | (((len - 1) as u8) << 2);
+        out.push(tag);
+        out.extend_from_slice(&(offset as u32).to_le_bytes());
+    }
+}
