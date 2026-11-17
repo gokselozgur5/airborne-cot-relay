@@ -248,3 +248,23 @@ impl HeartbeatGenerator {
         self.platform = platform;
     }
 }
+
+impl HeartbeatGenerator {
+    /// Update radio link metrics.
+    pub fn update_radio(&mut self, radio: RadioMetrics) {
+        self.radio = radio;
+    }
+
+    /// Update current platform pose coordinates.
+    pub fn update_pose(&mut self, pose: Option<PlatformPose>) {
+        self.platform.pose = pose;
+    }
+
+    /// Check if a heartbeat is due for emission.
+    pub fn is_due(&self, now_ms: u64) -> bool {
+        match self.last_generated_ms {
+            None => true,
+            Some(last) => now_ms.saturating_sub(last) >= self.config.interval_ms,
+        }
+    }
+}
