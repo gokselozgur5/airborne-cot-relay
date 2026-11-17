@@ -801,3 +801,13 @@ mod tests {
         let xml = comp.decompress_cot_xml(&payload).unwrap();
         assert_eq!(xml, SAMPLE_COT);
     }
+
+    #[test]
+    fn test_threshold_bypass() {
+        let config = CompressorConfig::default().with_min_compress_bytes(1000);
+        let mut comp = CotPayloadCompressor::new(config);
+        let payload = comp.compress_cot_xml(SAMPLE_COT).unwrap();
+        assert!(!payload.is_compressed());
+        assert_eq!(payload.algorithm, CompressionAlgorithm::None);
+        assert_eq!(comp.stats().payloads_bypassed, 1);
+    }
