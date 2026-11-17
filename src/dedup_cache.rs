@@ -25,3 +25,18 @@ impl Default for DedupCacheConfig {
         }
     }
 }
+
+/// Statistics on deduplication operations.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub struct DedupStats {
+    /// Total packets checked.
+    pub total_checked: u64,
+    /// Duplicates detected and dropped.
+    pub duplicates_dropped: u64,
+    /// Unique packets accepted.
+    pub unique_passed: u64,
+    /// Exact entries expired.
+    pub expired_count: u64,
+    /// Entries evicted due to capacity.
+    pub evictions: u64,
+}
