@@ -97,3 +97,19 @@ fn sha256_block(state: &mut [u32; 8], block: &[u8; 64]) {
         b = a;
         a = t1.wrapping_add(t2);
     }
+    state[0] = state[0].wrapping_add(a);
+    state[1] = state[1].wrapping_add(b);
+    state[2] = state[2].wrapping_add(c);
+    state[3] = state[3].wrapping_add(d);
+    state[4] = state[4].wrapping_add(e);
+    state[5] = state[5].wrapping_add(f);
+    state[6] = state[6].wrapping_add(g);
+    state[7] = state[7].wrapping_add(h);
+}
+
+/// Compute FIPS 180-4 SHA-256 256-bit cryptographic hash.
+pub fn sha256(data: &[u8]) -> [u8; 32] {
+    let mut state = H256_INIT;
+    let bit_len = (data.len() as u64).wrapping_mul(8);
+    let mut offset = 0;
+
