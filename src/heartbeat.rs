@@ -128,3 +128,20 @@ impl RadioMetrics {
         }
     }
 }
+
+impl RadioMetrics {
+    /// Calculate packet loss rate as a ratio (0.0 - 1.0).
+    pub fn packet_loss_rate(&self) -> f32 {
+        let total = self.tx_packets + self.tx_errors;
+        if total == 0 {
+            0.0
+        } else {
+            self.tx_errors as f32 / total as f32
+        }
+    }
+
+    /// Check if radio link quality or signal is degraded.
+    pub fn is_link_degraded(&self) -> bool {
+        !self.is_connected || self.link_quality_pct < 40 || self.rssi_dbm < -90
+    }
+}
