@@ -236,3 +236,22 @@ impl RetransmitTracker {
         removed
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_track_and_ack() {
+        let mut tracker = RetransmitTracker::new(RbtConfig::default());
+        let res = tracker.track_packet(1, vec![10, 20], 1000);
+        assert!(res.is_ok());
+        assert_eq!(tracker.tracked_count(), 1);
+        assert_eq!(tracker.stats().packets_tracked, 1);
+
+        assert!(tracker.process_ack(1, "node-1"));
+        assert!(!tracker.process_ack(1, "node-1"));
+        assert_eq!(tracker.stats().acks_received, 1);
+        assert!(tracker.is_acked_by(1, "node-1"));
+        assert!(!tracker.is_acked_by(1, "node-2"));
+    }
