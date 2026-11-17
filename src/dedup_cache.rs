@@ -129,3 +129,13 @@ impl DedupBloomFilter {
         self.bits.iter().map(|w| w.count_ones() as usize).sum()
     }
 }
+
+/// Primary deduplication cache combining sliding window expiration and Bloom filtering.
+#[derive(Debug, Clone)]
+pub struct CotDedupCache {
+    config: DedupCacheConfig,
+    bloom: DedupBloomFilter,
+    entries: HashMap<Vec<u8>, SlidingEntry>,
+    expiry_queue: VecDeque<(u64, Vec<u8>)>,
+    stats: DedupStats,
+}
