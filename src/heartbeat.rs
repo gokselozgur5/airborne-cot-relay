@@ -70,3 +70,20 @@ impl PlatformMetrics {
         }
     }
 }
+
+impl PlatformMetrics {
+    /// Check if battery is below the given percentage threshold.
+    pub fn is_battery_low(&self, threshold_pct: f32) -> bool {
+        self.battery_pct < threshold_pct
+    }
+
+    /// Check if CPU temperature exceeds the thermal limit.
+    pub fn is_cpu_overheating(&self, threshold_c: f32) -> bool {
+        self.cpu_temp_c > threshold_c
+    }
+
+    /// Update pose coordinates.
+    pub fn set_pose(&mut self, pose: Option<PlatformPose>) {
+        self.pose = pose;
+    }
+}
