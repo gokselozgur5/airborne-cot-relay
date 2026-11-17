@@ -125,3 +125,30 @@ impl FragmentHeader {
         let version = bytes[4];
         if version != PROTOCOL_VERSION {
             return Err(FragmentationError::UnsupportedVersion);
+        }
+        let flags = bytes[5];
+        let msg_id = u32::from_be_bytes([bytes[6], bytes[7], bytes[8], bytes[9]]);
+        let seq_index = u16::from_be_bytes([bytes[10], bytes[11]]);
+        let total_fragments = u16::from_be_bytes([bytes[12], bytes[13]]);
+        let checksum = u16::from_be_bytes([bytes[14], bytes[15]]);
+
+        if total_fragments == 0 {
+            return Err(FragmentationError::InvalidTotalFragments);
+        }
+        if seq_index >= total_fragments {
+            return Err(FragmentationError::IndexOutOfBounds);
+        }
+
+        Ok(Self {
+            magic,
+            version,
+            flags,
+            msg_id,
+            seq_index,
+            total_fragments,
+            checksum,
+        })
+    }
+}
+
+/// Encapsulates a fragment header and partial payload data.
