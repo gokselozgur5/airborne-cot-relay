@@ -598,3 +598,26 @@ fn decode_fixed_huffman_sym(reader: &mut BitReader<'_>) -> Result<u16, Compresso
         }
     }
 }
+
+fn decode_deflate_copy(reader: &mut BitReader<'_>, out: &mut Vec<u8>, sym: u16) -> Result<(), CompressorError> {
+    let len_idx = (sym - 257) as usize;
+    if len_idx >= 29 { return Err(CompressorError::CorruptPayload("invalid length code")); }
+    let extra_bits = LENGTH_EXTRA[len_idx];
+    let extra_val = if extra_bits > 0 { reader.read_bits(extra_bits)? } else { 0 };
+    let length = LENGTH_BASE[len_idx] as usize + extra_val as usize;
+    let dist_bits = reader.read_bits(5)?;
+    let dist_code = rev_bits(dist_bits, 5) as usize;
+    if dist_code >= 30 { return Err(CompressorError::CorruptPayload("invalid distance code")); }
+    let dist_extra_bits = DIST_EXTRA[dist_code];
+    let dist_extra_val = if dist_extra_bits > 0 { reader.read_bits(dist_extra_bits)? } else { 0 };
+    let distance = DIST_BASE[dist_code] as usize + dist_extra_val as usize;
+    if distance == 0 || distance > out.len() {
+        return Err(CompressorError::CorruptPayload("invalid backward distance"));
+    }
+    let start = out.len() - distance;
+    for i in 0..length {
+        let b = out[start + i];
+        out.push(b);
+    }
+    Ok(())
+}
