@@ -13,3 +13,19 @@ pub struct RbtConfig {
     pub retransmit_timeout_ms: u64,
     /// Maximum retransmission attempts before marking packet dropped.
     pub max_retransmissions: u32,
+    /// Maximum number of unacknowledged packets to track concurrently.
+    pub max_tracked_packets: usize,
+    /// Whether NACK immediately queues packet for retransmission.
+    pub nack_immediate: bool,
+}
+
+impl Default for RbtConfig {
+    fn default() -> Self {
+        Self {
+            retransmit_timeout_ms: 250,
+            max_retransmissions: 5,
+            max_tracked_packets: 1024,
+            nack_immediate: true,
+        }
+    }
+}
