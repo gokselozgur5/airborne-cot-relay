@@ -103,3 +103,28 @@ pub struct RadioMetrics {
     pub link_quality_pct: u8,
     pub is_connected: bool,
 }
+
+impl RadioMetrics {
+    /// Create a new radio metrics snapshot.
+    pub fn new(
+        rssi_dbm: i16,
+        snr_db: f32,
+        tx_power_dbm: i16,
+        link_quality_pct: u8,
+        is_connected: bool,
+    ) -> Self {
+        Self {
+            rssi_dbm,
+            snr_db,
+            tx_power_dbm,
+            tx_packets: 0,
+            rx_packets: 0,
+            tx_bytes: 0,
+            rx_bytes: 0,
+            tx_errors: 0,
+            rx_errors: 0,
+            link_quality_pct,
+            is_connected,
+        }
+    }
+}
