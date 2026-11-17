@@ -433,3 +433,16 @@ impl BitWriter {
         }
     }
 }
+
+struct BitReader<'a> {
+    data: &'a [u8],
+    pos: usize,
+    bit_buf: u32,
+    bits: u8,
+}
+
+impl<'a> BitReader<'a> {
+    fn new(data: &'a [u8]) -> Self {
+        Self { data, pos: 0, bit_buf: 0, bits: 0 }
+    }
+}
