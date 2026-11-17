@@ -35,3 +35,18 @@ fn ch(x: u32, y: u32, z: u32) -> u32 {
 fn maj(x: u32, y: u32, z: u32) -> u32 {
     (x & y) ^ (x & z) ^ (y & z)
 }
+
+#[inline]
+fn sigma0(x: u32) -> u32 {
+    rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22)
+}
+
+#[inline]
+fn sigma1(x: u32) -> u32 {
+    rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25)
+}
+
+#[inline]
+fn gamma0(x: u32) -> u32 {
+    rotr(x, 7) ^ rotr(x, 18) ^ (x >> 3)
+}
