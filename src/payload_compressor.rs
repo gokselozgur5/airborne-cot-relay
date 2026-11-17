@@ -463,3 +463,24 @@ impl<'a> BitReader<'a> {
         Ok(val)
     }
 }
+
+fn rev_bits(mut code: u32, len: u8) -> u32 {
+    let mut res = 0;
+    for _ in 0..len {
+        res = (res << 1) | (code & 1);
+        code >>= 1;
+    }
+    res
+}
+
+fn fixed_lit_code(sym: u16) -> (u32, u8) {
+    if sym <= 143 {
+        (rev_bits(0x30 + sym as u32, 8), 8)
+    } else if sym <= 255 {
+        (rev_bits(0x190 + (sym - 144) as u32, 9), 9)
+    } else if sym <= 279 {
+        (rev_bits((sym - 256) as u32, 7), 7)
+    } else {
+        (rev_bits(0xc0 + (sym - 280) as u32, 8), 8)
+    }
+}
