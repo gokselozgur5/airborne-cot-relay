@@ -143,3 +143,15 @@ impl CompressedPayload {
         !matches!(self.algorithm, CompressionAlgorithm::None)
     }
 }
+
+impl CompressedPayload {
+    /// Serializes payload into framed wire format with header and length prefix.
+    pub fn to_framed_bytes(&self) -> Vec<u8> {
+        let mut out = Vec::with_capacity(7 + self.data.len());
+        out.extend_from_slice(&Self::MAGIC);
+        out.push(self.algorithm.as_u8());
+        out.extend_from_slice(&(self.uncompressed_len as u32).to_be_bytes());
+        out.extend_from_slice(&self.data);
+        out
+    }
+}
