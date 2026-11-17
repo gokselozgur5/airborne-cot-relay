@@ -262,3 +262,25 @@ impl MulticastListener {
             recv_buf,
         })
     }
+
+    pub fn enqueue(&self, mut packet: MulticastPacket) -> Result<(), MulticastPacket> {
+        match self.config.drop_policy {
+            DropPolicy::DropNewest => {
+                if let Err(dropped) = self.ring_buffer.push(packet) {
+                    self.stats.record_dropped_overflow();
+                    Err(dropped)
+                } else {
+                    self.stats.record_enqueued();
+                    Ok(())
+                }
+            }
+            DropPolicy::DropOldest => {
+                while let Err(ret) = self.ring_buffer.push(packet) {
+                    let _ = self.ring_buffer.pop();
+                    self.stats.record_dropped_overflow();
+                    packet = ret;
+                }
+                self.stats.record_enqueued();
+                Ok(())
+            }
+        }
