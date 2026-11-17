@@ -125,3 +125,21 @@ pub struct CompressedPayload {
     /// Encoded payload data bytes.
     pub data: Vec<u8>,
 }
+
+impl CompressedPayload {
+    /// Magic header bytes identifying CoT compressed payloads.
+    pub const MAGIC: [u8; 2] = [0x43, 0x50];
+
+    /// Calculates compression ratio (compressed / uncompressed).
+    pub fn ratio(&self) -> f64 {
+        if self.uncompressed_len == 0 {
+            return 1.0;
+        }
+        self.data.len() as f64 / self.uncompressed_len as f64
+    }
+
+    /// Returns true if algorithm is not None.
+    pub const fn is_compressed(&self) -> bool {
+        !matches!(self.algorithm, CompressionAlgorithm::None)
+    }
+}
