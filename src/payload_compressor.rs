@@ -758,3 +758,9 @@ impl CotPayloadCompressor {
         String::from_utf8(bytes).map_err(|_| CompressorError::InvalidUtf8)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const SAMPLE_COT: &str = "<event version=\"2.0\" uid=\"AIR-01\" type=\"a-f-A-M-F\"><point lat=\"34.12\" lon=\"-118.65\"/><detail><track course=\"128.5\" speed=\"185.2\"/></detail></event>";
