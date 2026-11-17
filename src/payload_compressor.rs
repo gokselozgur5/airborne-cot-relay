@@ -28,3 +28,14 @@ impl CompressionAlgorithm {
         }
     }
 }
+
+impl CompressionAlgorithm {
+    /// Returns human-readable lowercase algorithm name.
+    pub const fn name(&self) -> &'static str {
+        match self {
+            Self::None => "none",
+            Self::Snappy => "snappy",
+            Self::Deflate => "deflate",
+        }
+    }
+}
