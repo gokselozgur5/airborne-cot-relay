@@ -537,3 +537,26 @@ fn write_deflate_match(writer: &mut BitWriter, match_len: usize, offset: usize) 
         writer.write_bits(dist_extra_val, dist_extra_bits);
     }
 }
+
+fn step_deflate_compress(input: &[u8], pos: &mut usize, table: &mut [u32; 4096], writer: &mut BitWriter) {
+    let p = *pos;
+    if p + 3 <= input.len() {
+        let chunk = (input[p] as u32) | ((input[p + 1] as u32) << 8) | ((input[p + 2] as u32) << 16);
+        let hash = ((chunk.wrapping_mul(0x1e35a7bd)) >> 20) as usize & 4095;
+        let cand = table[hash] as usize;
+        table[hash] = p as u32;
+        if p > cand && (p - cand) <= 32768 && input[cand..cand + 3] == input[p..p + 3] {
+            let offset = p - cand;
+            let mut match_len = 3;
+            while p + match_len < input.len() && match_len < 258 && input[cand + match_len] == input[p + match_len] {
+                match_len += 1;
+            }
+            write_deflate_match(writer, match_len, offset);
+            *pos += match_len;
+            return;
+        }
+    }
+    let (c, l) = fixed_lit_code(input[p] as u16);
+    writer.write_bits(c, l);
+    *pos += 1;
+}
