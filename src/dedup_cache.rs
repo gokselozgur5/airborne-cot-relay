@@ -106,3 +106,26 @@ impl DedupBloomFilter {
             self.bits[bit_idx / 64] |= 1u64 << (bit_idx % 64);
         }
     }
+    /// Checks whether key may be present in the bloom filter.
+    pub fn contains(&self, data: &[u8]) -> bool {
+        let (h1, h2) = Self::hash_pair(data);
+        for i in 0..self.num_hashes {
+            let comb = h1.wrapping_add((i as u64).wrapping_mul(h2));
+            let bit_idx = (comb % self.num_bits as u64) as usize;
+            if (self.bits[bit_idx / 64] & (1u64 << (bit_idx % 64))) == 0 {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Clears all bits in bloom filter.
+    pub fn clear(&mut self) {
+        self.bits.fill(0);
+    }
+
+    /// Returns count of set bits in bloom filter.
+    pub fn count_ones(&self) -> usize {
+        self.bits.iter().map(|w| w.count_ones() as usize).sum()
+    }
+}
