@@ -277,4 +277,16 @@ mod tests {
             CotPriority::Critical
         );
     }
+
+    #[test]
+    fn test_throttle_config_defaults_and_builder() {
+        let cfg = ThrottleConfig::default();
+        assert_eq!(cfg.max_bandwidth_bps, 64_000);
+        assert!(cfg.emergency_bypass);
+        let custom = ThrottleConfig::new(128_000, 9_600, 8_192).with_emergency_bypass(false);
+        assert_eq!(custom.max_bandwidth_bps, 128_000);
+        assert_eq!(custom.min_bandwidth_bps, 9_600);
+        assert_eq!(custom.burst_allowance_bytes, 8_192);
+        assert!(!custom.emergency_bypass);
+    }
 }
