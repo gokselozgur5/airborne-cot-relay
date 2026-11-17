@@ -394,3 +394,23 @@ impl HeartbeatGenerator {
         self.total_generated = 0;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_platform_state_and_health() {
+        let state = PlatformOperationalState::Nominal;
+        assert_eq!(state.as_str(), "NOMINAL");
+        assert!(state.is_healthy());
+
+        let emergency = PlatformOperationalState::Emergency;
+        assert_eq!(emergency.as_str(), "EMERGENCY");
+        assert!(!emergency.is_healthy());
+
+        let fault = PlatformOperationalState::Fault;
+        assert_eq!(fault.as_str(), "FAULT");
+        assert!(!fault.is_healthy());
+    }
+}
