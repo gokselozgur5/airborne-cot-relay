@@ -218,3 +218,25 @@ pub struct DroppingStatsSnapshot {
 }
 
 impl DroppingStatsSnapshot {
+    pub fn total_dropped(&self) -> u64 {
+        self.dropped_overflow + self.dropped_oversized + self.dropped_error
+    }
+
+    pub fn drop_rate(&self) -> f64 {
+        if self.received_packets == 0 {
+            0.0
+        } else {
+            self.total_dropped() as f64 / self.received_packets as f64
+        }
+    }
+}
+
+pub struct MulticastListener {
+    socket: UdpSocket,
+    config: MulticastListenerConfig,
+    ring_buffer: Arc<AtomicRingBuffer<MulticastPacket>>,
+    stats: Arc<DroppingStats>,
+    recv_buf: Vec<u8>,
+}
+
+impl MulticastListener {
