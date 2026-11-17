@@ -174,3 +174,25 @@ impl DroppingStats {
         self.enqueued_packets.fetch_add(1, Ordering::Relaxed);
     }
 
+    pub fn record_dropped_overflow(&self) {
+        self.dropped_overflow.fetch_add(1, Ordering::Relaxed);
+    }
+
+    pub fn record_dropped_oversized(&self) {
+        self.dropped_oversized.fetch_add(1, Ordering::Relaxed);
+    }
+
+    pub fn record_dropped_error(&self) {
+        self.dropped_error.fetch_add(1, Ordering::Relaxed);
+    }
+
+    pub fn snapshot(&self) -> DroppingStatsSnapshot {
+        DroppingStatsSnapshot {
+            received_packets: self.received_packets.load(Ordering::Relaxed),
+            received_bytes: self.received_bytes.load(Ordering::Relaxed),
+            enqueued_packets: self.enqueued_packets.load(Ordering::Relaxed),
+            dropped_overflow: self.dropped_overflow.load(Ordering::Relaxed),
+            dropped_oversized: self.dropped_oversized.load(Ordering::Relaxed),
+            dropped_error: self.dropped_error.load(Ordering::Relaxed),
+        }
+    }
