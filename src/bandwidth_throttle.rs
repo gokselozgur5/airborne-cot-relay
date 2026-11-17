@@ -156,3 +156,25 @@ impl BandwidthThrottle {
         }
     }
 }
+
+impl BandwidthThrottle {
+    pub fn update_link_conditions(&mut self, rtt: Duration, packet_loss_ratio: f64) {
+        let old_state = self.state;
+        let rtt_ms = rtt.as_millis();
+        let new_state = if packet_loss_ratio > 0.25 || rtt_ms > 800 {
+            CongestionState::Critical
+        } else if packet_loss_ratio > 0.12 || rtt_ms > 450 {
+            CongestionState::Congested
+        } else if packet_loss_ratio > 0.05 || rtt_ms > 250 {
+            CongestionState::Constrained
+        } else if packet_loss_ratio > 0.01 || rtt_ms > 120 {
+            CongestionState::Nominal
+        } else {
+            CongestionState::Optimal
+        };
+        if new_state != old_state {
+            self.state = new_state;
+            self.stats.congestion_transitions += 1;
+        }
+    }
+}
