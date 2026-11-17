@@ -382,3 +382,23 @@ impl TelemetryRingRecorder {
         }
     }
 }
+
+impl TelemetryRingRecorder {
+    fn format_csv_row(r: &TelemetryRecord) -> String {
+        format!(
+            "{},{},{:.6},{:.6},{:.2},{:.4},{:.4},{:.4},{:.2},{:.1},{},{}\n",
+            r.sequence,
+            r.timestamp_ms,
+            r.pose.lat_deg,
+            r.pose.lon_deg,
+            r.pose.hae_m,
+            r.pose.roll_rad,
+            r.pose.pitch_rad,
+            r.pose.yaw_rad,
+            r.battery_volts,
+            r.cpu_temp_c,
+            r.link_quality_pct,
+            r.error_flags,
+        )
+    }
+}
