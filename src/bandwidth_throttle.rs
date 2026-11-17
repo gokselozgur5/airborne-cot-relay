@@ -299,4 +299,20 @@ mod tests {
         assert_eq!(throttle.stats().bytes_admitted, 200);
         assert_eq!(throttle.stats().admitted_by_priority[4], 1);
     }
+
+    #[test]
+    fn test_priority_filtering_under_congestion() {
+        let mut throttle = BandwidthThrottle::new(ThrottleConfig::default());
+        throttle.set_congestion_state(CongestionState::Congested);
+        assert_eq!(throttle.state(), CongestionState::Congested);
+        let d_low = throttle.admit(CotPriority::Low, 100);
+        assert_eq!(
+            d_low,
+            ThrottleDecision::Dropped(DropReason::BelowPriorityFloor)
+        );
+        let d_high = throttle.admit(CotPriority::High, 100);
+        assert_eq!(d_high, ThrottleDecision::Admitted);
+        assert_eq!(throttle.stats().packets_dropped, 1);
+        assert_eq!(throttle.stats().packets_admitted, 1);
+    }
 }
