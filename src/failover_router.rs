@@ -384,4 +384,18 @@ mod tests {
         assert_eq!(d2.interface_id, "i2");
         assert_eq!(d3.interface_id, "i1");
     }
+
+    #[test]
+    fn test_payload_validation_and_exhaustion_errors() {
+        let mut r = FailoverRouter::new(RouterConfig {
+            policy: FailoverPolicy::PriorityPrimary,
+            max_payload_size: 10,
+        });
+        assert_eq!(r.route(b""), Err(RouterError::EmptyPayload));
+        assert_eq!(
+            r.route(b"12345678901"),
+            Err(RouterError::PayloadTooLarge { size: 11, limit: 10 })
+        );
+        assert_eq!(r.route(b"valid"), Err(RouterError::NoHealthyInterface));
+    }
 }
