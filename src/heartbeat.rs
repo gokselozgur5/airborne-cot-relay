@@ -177,3 +177,29 @@ pub struct HeartbeatConfig {
     pub interval_ms: u64,
     pub stale_duration_ms: u64,
 }
+
+impl HeartbeatConfig {
+    /// Create a new heartbeat configuration with default interval.
+    pub fn new(uid: impl Into<String>, callsign: impl Into<String>) -> Self {
+        Self {
+            uid: uid.into(),
+            callsign: callsign.into(),
+            cot_type: "a-f-A-M-F-Q".to_string(),
+            interval_ms: 1000,
+            stale_duration_ms: 3000,
+        }
+    }
+
+    /// Set custom CoT type code.
+    pub fn with_cot_type(mut self, cot_type: impl Into<String>) -> Self {
+        self.cot_type = cot_type.into();
+        self
+    }
+
+    /// Set custom timing intervals.
+    pub fn with_intervals(mut self, interval_ms: u64, stale_ms: u64) -> Self {
+        self.interval_ms = interval_ms;
+        self.stale_duration_ms = stale_ms;
+        self
+    }
+}
