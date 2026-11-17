@@ -407,3 +407,18 @@ impl CotSignatureValidator {
     ) -> Result<SignedCotFrame, CotSignerError> {
         self.stats.frames_processed += 1;
 
+        if frame_bytes.len() < COT_HEADER_LEN {
+            self.stats.malformed_frames += 1;
+            return Err(CotSignerError::FrameTooShort {
+                actual: frame_bytes.len(),
+                expected: COT_HEADER_LEN,
+            });
+        }
+
+        let mut magic = [0u8; 4];
+        magic.copy_from_slice(&frame_bytes[0..4]);
+        if magic != COT_SIG_MAGIC {
+            self.stats.malformed_frames += 1;
+            return Err(CotSignerError::InvalidMagic(magic));
+        }
+
