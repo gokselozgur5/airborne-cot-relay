@@ -192,3 +192,25 @@ impl CotDedupCache {
         self.entries.clear();
         self.expiry_queue.clear();
     }
+    /// Prunes expired entries based on current millisecond timestamp.
+    pub fn prune_expired(&mut self, now_ms: u64) -> usize {
+        let mut pruned = 0;
+        while let Some((expires_at, key)) = self.expiry_queue.front() {
+            if *expires_at <= now_ms {
+                let (_, key) = self.expiry_queue.pop_front().unwrap();
+                if let Some(entry) = self.entries.get(&key) {
+                    if entry.is_expired(now_ms) {
+                        self.entries.remove(&key);
+                        pruned += 1;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+        self.stats.expired_count += pruned as u64;
+        if self.entries.is_empty() {
+            self.bloom.clear();
+        }
+        pruned
+    }
