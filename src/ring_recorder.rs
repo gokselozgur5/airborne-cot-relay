@@ -457,3 +457,23 @@ impl TelemetryRingRecorder {
         ).map_err(|e| CrashDumpError::Io(e.to_string()))
     }
 }
+
+impl TelemetryRingRecorder {
+    fn write_json<W: Write>(
+        &self,
+        report: &CrashDumpReport,
+        writer: &mut W,
+    ) -> Result<(), CrashDumpError> {
+        Self::write_json_header(report, writer)?;
+        for (i, r) in report.records.iter().enumerate() {
+            if i > 0 {
+                write!(writer, ",").map_err(|e| CrashDumpError::Io(e.to_string()))?;
+            }
+            writer
+                .write_all(Self::format_json_record(r).as_bytes())
+                .map_err(|e| CrashDumpError::Io(e.to_string()))?;
+        }
+        write!(writer, "]}}").map_err(|e| CrashDumpError::Io(e.to_string()))?;
+        Ok(())
+    }
+}
