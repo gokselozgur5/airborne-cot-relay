@@ -250,3 +250,21 @@ impl PayloadFragmenter {
         let mut packets = Vec::with_capacity(total_fragments);
 
         if payload.is_empty() {
+            let crc = crc16_ccitt(&[]);
+            let header = FragmentHeader::new(msg_id, 0, 1, crc)?;
+            packets.push(FragmentPacket::new(header, Vec::new()));
+            return Ok(packets);
+        }
+
+        for (idx, chunk) in payload.chunks(max_chunk).enumerate() {
+            let crc = crc16_ccitt(chunk);
+            let header = FragmentHeader::new(msg_id, idx as u16, total_u16, crc)?;
+            packets.push(FragmentPacket::new(header, chunk.to_vec()));
+        }
+
+        Ok(packets)
+    }
+}
+
+/// Configuration settings for the reassembly engine.
+#[derive(Debug, Clone, PartialEq, Eq)]
