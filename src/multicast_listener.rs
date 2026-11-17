@@ -328,3 +328,25 @@ impl MulticastListener {
     pub fn reset_stats(&self) {
         self.stats.reset();
     }
+
+    pub fn config(&self) -> &MulticastListenerConfig {
+        &self.config
+    }
+
+    pub fn socket(&self) -> &UdpSocket {
+        &self.socket
+    }
+
+    pub fn ring_len(&self) -> usize {
+        self.ring_buffer.len()
+    }
+
+    pub fn ring_capacity(&self) -> usize {
+        self.ring_buffer.capacity()
+    }
+
+    pub fn local_addr(&self) -> io::Result<SocketAddr> {
+        self.socket.local_addr()
+    }
+}
+
