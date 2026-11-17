@@ -332,3 +332,26 @@ impl TelemetryRingRecorder {
             .collect()
     }
 }
+
+impl TelemetryRingRecorder {
+    /// Generate a forensic crash dump snapshot with cause and fault code.
+    pub fn create_crash_dump(
+        &self,
+        reason: &str,
+        fault_code: u32,
+        timestamp_ms: u64,
+    ) -> CrashDumpReport {
+        let inner = match self.inner.read() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        CrashDumpReport {
+            timestamp_ms,
+            reason: reason.to_string(),
+            fault_code,
+            total_recorded: inner.total_recorded,
+            total_overwritten: inner.total_overwritten,
+            records: inner.buffer.iter().cloned().collect(),
+        }
+    }
+}
