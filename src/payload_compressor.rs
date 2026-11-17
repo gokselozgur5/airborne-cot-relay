@@ -313,3 +313,27 @@ pub fn snappy_compress(input: &[u8]) -> Vec<u8> {
     }
     out
 }
+
+fn decode_snappy_literal_len(tag: u8, input: &[u8], cursor: &mut usize) -> Result<usize, CompressorError> {
+    let high = tag >> 2;
+    match high {
+        0..=59 => Ok((high as usize) + 1),
+        60 => {
+            if *cursor >= input.len() {
+                return Err(CompressorError::CorruptPayload("truncated literal length"));
+            }
+            let val = input[*cursor] as usize + 1;
+            *cursor += 1;
+            Ok(val)
+        }
+        61 => {
+            if *cursor + 2 > input.len() {
+                return Err(CompressorError::CorruptPayload("truncated literal length"));
+            }
+            let val = u16::from_le_bytes([input[*cursor], input[*cursor + 1]]) as usize + 1;
+            *cursor += 2;
+            Ok(val)
+        }
+        _ => Err(CompressorError::CorruptPayload("unsupported literal length code")),
+    }
+}
