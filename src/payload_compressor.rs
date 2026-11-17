@@ -199,3 +199,11 @@ impl CompressorStats {
         (1.0 - self.overall_ratio()) * 100.0
     }
 }
+
+fn encode_varint_u32(mut val: u32, out: &mut Vec<u8>) {
+    while val >= 0x80 {
+        out.push(((val & 0x7f) | 0x80) as u8);
+        val >>= 7;
+    }
+    out.push(val as u8);
+}
