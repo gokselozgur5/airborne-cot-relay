@@ -37,3 +37,21 @@ pub struct RouterStats {
     pub failover_events: u64,
     pub total_bytes_routed: u64,
 }
+
+/// Network interface configuration and telemetry state.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NetworkInterface {
+    pub id: String,
+    pub name: String,
+    pub kind: RouteKind,
+    pub destination: SocketAddr,
+    pub priority: u32,
+    pub enabled: bool,
+    pub healthy: bool,
+    pub consecutive_failures: u32,
+    pub consecutive_successes: u32,
+    pub failure_threshold: u32,
+    pub recovery_threshold: u32,
+    pub bytes_sent: u64,
+    pub packets_sent: u64,
+}
