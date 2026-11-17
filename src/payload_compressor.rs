@@ -402,3 +402,15 @@ pub fn snappy_decompress(input: &[u8]) -> Result<Vec<u8>, CompressorError> {
     }
     Ok(out)
 }
+
+struct BitWriter {
+    buf: Vec<u8>,
+    bit_buf: u32,
+    bits: u8,
+}
+
+impl BitWriter {
+    fn new() -> Self {
+        Self { buf: Vec::new(), bit_buf: 0, bits: 0 }
+    }
+}
