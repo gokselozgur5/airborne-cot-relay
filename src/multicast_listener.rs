@@ -64,3 +64,25 @@ impl fmt::Display for MulticastListenerError {
             Self::InvalidRingCapacity => write!(f, "ring buffer capacity must be non-zero"),
             Self::InvalidPacketSize => write!(f, "maximum packet size must be non-zero"),
             Self::Io(err) => write!(f, "multicast listener io error: {}", err),
+            Self::RingBufferFull => write!(f, "multicast ring buffer full"),
+        }
+    }
+}
+
+impl std::error::Error for MulticastListenerError {}
+
+impl From<io::Error> for MulticastListenerError {
+    fn from(err: io::Error) -> Self {
+        Self::Io(err)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MulticastListenerConfig {
+    pub multicast_addr: Ipv4Addr,
+    pub interface_addr: Ipv4Addr,
+    pub port: u16,
+    pub ring_capacity: usize,
+    pub max_packet_size: usize,
+    pub read_timeout: Option<Duration>,
+    pub nonblocking: bool,
