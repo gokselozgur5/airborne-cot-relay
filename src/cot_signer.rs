@@ -461,3 +461,22 @@ impl CotSignatureValidator {
                     max_skew_secs: self.max_clock_skew_secs,
                 });
             }
+        }
+        let key = match self.keys.get(&key_id) {
+            Some(k) => k,
+            None => {
+                self.stats.key_not_found += 1;
+                return Err(CotSignerError::KeyNotFound(key_id));
+            }
+        };
+
+        let mut to_verify = Vec::with_capacity(12 + payload.len());
+        to_verify.extend_from_slice(&key_id.to_be_bytes());
+        to_verify.extend_from_slice(&timestamp.to_be_bytes());
+        to_verify.extend_from_slice(payload);
+
+        let computed = hmac_sha256(key, &to_verify);
+        if !constant_time_compare(&computed, &signature) {
+            self.stats.invalid_signatures += 1;
+            return Err(CotSignerError::InvalidSignature);
+        }
