@@ -480,3 +480,18 @@ impl CotSignatureValidator {
             self.stats.invalid_signatures += 1;
             return Err(CotSignerError::InvalidSignature);
         }
+
+        self.stats.valid_signatures += 1;
+        Ok(SignedCotFrame {
+            key_id,
+            timestamp,
+            signature,
+            payload: payload.to_vec(),
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
