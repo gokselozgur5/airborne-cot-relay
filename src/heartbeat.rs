@@ -413,4 +413,27 @@ mod tests {
         assert_eq!(fault.as_str(), "FAULT");
         assert!(!fault.is_healthy());
     }
+
+    #[test]
+    fn test_platform_metrics_thresholds() {
+        let mut m = PlatformMetrics::new(
+            "UAV-01",
+            PlatformOperationalState::Nominal,
+            18.5,
+            14.2,
+            72.5,
+            45.0,
+            3600,
+            None,
+        );
+        assert!(m.is_battery_low(20.0));
+        assert!(!m.is_battery_low(15.0));
+        assert!(m.is_cpu_overheating(70.0));
+        assert!(!m.is_cpu_overheating(75.0));
+
+        let pose = PlatformPose::new(100, 37.7749, -122.4194, 500.0, 0.0, 0.0, 1.57);
+        m.set_pose(Some(pose));
+        assert!(m.pose.is_some());
+    }
+
 }
