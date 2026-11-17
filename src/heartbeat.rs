@@ -167,3 +167,13 @@ impl RadioMetrics {
         }
     }
 }
+
+/// Heartbeat generator configuration.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HeartbeatConfig {
+    pub uid: String,
+    pub callsign: String,
+    pub cot_type: String,
+    pub interval_ms: u64,
+    pub stale_duration_ms: u64,
+}
