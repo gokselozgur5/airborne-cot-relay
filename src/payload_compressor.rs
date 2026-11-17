@@ -39,3 +39,20 @@ impl CompressionAlgorithm {
         }
     }
 }
+
+/// Error conditions encountered during payload compression or decompression.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum CompressorError {
+    /// Unrecognized algorithm wire identifier.
+    InvalidAlgorithm(u8),
+    /// Payload exceeds configured maximum byte limit.
+    PayloadTooLarge { len: usize, max: usize },
+    /// Corrupt compressed payload or invalid control code.
+    CorruptPayload(&'static str),
+    /// Decompression size mismatch or stream termination error.
+    DecompressionFailed(&'static str),
+    /// Frame magic header mismatch.
+    HeaderMismatch,
+    /// Decompressed payload is not valid UTF-8 string.
+    InvalidUtf8,
+}
