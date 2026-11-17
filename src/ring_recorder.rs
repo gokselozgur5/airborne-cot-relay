@@ -617,4 +617,16 @@ mod tests {
         assert!(txt.contains("=== AIRBORNE COT RELAY CRASH DUMP ==="));
         assert!(txt.contains("Fault Code:   0x00001234"));
     }
+
+    #[test]
+    fn test_clear_and_empty_behavior() {
+        let recorder = TelemetryRingRecorder::new(3);
+        assert_eq!(recorder.latest(), None);
+        assert_eq!(recorder.oldest(), None);
+        recorder.record_pose(1, 100, sample_pose(1.0, 1.0), 24.0, 40.0, 90, 0);
+        assert_eq!(recorder.len(), 1);
+        recorder.clear();
+        assert!(recorder.is_empty());
+        assert_eq!(recorder.stats().total_recorded, 0);
+    }
 }
