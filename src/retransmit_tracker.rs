@@ -99,3 +99,18 @@ pub struct PacketRecord {
     pub nacks: HashSet<String>,
     pub force_retransmit: bool,
 }
+
+impl PacketRecord {
+    pub fn new(seq: u64, payload: Vec<u8>, sent_ms: u64) -> Self {
+        Self {
+            seq,
+            payload,
+            first_sent_ms: sent_ms,
+            last_sent_ms: sent_ms,
+            retransmit_count: 0,
+            acks: HashSet::new(),
+            nacks: HashSet::new(),
+            force_retransmit: false,
+        }
+    }
+}
