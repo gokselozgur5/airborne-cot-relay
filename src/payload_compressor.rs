@@ -373,3 +373,17 @@ fn decode_snappy_copy_tag(tag: u8, input: &[u8], cursor: &mut usize, out: &mut V
         _ => Err(CompressorError::CorruptPayload("unsupported copy tag")),
     }
 }
+
+fn decode_snappy_step(tag: u8, input: &[u8], cursor: &mut usize, out: &mut Vec<u8>) -> Result<(), CompressorError> {
+    if (tag & 0x03) == 0x00 {
+        let lit_len = decode_snappy_literal_len(tag, input, cursor)?;
+        if *cursor + lit_len > input.len() {
+            return Err(CompressorError::CorruptPayload("literal overrun"));
+        }
+        out.extend_from_slice(&input[*cursor..*cursor + lit_len]);
+        *cursor += lit_len;
+        Ok(())
+    } else {
+        decode_snappy_copy_tag(tag, input, cursor, out)
+    }
+}
