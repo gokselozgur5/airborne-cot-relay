@@ -214,3 +214,14 @@ pub struct HeartbeatRecord {
     pub radio: RadioMetrics,
     pub cot_xml: String,
 }
+
+/// Periodic airborne telemetry heartbeat generator.
+#[derive(Debug, Clone)]
+pub struct HeartbeatGenerator {
+    config: HeartbeatConfig,
+    sequence: u64,
+    platform: PlatformMetrics,
+    radio: RadioMetrics,
+    last_generated_ms: Option<u64>,
+    total_generated: u64,
+}
