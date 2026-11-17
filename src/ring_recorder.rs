@@ -92,3 +92,21 @@ pub enum OverwriteMode {
     /// Reject new telemetry records when capacity is full.
     RejectNew,
 }
+
+/// Configuration parameters for telemetry ring recorder.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RingRecorderConfig {
+    /// Maximum number of records retained in ring buffer.
+    pub capacity: usize,
+    /// Eviction policy when capacity is exhausted.
+    pub overwrite_mode: OverwriteMode,
+}
+
+impl Default for RingRecorderConfig {
+    fn default() -> Self {
+        Self {
+            capacity: 1024,
+            overwrite_mode: OverwriteMode::OverwriteOldest,
+        }
+    }
+}
