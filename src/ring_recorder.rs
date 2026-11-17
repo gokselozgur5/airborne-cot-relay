@@ -589,4 +589,18 @@ mod tests {
         assert_eq!(in_range[0].timestamp_ms, 200);
         assert_eq!(in_range[2].timestamp_ms, 400);
     }
+
+    #[test]
+    fn test_crash_dump_generation() {
+        let recorder = TelemetryRingRecorder::new(5);
+        let pose = sample_pose(37.77, -122.41);
+        recorder.record_pose(1, 1000, pose, 22.8, 55.4, 88, 0x01);
+        let report = recorder.create_crash_dump("FLIGHT_TERMINATION", 0xDEADBEEF, 5000);
+        assert_eq!(report.reason, "FLIGHT_TERMINATION");
+        assert_eq!(report.fault_code, 0xDEADBEEF);
+        assert_eq!(report.records.len(), 1);
+        let csv = recorder.dump_to_string(&report, DumpFormat::Csv).unwrap();
+        assert!(csv.contains("seq,timestamp_ms"));
+        assert!(csv.contains("37.770000,-122.410000"));
+    }
 }
