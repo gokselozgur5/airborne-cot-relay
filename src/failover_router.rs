@@ -282,3 +282,21 @@ impl FailoverRouter {
         false
     }
 }
+
+impl FailoverRouter {
+    pub fn stats(&self) -> &RouterStats {
+        &self.stats
+    }
+
+    pub fn reset_stats(&mut self) {
+        self.stats = RouterStats::default();
+    }
+
+    pub fn healthy_count(&self) -> usize {
+        self.interfaces.iter().filter(|i| i.enabled && i.healthy).count()
+    }
+
+    pub fn interfaces(&self) -> &[NetworkInterface] {
+        &self.interfaces
+    }
+}
