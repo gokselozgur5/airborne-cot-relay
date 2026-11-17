@@ -503,3 +503,22 @@ fn length_to_code(len: usize) -> (u16, u32, u8) {
     }
     (257, 0, 0)
 }
+
+const DIST_BASE: [u16; 30] = [
+    1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577,
+];
+const DIST_EXTRA: [u8; 30] = [
+    0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13,
+];
+
+fn dist_to_code(dist: usize) -> (u8, u32, u8) {
+    let dist = dist.min(32768) as u16;
+    for i in (0..30).rev() {
+        if dist >= DIST_BASE[i] {
+            let extra_bits = DIST_EXTRA[i];
+            let extra_val = (dist - DIST_BASE[i]) as u32;
+            return (i as u8, extra_val, extra_bits);
+        }
+    }
+    (0, 0, 0)
+}
