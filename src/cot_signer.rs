@@ -66,3 +66,18 @@ fn sha256_block(state: &mut [u32; 8], block: &[u8; 64]) {
             block[t * 4 + 3],
         ]);
     }
+    for t in 16..64 {
+        w[t] = gamma1(w[t - 2])
+            .wrapping_add(w[t - 7])
+            .wrapping_add(gamma0(w[t - 15]))
+            .wrapping_add(w[t - 16]);
+    }
+    let mut a = state[0];
+    let mut b = state[1];
+    let mut c = state[2];
+    let mut d = state[3];
+    let mut e = state[4];
+    let mut f = state[5];
+    let mut g = state[6];
+    let mut h = state[7];
+
