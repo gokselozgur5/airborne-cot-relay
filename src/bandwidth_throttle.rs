@@ -228,3 +228,30 @@ impl BandwidthThrottle {
         (wait_secs * 1000.0).ceil() as u64
     }
 }
+
+impl BandwidthThrottle {
+    fn admit_token_budget(
+        &mut self,
+        priority: CotPriority,
+        payload_bytes: usize,
+    ) -> ThrottleDecision {
+        let needed = payload_bytes as f64;
+        if self.token_balance >= needed {
+            self.token_balance -= needed;
+            self.stats.packets_admitted += 1;
+            self.stats.bytes_admitted += payload_bytes as u64;
+            self.stats.admitted_by_priority[priority.as_tier()] += 1;
+            ThrottleDecision::Admitted
+        } else {
+            let wait_ms = self.calculate_wait_ms(needed - self.token_balance);
+            if priority <= CotPriority::Normal && self.state >= CongestionState::Constrained {
+                self.stats.packets_dropped += 1;
+                self.stats.bytes_dropped += payload_bytes as u64;
+                self.stats.dropped_by_priority[priority.as_tier()] += 1;
+                ThrottleDecision::Dropped(DropReason::BandwidthExhausted)
+            } else {
+                ThrottleDecision::Throttled { wait_ms }
+            }
+        }
+    }
+}
