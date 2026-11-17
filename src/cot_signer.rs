@@ -176,3 +176,20 @@ pub fn hmac_sha256(key: &[u8], message: &[u8]) -> [u8; 32] {
     for b in k_pad.iter() {
         inner_buf.push(b ^ 0x36);
     }
+    inner_buf.extend_from_slice(message);
+    let inner_hash = sha256(&inner_buf);
+
+    let mut outer_buf = Vec::with_capacity(64 + 32);
+    for b in k_pad.iter() {
+        outer_buf.push(b ^ 0x5c);
+    }
+    outer_buf.extend_from_slice(&inner_hash);
+    sha256(&outer_buf)
+}
+
+/// Magic bytes for signed Cursor-on-Target wire frame.
+pub const COT_SIG_MAGIC: [u8; 4] = *b"CSIG";
+
+/// Version 1 framing header format.
+pub const COT_SIG_VERSION: u8 = 1;
+
