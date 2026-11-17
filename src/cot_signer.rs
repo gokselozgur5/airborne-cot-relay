@@ -607,3 +607,18 @@ mod tests {
         let mut frame = signer.create_signed_frame(b"telemetry", 2000);
         frame[25] ^= 0xff; // tamper signature byte
 
+        let mut validator = CotSignatureValidator::new(60);
+        validator.add_key(2, key);
+        let err = validator.verify_frame(&frame, 2000).unwrap_err();
+        assert_eq!(err, CotSignerError::InvalidSignature);
+    }
+
+    #[test]
+    fn test_key_not_found() {
+        let mut signer = CotSigner::new(CotSignerConfig {
+            key_id: 99,
+            secret_key: b"secret".to_vec(),
+            max_clock_skew_secs: 60,
+        });
+        let frame = signer.create_signed_frame(b"cot", 500);
+
