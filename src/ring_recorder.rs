@@ -156,3 +156,26 @@ pub struct TelemetryRingRecorder {
     config: RingRecorderConfig,
     inner: RwLock<RecorderInner>,
 }
+
+impl TelemetryRingRecorder {
+    /// Create a new recorder with default configuration and given capacity.
+    pub fn new(capacity: usize) -> Self {
+        Self::with_config(RingRecorderConfig {
+            capacity: capacity.max(1),
+            ..Default::default()
+        })
+    }
+
+    /// Create a new recorder with custom configuration.
+    pub fn with_config(config: RingRecorderConfig) -> Self {
+        let capacity = config.capacity.max(1);
+        Self {
+            config: RingRecorderConfig { capacity, ..config },
+            inner: RwLock::new(RecorderInner {
+                buffer: VecDeque::with_capacity(capacity),
+                total_recorded: 0,
+                total_overwritten: 0,
+            }),
+        }
+    }
+}
