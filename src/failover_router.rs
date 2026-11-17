@@ -300,3 +300,28 @@ impl FailoverRouter {
         &self.interfaces
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_interface_health_transitions() {
+        let addr = "127.0.0.1:8080".parse().unwrap();
+        let mut iface = NetworkInterface::new("eth0", "primary", RouteKind::Broadcast, addr)
+            .with_thresholds(2, 2);
+
+        assert!(iface.healthy);
+        assert!(!iface.record_failure());
+        assert!(iface.healthy);
+        assert!(iface.record_failure());
+        assert!(!iface.healthy);
+
+        iface.record_success(100);
+        assert!(!iface.healthy);
+        iface.record_success(100);
+        assert!(iface.healthy);
+        assert_eq!(iface.bytes_sent, 200);
+        assert_eq!(iface.packets_sent, 2);
+    }
+}
