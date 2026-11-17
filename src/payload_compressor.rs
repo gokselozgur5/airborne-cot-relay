@@ -11,3 +11,20 @@ pub enum CompressionAlgorithm {
     /// RFC 1951 Deflate stream format.
     Deflate = 2,
 }
+
+impl CompressionAlgorithm {
+    /// Converts algorithm enum to protocol wire identifier byte.
+    pub const fn as_u8(&self) -> u8 {
+        *self as u8
+    }
+
+    /// Parses protocol wire identifier byte into algorithm enum.
+    pub const fn from_u8(val: u8) -> Result<Self, CompressorError> {
+        match val {
+            0 => Ok(Self::None),
+            1 => Ok(Self::Snappy),
+            2 => Ok(Self::Deflate),
+            _ => Err(CompressorError::InvalidAlgorithm(val)),
+        }
+    }
+}
