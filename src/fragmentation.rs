@@ -341,3 +341,19 @@ impl InFlightSession {
 
 /// Diagnostic counters for the fragmentation and reassembly engine.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct FragmentationStats {
+    pub fragments_received: u64,
+    pub messages_completed: u64,
+    pub duplicate_fragments: u64,
+    pub corrupt_fragments: u64,
+    pub expired_sessions: u64,
+}
+
+/// Engine managing reassembly sessions for incoming fragmented UDP packets.
+#[derive(Debug, Clone)]
+pub struct ReassemblyEngine {
+    config: ReassemblyConfig,
+    sessions: HashMap<u32, InFlightSession>,
+    stats: FragmentationStats,
+}
+
