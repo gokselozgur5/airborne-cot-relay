@@ -772,3 +772,11 @@ mod tests {
         let decompressed = snappy_decompress(&compressed).unwrap();
         assert_eq!(decompressed, SAMPLE_COT.as_bytes());
     }
+
+    #[test]
+    fn test_deflate_roundtrip() {
+        let compressed = deflate_compress(SAMPLE_COT.as_bytes());
+        assert!(compressed.len() < SAMPLE_COT.len());
+        let decompressed = deflate_decompress(&compressed).unwrap();
+        assert_eq!(decompressed, SAMPLE_COT.as_bytes());
+    }
