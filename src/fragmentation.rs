@@ -68,3 +68,14 @@ pub fn crc16_ccitt(data: &[u8]) -> u16 {
 
 /// 16-byte protocol header for payload fragments.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FragmentHeader {
+    pub magic: [u8; 4],
+    pub version: u8,
+    pub flags: u8,
+    pub msg_id: u32,
+    pub seq_index: u16,
+    pub total_fragments: u16,
+    pub checksum: u16,
+}
+
+impl FragmentHeader {
