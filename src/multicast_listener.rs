@@ -394,3 +394,25 @@ mod tests {
         assert_eq!(snap.dropped_oversized, 1);
         assert_eq!(snap.dropped_error, 1);
         assert_eq!(snap.total_dropped(), 3);
+        assert_eq!(snap.drop_rate(), 3.0);
+
+        stats.reset();
+        let snap2 = stats.snapshot();
+        assert_eq!(snap2.received_packets, 0);
+        assert_eq!(snap2.total_dropped(), 0);
+        assert_eq!(snap2.drop_rate(), 0.0);
+    }
+
+    #[test]
+    fn test_drop_policy_overflow() {
+        let group: Ipv4Addr = "239.255.10.2".parse().unwrap();
+        let cfg = MulticastListenerConfig::new(group, 5001)
+            .with_ring_capacity(2)
+            .with_drop_policy(DropPolicy::DropNewest);
+
+        let temp = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let port = temp.local_addr().unwrap().port();
+        drop(temp);
+
+        let cfg = cfg.with_ring_capacity(2);
+        let mut listener_cfg = cfg.clone();
