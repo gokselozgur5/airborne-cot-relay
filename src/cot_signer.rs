@@ -706,3 +706,4 @@ mod tests {
         assert_eq!(validator.stats().frames_processed, 1);
         assert_eq!(validator.stats().valid_signatures, 1);
     }
+}
