@@ -74,3 +74,20 @@ impl Default for ThrottleConfig {
         }
     }
 }
+
+impl ThrottleConfig {
+    pub fn new(max_bps: u64, min_bps: u64, burst_bytes: usize) -> Self {
+        Self {
+            max_bandwidth_bps: max_bps,
+            min_bandwidth_bps: min_bps,
+            burst_allowance_bytes: burst_bytes,
+            emergency_bypass: true,
+            window_duration: Duration::from_secs(1),
+        }
+    }
+
+    pub fn with_emergency_bypass(mut self, bypass: bool) -> Self {
+        self.emergency_bypass = bypass;
+        self
+    }
+}
