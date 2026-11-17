@@ -487,3 +487,25 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_fragmentation_single_packet() {
+        let mut fragmenter = PayloadFragmenter::new(FragmenterConfig::default()).unwrap();
+        let payload = b"<event version='2.0' uid='drone-1'/>";
+        let fragments = fragmenter.fragment(payload).unwrap();
+
+        assert_eq!(fragments.len(), 1);
+        assert_eq!(fragments[0].data, payload);
+
+        let mut engine = ReassemblyEngine::new(ReassemblyConfig::default());
+        let result = engine.process_packet(&fragments[0], 1000).unwrap();
+        assert_eq!(result, Some(payload.to_vec()));
+    }
+
+    #[test]
+    fn test_empty_payload() {
+        let mut fragmenter = PayloadFragmenter::new(FragmenterConfig::default()).unwrap();
+        let fragments = fragmenter.fragment(b"").unwrap();
+        assert_eq!(fragments.len(), 1);
+        assert!(fragments[0].data.is_empty());
+    }
+
