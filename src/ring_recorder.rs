@@ -127,3 +127,20 @@ pub struct RecorderStats {
     /// Timestamp of newest record in buffer, if any.
     pub newest_timestamp_ms: Option<u64>,
 }
+
+/// Forensic crash dump report containing metadata and telemetry trace.
+#[derive(Debug, Clone, PartialEq)]
+pub struct CrashDumpReport {
+    /// Incident timestamp in milliseconds.
+    pub timestamp_ms: u64,
+    /// Human-readable crash or fault reason description.
+    pub reason: String,
+    /// Numeric platform fault code.
+    pub fault_code: u32,
+    /// Cumulative samples recorded prior to crash.
+    pub total_recorded: u64,
+    /// Number of records evicted prior to crash.
+    pub total_overwritten: u64,
+    /// Chronological list of recorded telemetry frames.
+    pub records: Vec<TelemetryRecord>,
+}
