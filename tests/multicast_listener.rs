@@ -46,3 +46,27 @@ fn test_multicast_listener_integration_drain_and_stats() {
 fn test_multicast_listener_integration_oversized_drop() {
     let group: Ipv4Addr = "239.255.42.2".parse().unwrap();
     let temp = UdpSocket::bind("127.0.0.1:0").unwrap();
+    let port = temp.local_addr().unwrap().port();
+    drop(temp);
+
+    let cfg = MulticastListenerConfig::new(group, port)
+        .with_max_packet_size(16)
+        .with_read_timeout(Duration::from_millis(50))
+        .with_nonblocking(true);
+
+    let mut listener = MulticastListener::bind(cfg).unwrap();
+    let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
+    let target = SocketAddr::from(([127, 0, 0, 1], port));
+
+    sender.send_to(b"SHORT_VALID", target).unwrap();
+    sender.send_to(b"THIS_IS_DEFINITELY_TOO_LONG_PACKET", target).unwrap();
+
+    std::thread::sleep(Duration::from_millis(15));
+    let read_count = listener.poll_socket().unwrap();
+    assert_eq!(read_count, 1);
+
+    let stats = listener.stats();
+    assert_eq!(stats.received_packets, 2);
+    assert_eq!(stats.enqueued_packets, 1);
+    assert_eq!(stats.dropped_oversized, 1);
+}
