@@ -337,3 +337,15 @@ fn decode_snappy_literal_len(tag: u8, input: &[u8], cursor: &mut usize) -> Resul
         _ => Err(CompressorError::CorruptPayload("unsupported literal length code")),
     }
 }
+
+fn copy_snappy_bytes(out: &mut Vec<u8>, offset: usize, len: usize) -> Result<(), CompressorError> {
+    if offset == 0 || offset > out.len() {
+        return Err(CompressorError::CorruptPayload("invalid copy offset"));
+    }
+    let start = out.len() - offset;
+    for i in 0..len {
+        let b = out[start + i];
+        out.push(b);
+    }
+    Ok(())
+}
