@@ -79,3 +79,26 @@ pub struct FragmentHeader {
 }
 
 impl FragmentHeader {
+    pub fn new(
+        msg_id: u32,
+        seq_index: u16,
+        total_fragments: u16,
+        checksum: u16,
+    ) -> Result<Self, FragmentationError> {
+        if total_fragments == 0 {
+            return Err(FragmentationError::InvalidTotalFragments);
+        }
+        if seq_index >= total_fragments {
+            return Err(FragmentationError::IndexOutOfBounds);
+        }
+        Ok(Self {
+            magic: MAGIC_BYTES,
+            version: PROTOCOL_VERSION,
+            flags: 0,
+            msg_id,
+            seq_index,
+            total_fragments,
+            checksum,
+        })
+    }
+
