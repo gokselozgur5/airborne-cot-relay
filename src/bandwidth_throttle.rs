@@ -178,3 +178,18 @@ impl BandwidthThrottle {
         }
     }
 }
+
+impl BandwidthThrottle {
+    fn replenish_tokens_at(&mut self, now: Instant) {
+        let elapsed = now.duration_since(self.last_update).as_secs_f64();
+        let bytes_per_sec = (self.effective_bandwidth_bps() as f64) / 8.0;
+        let added = elapsed * bytes_per_sec;
+        let cap = self.config.burst_allowance_bytes as f64;
+        self.token_balance = (self.token_balance + added).min(cap);
+        self.last_update = now;
+    }
+
+    pub fn reset_stats(&mut self) {
+        self.stats = ThrottleStats::default();
+    }
+}
