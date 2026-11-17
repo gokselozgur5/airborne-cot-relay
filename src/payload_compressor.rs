@@ -349,3 +349,27 @@ fn copy_snappy_bytes(out: &mut Vec<u8>, offset: usize, len: usize) -> Result<(),
     }
     Ok(())
 }
+
+fn decode_snappy_copy_tag(tag: u8, input: &[u8], cursor: &mut usize, out: &mut Vec<u8>) -> Result<(), CompressorError> {
+    match tag & 0x03 {
+        0x01 => {
+            if *cursor >= input.len() {
+                return Err(CompressorError::CorruptPayload("truncated copy offset"));
+            }
+            let len = (((tag >> 2) & 0x07) as usize) + 4;
+            let offset = ((((tag >> 5) & 0x07) as usize) << 8) | (input[*cursor] as usize);
+            *cursor += 1;
+            copy_snappy_bytes(out, offset, len)
+        }
+        0x02 => {
+            if *cursor + 2 > input.len() {
+                return Err(CompressorError::CorruptPayload("truncated 2-byte copy offset"));
+            }
+            let len = ((tag >> 2) as usize) + 1;
+            let offset = u16::from_le_bytes([input[*cursor], input[*cursor + 1]]) as usize;
+            *cursor += 2;
+            copy_snappy_bytes(out, offset, len)
+        }
+        _ => Err(CompressorError::CorruptPayload("unsupported copy tag")),
+    }
+}
