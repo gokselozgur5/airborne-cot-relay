@@ -365,3 +365,32 @@ impl HeartbeatGenerator {
         }
     }
 }
+
+impl HeartbeatGenerator {
+    /// Total count of heartbeats generated.
+    pub const fn total_generated(&self) -> u64 {
+        self.total_generated
+    }
+
+    /// Monotonic sequence number of last generated heartbeat.
+    pub const fn sequence(&self) -> u64 {
+        self.sequence
+    }
+
+    /// Timestamp of last generated heartbeat in milliseconds.
+    pub const fn last_generated_ms(&self) -> Option<u64> {
+        self.last_generated_ms
+    }
+
+    /// Reference to configuration.
+    pub const fn config(&self) -> &HeartbeatConfig {
+        &self.config
+    }
+
+    /// Reset sequence counters and emission timestamps.
+    pub fn reset(&mut self) {
+        self.sequence = 0;
+        self.last_generated_ms = None;
+        self.total_generated = 0;
+    }
+}
