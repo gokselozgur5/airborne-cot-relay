@@ -42,3 +42,25 @@ impl MulticastPacket {
     }
 
     pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+}
+
+#[derive(Debug)]
+pub enum MulticastListenerError {
+    InvalidGroup(Ipv4Addr),
+    InvalidPort,
+    InvalidRingCapacity,
+    InvalidPacketSize,
+    Io(io::Error),
+    RingBufferFull,
+}
+
+impl fmt::Display for MulticastListenerError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::InvalidGroup(ip) => write!(f, "invalid multicast address: {}", ip),
+            Self::InvalidPort => write!(f, "multicast port must be non-zero"),
+            Self::InvalidRingCapacity => write!(f, "ring buffer capacity must be non-zero"),
+            Self::InvalidPacketSize => write!(f, "maximum packet size must be non-zero"),
+            Self::Io(err) => write!(f, "multicast listener io error: {}", err),
