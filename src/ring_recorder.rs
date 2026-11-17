@@ -144,3 +144,15 @@ pub struct CrashDumpReport {
     /// Chronological list of recorded telemetry frames.
     pub records: Vec<TelemetryRecord>,
 }
+
+struct RecorderInner {
+    buffer: VecDeque<TelemetryRecord>,
+    total_recorded: u64,
+    total_overwritten: u64,
+}
+
+/// Circular in-memory telemetry recorder with thread-safe access.
+pub struct TelemetryRingRecorder {
+    config: RingRecorderConfig,
+    inner: RwLock<RecorderInner>,
+}
