@@ -13,3 +13,21 @@ pub enum PlatformOperationalState {
     Standby,
     Fault,
 }
+
+impl PlatformOperationalState {
+    /// Return the string representation of the state.
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            Self::Nominal => "NOMINAL",
+            Self::Degraded => "DEGRADED",
+            Self::Emergency => "EMERGENCY",
+            Self::Standby => "STANDBY",
+            Self::Fault => "FAULT",
+        }
+    }
+
+    /// Check if the platform is in a healthy operating state.
+    pub const fn is_healthy(&self) -> bool {
+        matches!(self, Self::Nominal | Self::Standby)
+    }
+}
