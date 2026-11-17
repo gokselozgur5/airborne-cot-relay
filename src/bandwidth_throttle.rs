@@ -255,3 +255,26 @@ impl BandwidthThrottle {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_congestion_state_factor_and_priority_floor() {
+        assert_eq!(CongestionState::Optimal.bandwidth_factor(), 1.0);
+        assert_eq!(CongestionState::Critical.bandwidth_factor(), 0.15);
+        assert_eq!(
+            CongestionState::Optimal.min_allowed_priority(),
+            CotPriority::Low
+        );
+        assert_eq!(
+            CongestionState::Constrained.min_allowed_priority(),
+            CotPriority::Normal
+        );
+        assert_eq!(
+            CongestionState::Critical.min_allowed_priority(),
+            CotPriority::Critical
+        );
+    }
+}
