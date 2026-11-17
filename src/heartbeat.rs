@@ -225,3 +225,26 @@ pub struct HeartbeatGenerator {
     last_generated_ms: Option<u64>,
     total_generated: u64,
 }
+
+impl HeartbeatGenerator {
+    /// Create a new heartbeat generator instance.
+    pub fn new(
+        config: HeartbeatConfig,
+        platform: PlatformMetrics,
+        radio: RadioMetrics,
+    ) -> Self {
+        Self {
+            config,
+            sequence: 0,
+            platform,
+            radio,
+            last_generated_ms: None,
+            total_generated: 0,
+        }
+    }
+
+    /// Update platform metrics.
+    pub fn update_platform(&mut self, platform: PlatformMetrics) {
+        self.platform = platform;
+    }
+}
