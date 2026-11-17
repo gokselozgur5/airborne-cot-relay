@@ -691,3 +691,15 @@ impl CotPayloadCompressor {
         }
     }
 }
+
+impl CotPayloadCompressor {
+    fn record_bypassed_payload(&mut self, len: usize, payload: &[u8]) -> CompressedPayload {
+        self.stats.payloads_bypassed += 1;
+        self.stats.total_compressed_bytes += len as u64;
+        CompressedPayload {
+            algorithm: CompressionAlgorithm::None,
+            uncompressed_len: len,
+            data: payload.to_vec(),
+        }
+    }
+}
