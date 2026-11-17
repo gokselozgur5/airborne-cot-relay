@@ -284,3 +284,25 @@ impl MulticastListener {
                 Ok(())
             }
         }
+    }
+
+    pub fn poll_socket(&mut self) -> Result<usize, MulticastListenerError> {
+        let mut count = 0;
+        loop {
+            match self.socket.recv_from(&mut self.recv_buf) {
+                Ok((bytes_read, src)) => {
+                    self.stats.record_received(bytes_read);
+                    if bytes_read > self.config.max_packet_size {
+                        self.stats.record_dropped_oversized();
+                        continue;
+                    }
+                    let packet = MulticastPacket::new(self.recv_buf[..bytes_read].to_vec(), src);
+                    if self.enqueue(packet).is_ok() {
+                        count += 1;
+                    }
+                }
+                Err(ref e) if e.kind() == io::ErrorKind::WouldBlock || e.kind() == io::ErrorKind::TimedOut => {
+                    break;
+                }
+                Err(e) => {
+                    self.stats.record_dropped_error();
