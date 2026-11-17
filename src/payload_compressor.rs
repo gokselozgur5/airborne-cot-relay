@@ -73,3 +73,24 @@ impl std::fmt::Display for CompressorError {
 }
 
 impl std::error::Error for CompressorError {}
+
+/// Configuration settings for CoT payload compressor.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CompressorConfig {
+    /// Selected compression algorithm.
+    pub algorithm: CompressionAlgorithm,
+    /// Minimum size in bytes before compression is applied.
+    pub min_compress_bytes: usize,
+    /// Maximum allowed payload size in bytes.
+    pub max_payload_bytes: usize,
+}
+
+impl Default for CompressorConfig {
+    fn default() -> Self {
+        Self {
+            algorithm: CompressionAlgorithm::Snappy,
+            min_compress_bytes: 32,
+            max_payload_bytes: 10 * 1024 * 1024,
+        }
+    }
+}
