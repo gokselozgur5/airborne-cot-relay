@@ -443,3 +443,26 @@ impl ReassemblyEngine {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_header_encode_decode() {
+        let header = FragmentHeader::new(42, 1, 3, 0xABCD).unwrap();
+        let bytes = header.encode();
+        assert_eq!(bytes.len(), HEADER_SIZE);
+        let decoded = FragmentHeader::decode(&bytes).unwrap();
+        assert_eq!(header, decoded);
+    }
+
+    #[test]
+    fn test_crc16_integrity() {
+        let data1 = b"test payload 1";
+        let data2 = b"test payload 2";
+        let crc1 = crc16_ccitt(data1);
+        let crc2 = crc16_ccitt(data2);
+        assert_ne!(crc1, crc2);
+        assert_eq!(crc1, crc16_ccitt(data1));
+    }
+
