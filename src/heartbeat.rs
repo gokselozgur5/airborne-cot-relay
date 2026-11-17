@@ -436,4 +436,26 @@ mod tests {
         assert!(m.pose.is_some());
     }
 
+
+    #[test]
+    fn test_radio_metrics_and_counters() {
+        let mut radio = RadioMetrics::new(-75, 18.2, 20, 85, true);
+        assert!(!radio.is_link_degraded());
+        assert_eq!(radio.packet_loss_rate(), 0.0);
+
+        radio.record_tx(256, true);
+        radio.record_tx(256, false);
+        assert_eq!(radio.tx_packets, 1);
+        assert_eq!(radio.tx_errors, 1);
+        assert_eq!(radio.tx_bytes, 512);
+        assert!((radio.packet_loss_rate() - 0.5).abs() < f32::EPSILON);
+
+        radio.record_rx(128, true);
+        assert_eq!(radio.rx_packets, 1);
+        assert_eq!(radio.rx_bytes, 128);
+
+        radio.is_connected = false;
+        assert!(radio.is_link_degraded());
+    }
+
 }
