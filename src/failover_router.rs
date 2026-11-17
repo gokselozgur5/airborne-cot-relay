@@ -365,4 +365,23 @@ mod tests {
         assert_eq!(d2.kind, RouteKind::Unicast);
         assert!(d2.is_failover);
     }
+
+    #[test]
+    fn test_round_robin_distribution() {
+        let mut r = FailoverRouter::new(RouterConfig {
+            policy: FailoverPolicy::RoundRobin,
+            max_payload_size: 1024,
+        });
+        let a1 = "127.0.0.1:8001".parse().unwrap();
+        let a2 = "127.0.0.1:8002".parse().unwrap();
+        r.add_interface(NetworkInterface::new("i1", "if1", RouteKind::Broadcast, a1));
+        r.add_interface(NetworkInterface::new("i2", "if2", RouteKind::Unicast, a2));
+
+        let d1 = r.route(b"p1").unwrap();
+        let d2 = r.route(b"p2").unwrap();
+        let d3 = r.route(b"p3").unwrap();
+        assert_eq!(d1.interface_id, "i1");
+        assert_eq!(d2.interface_id, "i2");
+        assert_eq!(d3.interface_id, "i1");
+    }
 }
