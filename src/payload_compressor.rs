@@ -703,3 +703,28 @@ impl CotPayloadCompressor {
         }
     }
 }
+
+impl CotPayloadCompressor {
+    /// Compresses a raw byte payload according to configured algorithm and threshold.
+    pub fn compress(&mut self, payload: &[u8]) -> Result<CompressedPayload, CompressorError> {
+        let len = payload.len();
+        if len > self.config.max_payload_bytes {
+            return Err(CompressorError::PayloadTooLarge {
+                len,
+                max: self.config.max_payload_bytes,
+            });
+        }
+        self.stats.total_raw_bytes += len as u64;
+        if self.should_bypass(len) {
+            return Ok(self.record_bypassed_payload(len, payload));
+        }
+        let data = self.execute_compression(payload);
+        self.stats.payloads_compressed += 1;
+        self.stats.total_compressed_bytes += data.len() as u64;
+        Ok(CompressedPayload {
+            algorithm: self.config.algorithm,
+            uncompressed_len: len,
+            data,
+        })
+    }
+}
