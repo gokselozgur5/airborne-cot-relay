@@ -811,3 +811,12 @@ mod tests {
         assert_eq!(payload.algorithm, CompressionAlgorithm::None);
         assert_eq!(comp.stats().payloads_bypassed, 1);
     }
+
+    #[test]
+    fn test_framed_serialization_roundtrip() {
+        let mut comp = CotPayloadCompressor::new(CompressorConfig::default());
+        let payload = comp.compress_cot_xml(SAMPLE_COT).unwrap();
+        let framed = payload.to_framed_bytes();
+        let parsed = CompressedPayload::from_framed_bytes(&framed).unwrap();
+        assert_eq!(parsed, payload);
+    }
