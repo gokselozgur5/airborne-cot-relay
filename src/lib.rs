@@ -115,3 +115,10 @@ pub use failover_router::{
     FailoverPolicy, FailoverRouter, NetworkInterface, RouteKind, RouterConfig, RouterError,
     RouterStats, RoutingDecision,
 };
+
+pub mod fragmentation;
+pub use fragmentation::{
+    crc16_ccitt, FragmentHeader as CotFragmentHeader, FragmentPacket, FragmentationError, FragmentationStats,
+    FragmenterConfig, InFlightSession, PayloadFragmenter, ReassemblyConfig, ReassemblyEngine,
+    DEFAULT_MTU, HEADER_SIZE as FRAG_HEADER_SIZE, MAGIC_BYTES, MIN_MTU, PROTOCOL_VERSION,
+};
