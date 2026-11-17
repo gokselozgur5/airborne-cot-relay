@@ -422,3 +422,24 @@ impl CotSignatureValidator {
             return Err(CotSignerError::InvalidMagic(magic));
         }
 
+        let version = frame_bytes[4];
+        if version != COT_SIG_VERSION {
+            self.stats.malformed_frames += 1;
+            return Err(CotSignerError::UnsupportedVersion(version));
+        }
+        let key_id = u32::from_be_bytes(frame_bytes[5..9].try_into().unwrap());
+        let timestamp = u64::from_be_bytes(frame_bytes[9..17].try_into().unwrap());
+
+        let mut signature = [0u8; 32];
+        signature.copy_from_slice(&frame_bytes[17..49]);
+
+        let payload_len = u32::from_be_bytes(frame_bytes[49..53].try_into().unwrap()) as usize;
+        let payload = &frame_bytes[53..];
+
+        if payload.len() != payload_len {
+            self.stats.malformed_frames += 1;
+            return Err(CotSignerError::PayloadLengthMismatch {
+                expected: payload_len,
+                actual: payload.len(),
+            });
+        }
