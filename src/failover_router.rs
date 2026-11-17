@@ -141,3 +141,28 @@ pub struct RoutingDecision {
     pub payload_len: usize,
     pub is_failover: bool,
 }
+
+/// Multi-interface broadcast and unicast failover router.
+#[derive(Debug, Clone)]
+pub struct FailoverRouter {
+    config: RouterConfig,
+    interfaces: Vec<NetworkInterface>,
+    round_robin_idx: usize,
+    stats: RouterStats,
+}
+
+impl FailoverRouter {
+    pub fn new(config: RouterConfig) -> Self {
+        Self {
+            config,
+            interfaces: Vec::new(),
+            round_robin_idx: 0,
+            stats: RouterStats::default(),
+        }
+    }
+
+    pub fn with_interfaces(mut self, interfaces: Vec<NetworkInterface>) -> Self {
+        self.interfaces = interfaces;
+        self
+    }
+}
