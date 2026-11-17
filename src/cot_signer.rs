@@ -50,3 +50,19 @@ fn sigma1(x: u32) -> u32 {
 fn gamma0(x: u32) -> u32 {
     rotr(x, 7) ^ rotr(x, 18) ^ (x >> 3)
 }
+
+#[inline]
+fn gamma1(x: u32) -> u32 {
+    rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10)
+}
+
+fn sha256_block(state: &mut [u32; 8], block: &[u8; 64]) {
+    let mut w = [0u32; 64];
+    for t in 0..16 {
+        w[t] = u32::from_be_bytes([
+            block[t * 4],
+            block[t * 4 + 1],
+            block[t * 4 + 2],
+            block[t * 4 + 3],
+        ]);
+    }
