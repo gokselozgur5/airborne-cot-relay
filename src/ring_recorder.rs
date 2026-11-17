@@ -491,3 +491,31 @@ impl TelemetryRingRecorder {
         )
     }
 }
+
+impl TelemetryRingRecorder {
+    fn write_text<W: Write>(
+        &self,
+        report: &CrashDumpReport,
+        writer: &mut W,
+    ) -> Result<(), CrashDumpError> {
+        writer
+            .write_all(Self::format_text_header(report).as_bytes())
+            .map_err(|e| CrashDumpError::Io(e.to_string()))?;
+        for r in &report.records {
+            writeln!(
+                writer,
+                "#{:05} @ {:>8}ms | lat={:8.4} lon={:8.4} alt={:6.1}m | bat={:4.1}V temp={:4.1}C link={:3}%",
+                r.sequence,
+                r.timestamp_ms,
+                r.pose.lat_deg,
+                r.pose.lon_deg,
+                r.pose.hae_m,
+                r.battery_volts,
+                r.cpu_temp_c,
+                r.link_quality_pct
+            )
+            .map_err(|e| CrashDumpError::Io(e.to_string()))?;
+        }
+        Ok(())
+    }
+}
