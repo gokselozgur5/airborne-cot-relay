@@ -403,3 +403,20 @@ impl ReassemblyEngine {
         }
     }
 
+    pub fn process_bytes(
+        &mut self,
+        bytes: &[u8],
+        now_ms: u64,
+    ) -> Result<Option<Vec<u8>>, FragmentationError> {
+        let packet = match FragmentPacket::from_bytes(bytes) {
+            Ok(p) => p,
+            Err(e) => {
+                if e == FragmentationError::ChecksumMismatch {
+                    self.stats.corrupt_fragments += 1;
+                }
+                return Err(e);
+            }
+        };
+        self.process_packet(&packet, now_ms)
+    }
+
