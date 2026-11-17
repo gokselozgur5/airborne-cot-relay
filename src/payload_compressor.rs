@@ -660,3 +660,20 @@ impl CotPayloadCompressor {
         }
     }
 }
+
+impl CotPayloadCompressor {
+    /// Returns current configuration.
+    pub fn config(&self) -> &CompressorConfig {
+        &self.config
+    }
+
+    /// Returns cumulative compression metrics.
+    pub fn stats(&self) -> &CompressorStats {
+        &self.stats
+    }
+
+    /// Resets cumulative stats counters.
+    pub fn reset_stats(&mut self) {
+        self.stats = CompressorStats::default();
+    }
+}
