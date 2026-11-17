@@ -115,3 +115,29 @@ impl NetworkInterface {
         false
     }
 }
+
+/// Configuration for failover routing engine.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RouterConfig {
+    pub policy: FailoverPolicy,
+    pub max_payload_size: usize,
+}
+
+impl Default for RouterConfig {
+    fn default() -> Self {
+        Self {
+            policy: FailoverPolicy::BroadcastWithUnicastBackup,
+            max_payload_size: 65507,
+        }
+    }
+}
+
+/// Routing decision output describing transport route.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RoutingDecision {
+    pub interface_id: String,
+    pub kind: RouteKind,
+    pub destination: SocketAddr,
+    pub payload_len: usize,
+    pub is_failover: bool,
+}
