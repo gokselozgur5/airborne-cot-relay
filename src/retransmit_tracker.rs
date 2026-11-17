@@ -288,3 +288,22 @@ mod tests {
         assert_eq!(pending.len(), 1);
         assert_eq!(pending[0].0, 102);
     }
+    #[test]
+    fn test_retransmit_timeout_and_max_retries() {
+        let cfg = RbtConfig::new(200, 2, 10, false);
+        let mut tracker = RetransmitTracker::new(cfg);
+        tracker.track_packet(5, vec![99], 1000).unwrap();
+
+        assert!(tracker.get_pending_retransmissions(1100).is_empty());
+
+        let p1 = tracker.get_pending_retransmissions(1250);
+        assert_eq!(p1.len(), 1);
+
+        let p2 = tracker.get_pending_retransmissions(1500);
+        assert_eq!(p2.len(), 1);
+
+        let p3 = tracker.get_pending_retransmissions(1750);
+        assert!(p3.is_empty());
+        assert_eq!(tracker.tracked_count(), 0);
+        assert_eq!(tracker.stats().packets_dropped_max_retries, 1);
+    }
