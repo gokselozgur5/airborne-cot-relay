@@ -622,3 +622,19 @@ mod tests {
         });
         let frame = signer.create_signed_frame(b"cot", 500);
 
+        let mut validator = CotSignatureValidator::new(60);
+        validator.add_key(88, b"other".to_vec());
+        let err = validator.verify_frame(&frame, 500).unwrap_err();
+        assert_eq!(err, CotSignerError::KeyNotFound(99));
+    }
+
+    #[test]
+    fn test_timestamp_clock_skew_validation() {
+        let key = b"skew-test-key".to_vec();
+        let mut signer = CotSigner::new(CotSignerConfig {
+            key_id: 5,
+            secret_key: key.clone(),
+            max_clock_skew_secs: 30,
+        });
+        let frame = signer.create_signed_frame(b"cot", 1000);
+
