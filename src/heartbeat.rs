@@ -145,3 +145,25 @@ impl RadioMetrics {
         !self.is_connected || self.link_quality_pct < 40 || self.rssi_dbm < -90
     }
 }
+
+impl RadioMetrics {
+    /// Record transmitted packet and byte count.
+    pub fn record_tx(&mut self, bytes: u64, success: bool) {
+        self.tx_bytes += bytes;
+        if success {
+            self.tx_packets += 1;
+        } else {
+            self.tx_errors += 1;
+        }
+    }
+
+    /// Record received packet and byte count.
+    pub fn record_rx(&mut self, bytes: u64, success: bool) {
+        self.rx_bytes += bytes;
+        if success {
+            self.rx_packets += 1;
+        } else {
+            self.rx_errors += 1;
+        }
+    }
+}
