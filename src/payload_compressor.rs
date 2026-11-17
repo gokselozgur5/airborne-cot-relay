@@ -484,3 +484,22 @@ fn fixed_lit_code(sym: u16) -> (u32, u8) {
         (rev_bits(0xc0 + (sym - 280) as u32, 8), 8)
     }
 }
+
+const LENGTH_BASE: [u16; 29] = [
+    3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258,
+];
+const LENGTH_EXTRA: [u8; 29] = [
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0,
+];
+
+fn length_to_code(len: usize) -> (u16, u32, u8) {
+    let len = len.min(258) as u16;
+    for i in (0..29).rev() {
+        if len >= LENGTH_BASE[i] {
+            let extra_bits = LENGTH_EXTRA[i];
+            let extra_val = (len - LENGTH_BASE[i]) as u32;
+            return (257 + i as u16, extra_val, extra_bits);
+        }
+    }
+    (257, 0, 0)
+}
