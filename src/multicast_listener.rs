@@ -350,3 +350,25 @@ impl MulticastListener {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_validation() {
+        let group: Ipv4Addr = "239.255.10.1".parse().unwrap();
+        let cfg = MulticastListenerConfig::new(group, 5000);
+        assert!(cfg.validate().is_ok());
+
+        let unicast: Ipv4Addr = "192.168.1.1".parse().unwrap();
+        assert!(MulticastListenerConfig::new(unicast, 5000).validate().is_err());
+        assert!(MulticastListenerConfig::new(group, 0).validate().is_err());
+        assert!(MulticastListenerConfig::new(group, 5000).with_ring_capacity(0).validate().is_err());
+        assert!(MulticastListenerConfig::new(group, 5000).with_max_packet_size(0).validate().is_err());
+    }
+
+    #[test]
+    fn test_packet_properties() {
+        let src: SocketAddr = "127.0.0.1:9000".parse().unwrap();
+        let pkt = MulticastPacket::new(b"test_payload".to_vec(), src);
+        assert_eq!(pkt.len(), 12);
