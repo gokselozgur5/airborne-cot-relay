@@ -289,4 +289,14 @@ mod tests {
         assert_eq!(custom.burst_allowance_bytes, 8_192);
         assert!(!custom.emergency_bypass);
     }
+
+    #[test]
+    fn test_emergency_bypass_admits_even_when_exhausted() {
+        let mut throttle = BandwidthThrottle::new(ThrottleConfig::new(10_000, 2_000, 50));
+        let d1 = throttle.admit(CotPriority::Emergency, 200);
+        assert_eq!(d1, ThrottleDecision::Admitted);
+        assert_eq!(throttle.stats().packets_admitted, 1);
+        assert_eq!(throttle.stats().bytes_admitted, 200);
+        assert_eq!(throttle.stats().admitted_by_priority[4], 1);
+    }
 }
