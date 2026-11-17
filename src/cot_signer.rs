@@ -657,3 +657,18 @@ mod tests {
                 diff_secs: 50,
                 max_skew_secs: 30
             }
+        );
+    }
+
+    #[test]
+    fn test_malformed_frame_rejection() {
+        let mut validator = CotSignatureValidator::new(60);
+        let short = vec![0u8; 20];
+        assert_eq!(
+            validator.verify_frame(&short, 100).unwrap_err(),
+            CotSignerError::FrameTooShort {
+                actual: 20,
+                expected: COT_HEADER_LEN
+            }
+        );
+
