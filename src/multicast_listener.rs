@@ -130,3 +130,25 @@ impl MulticastListenerConfig {
 
     pub fn with_drop_policy(mut self, drop_policy: DropPolicy) -> Self {
         self.drop_policy = drop_policy;
+        self
+    }
+
+    pub fn validate(&self) -> Result<(), MulticastListenerError> {
+        if !self.multicast_addr.is_multicast() {
+            return Err(MulticastListenerError::InvalidGroup(self.multicast_addr));
+        }
+        if self.port == 0 {
+            return Err(MulticastListenerError::InvalidPort);
+        }
+        if self.ring_capacity == 0 {
+            return Err(MulticastListenerError::InvalidRingCapacity);
+        }
+        if self.max_packet_size == 0 {
+            return Err(MulticastListenerError::InvalidPacketSize);
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct DroppingStats {
