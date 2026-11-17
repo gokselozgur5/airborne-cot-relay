@@ -260,3 +260,11 @@ fn emit_snappy_copy(offset: usize, len: usize, out: &mut Vec<u8>) {
         out.extend_from_slice(&(offset as u32).to_le_bytes());
     }
 }
+
+fn find_snappy_match(input: &[u8], pos: usize, cand: usize) -> usize {
+    let mut match_len = 4;
+    while pos + match_len < input.len() && match_len < 64 && input[cand + match_len] == input[pos + match_len] {
+        match_len += 1;
+    }
+    match_len
+}
