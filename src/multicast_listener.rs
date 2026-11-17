@@ -438,3 +438,16 @@ mod tests {
         let cfg = MulticastListenerConfig::new(group, port)
             .with_read_timeout(Duration::from_millis(50))
             .with_nonblocking(true);
+        let mut listener = MulticastListener::bind(cfg).unwrap();
+
+        let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
+        sender.send_to(b"MULTICAST_HELLO", SocketAddr::from(([127, 0, 0, 1], port))).unwrap();
+
+        // give socket a tiny slice to process
+        std::thread::sleep(Duration::from_millis(10));
+        let polled = listener.poll_socket().unwrap();
+        assert!(polled >= 1);
+        let pkt = listener.pop_packet().unwrap();
+        assert_eq!(pkt.data, b"MULTICAST_HELLO");
+    }
+}
