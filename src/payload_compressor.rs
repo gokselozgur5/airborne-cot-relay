@@ -223,3 +223,24 @@ fn decode_varint_u32(input: &[u8]) -> Result<(u32, usize), CompressorError> {
     }
     Err(CompressorError::CorruptPayload("truncated varint"))
 }
+
+fn emit_snappy_literal(lit: &[u8], out: &mut Vec<u8>) {
+    if lit.is_empty() {
+        return;
+    }
+    let n = lit.len();
+    if n <= 60 {
+        out.push(((n - 1) as u8) << 2);
+    } else if n <= 256 {
+        out.push(60 << 2);
+        out.push((n - 1) as u8);
+    } else if n <= 65536 {
+        out.push(61 << 2);
+        out.extend_from_slice(&((n - 1) as u16).to_le_bytes());
+    } else {
+        out.push(62 << 2);
+        let bytes = ((n - 1) as u32).to_le_bytes();
+        out.extend_from_slice(&bytes[..3]);
+    }
+    out.extend_from_slice(lit);
+}
