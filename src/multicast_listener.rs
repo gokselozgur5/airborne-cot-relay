@@ -86,3 +86,25 @@ pub struct MulticastListenerConfig {
     pub max_packet_size: usize,
     pub read_timeout: Option<Duration>,
     pub nonblocking: bool,
+    pub drop_policy: DropPolicy,
+}
+
+impl MulticastListenerConfig {
+    pub fn new(multicast_addr: Ipv4Addr, port: u16) -> Self {
+        Self {
+            multicast_addr,
+            interface_addr: Ipv4Addr::UNSPECIFIED,
+            port,
+            ring_capacity: 128,
+            max_packet_size: 4096,
+            read_timeout: None,
+            nonblocking: false,
+            drop_policy: DropPolicy::DropNewest,
+        }
+    }
+
+    pub fn with_interface(mut self, interface_addr: Ipv4Addr) -> Self {
+        self.interface_addr = interface_addr;
+        self
+    }
+
