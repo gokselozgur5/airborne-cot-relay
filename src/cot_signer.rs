@@ -569,3 +569,22 @@ mod tests {
         let now = 1700000000;
         let frame = signer.create_signed_frame(payload, now);
 
+        let mut validator = CotSignatureValidator::new(60);
+        validator.add_key(10, key);
+        let res = validator.verify_frame(&frame, now + 10).unwrap();
+        assert_eq!(res.key_id, 10);
+        assert_eq!(res.timestamp, now);
+        assert_eq!(res.payload, payload);
+    }
+
+    #[test]
+    fn test_tampered_payload_rejected() {
+        let key = b"mission-key-alpha".to_vec();
+        let mut signer = CotSigner::new(CotSignerConfig {
+            key_id: 1,
+            secret_key: key.clone(),
+            max_clock_skew_secs: 60,
+        });
+        let payload = b"legitimate-cot-telemetry";
+        let mut frame = signer.create_signed_frame(payload, 1000);
+
