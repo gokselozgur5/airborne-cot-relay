@@ -337,3 +337,31 @@ impl HeartbeatGenerator {
         )
     }
 }
+
+impl HeartbeatGenerator {
+    /// Force generate a heartbeat record.
+    pub fn generate(&mut self, now_ms: u64) -> HeartbeatRecord {
+        self.sequence += 1;
+        self.total_generated += 1;
+        self.last_generated_ms = Some(now_ms);
+        let stale_ms = now_ms + self.config.stale_duration_ms;
+        let cot_xml = self.render_cot_xml(now_ms, stale_ms);
+        HeartbeatRecord {
+            sequence: self.sequence,
+            timestamp_ms: now_ms,
+            stale_ms,
+            platform: self.platform.clone(),
+            radio: self.radio.clone(),
+            cot_xml,
+        }
+    }
+
+    /// Generate heartbeat record only if due according to configured interval.
+    pub fn generate_if_due(&mut self, now_ms: u64) -> Option<HeartbeatRecord> {
+        if self.is_due(now_ms) {
+            Some(self.generate(now_ms))
+        } else {
+            None
+        }
+    }
+}
