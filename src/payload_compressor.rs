@@ -728,3 +728,20 @@ impl CotPayloadCompressor {
         })
     }
 }
+
+impl CotPayloadCompressor {
+    /// Decompresses payload back into original uncompressed byte slice.
+    pub fn decompress(&self, compressed: &CompressedPayload) -> Result<Vec<u8>, CompressorError> {
+        if compressed.uncompressed_len > self.config.max_payload_bytes {
+            return Err(CompressorError::PayloadTooLarge {
+                len: compressed.uncompressed_len,
+                max: self.config.max_payload_bytes,
+            });
+        }
+        match compressed.algorithm {
+            CompressionAlgorithm::None => Ok(compressed.data.clone()),
+            CompressionAlgorithm::Snappy => snappy_decompress(&compressed.data),
+            CompressionAlgorithm::Deflate => deflate_decompress(&compressed.data),
+        }
+    }
+}
