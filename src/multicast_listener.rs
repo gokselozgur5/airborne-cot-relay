@@ -152,3 +152,25 @@ impl MulticastListenerConfig {
 
 #[derive(Debug, Default)]
 pub struct DroppingStats {
+    received_packets: AtomicU64,
+    received_bytes: AtomicU64,
+    enqueued_packets: AtomicU64,
+    dropped_overflow: AtomicU64,
+    dropped_oversized: AtomicU64,
+    dropped_error: AtomicU64,
+}
+
+impl DroppingStats {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn record_received(&self, bytes: usize) {
+        self.received_packets.fetch_add(1, Ordering::Relaxed);
+        self.received_bytes.fetch_add(bytes as u64, Ordering::Relaxed);
+    }
+
+    pub fn record_enqueued(&self) {
+        self.enqueued_packets.fetch_add(1, Ordering::Relaxed);
+    }
+
