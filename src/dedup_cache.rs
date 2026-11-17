@@ -301,3 +301,19 @@ mod tests {
         assert!(cache.check_and_insert(b"p1", 3500));
         assert_eq!(cache.stats().unique_passed, 2);
     }
+    #[test]
+    fn test_cache_capacity_eviction_and_uid_time() {
+        let config = DedupCacheConfig {
+            sliding_window_ms: 10_000,
+            max_capacity: 2,
+            bloom_bits: 512,
+            bloom_hashes: 3,
+        };
+        let mut cache = CotDedupCache::with_config(config);
+        assert!(cache.check_and_insert_uid_time("uav-1", 100, 1000));
+        assert!(cache.check_and_insert_uid_time("uav-2", 200, 1000));
+        assert!(cache.check_and_insert_uid_time("uav-3", 300, 1000));
+        assert_eq!(cache.stats().evictions, 1);
+        assert_eq!(cache.len(), 2);
+    }
+}
