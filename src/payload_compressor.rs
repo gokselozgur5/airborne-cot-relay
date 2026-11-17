@@ -643,3 +643,20 @@ pub fn deflate_decompress(input: &[u8]) -> Result<Vec<u8>, CompressorError> {
     }
     Ok(out)
 }
+
+/// Primary CoT payload compression engine with configurable algorithms and stats.
+#[derive(Debug, Clone)]
+pub struct CotPayloadCompressor {
+    config: CompressorConfig,
+    stats: CompressorStats,
+}
+
+impl CotPayloadCompressor {
+    /// Creates a new compressor with the given configuration.
+    pub fn new(config: CompressorConfig) -> Self {
+        Self {
+            config,
+            stats: CompressorStats::default(),
+        }
+    }
+}
