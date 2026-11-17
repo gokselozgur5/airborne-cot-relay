@@ -372,3 +372,25 @@ mod tests {
         let src: SocketAddr = "127.0.0.1:9000".parse().unwrap();
         let pkt = MulticastPacket::new(b"test_payload".to_vec(), src);
         assert_eq!(pkt.len(), 12);
+        assert!(!pkt.is_empty());
+        assert_eq!(pkt.source, src);
+        assert_eq!(pkt.data, b"test_payload");
+    }
+
+    #[test]
+    fn test_dropping_stats_accounting() {
+        let stats = DroppingStats::new();
+        stats.record_received(100);
+        stats.record_enqueued();
+        stats.record_dropped_overflow();
+        stats.record_dropped_oversized();
+        stats.record_dropped_error();
+
+        let snap = stats.snapshot();
+        assert_eq!(snap.received_packets, 1);
+        assert_eq!(snap.received_bytes, 100);
+        assert_eq!(snap.enqueued_packets, 1);
+        assert_eq!(snap.dropped_overflow, 1);
+        assert_eq!(snap.dropped_oversized, 1);
+        assert_eq!(snap.dropped_error, 1);
+        assert_eq!(snap.total_dropped(), 3);
