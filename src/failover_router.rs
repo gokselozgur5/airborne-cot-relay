@@ -265,3 +265,20 @@ impl FailoverRouter {
         })
     }
 }
+
+impl FailoverRouter {
+    pub fn record_success(&mut self, id: &str, bytes: usize) -> bool {
+        if let Some(iface) = self.get_interface_mut(id) {
+            iface.record_success(bytes);
+            return true;
+        }
+        false
+    }
+
+    pub fn record_failure(&mut self, id: &str) -> bool {
+        if let Some(iface) = self.get_interface_mut(id) {
+            return iface.record_failure();
+        }
+        false
+    }
+}
