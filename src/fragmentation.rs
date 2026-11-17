@@ -284,3 +284,22 @@ impl Default for ReassemblyConfig {
 
 /// Tracking buffer for an in-flight fragmented message.
 #[derive(Debug, Clone)]
+pub struct InFlightSession {
+    pub msg_id: u32,
+    pub total_fragments: u16,
+    pub received_fragments: BTreeMap<u16, Vec<u8>>,
+    pub created_at_ms: u64,
+    pub last_updated_ms: u64,
+}
+
+impl InFlightSession {
+    pub fn new(msg_id: u32, total_fragments: u16, now_ms: u64) -> Self {
+        Self {
+            msg_id,
+            total_fragments,
+            received_fragments: BTreeMap::new(),
+            created_at_ms: now_ms,
+            last_updated_ms: now_ms,
+        }
+    }
+
