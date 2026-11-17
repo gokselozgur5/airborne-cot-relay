@@ -110,3 +110,20 @@ impl Default for RingRecorderConfig {
         }
     }
 }
+
+/// Recorder runtime telemetry buffer metrics.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct RecorderStats {
+    /// Cumulative count of samples accepted into recorder.
+    pub total_recorded: u64,
+    /// Total samples dropped due to capacity eviction.
+    pub total_overwritten: u64,
+    /// Maximum ring buffer capacity.
+    pub buffer_capacity: usize,
+    /// Current number of stored telemetry records.
+    pub current_len: usize,
+    /// Timestamp of oldest record in buffer, if any.
+    pub oldest_timestamp_ms: Option<u64>,
+    /// Timestamp of newest record in buffer, if any.
+    pub newest_timestamp_ms: Option<u64>,
+}
