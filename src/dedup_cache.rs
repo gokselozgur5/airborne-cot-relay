@@ -139,3 +139,21 @@ pub struct CotDedupCache {
     expiry_queue: VecDeque<(u64, Vec<u8>)>,
     stats: DedupStats,
 }
+
+impl CotDedupCache {
+    /// Creates a new deduplication cache with default configuration.
+    pub fn new() -> Self {
+        Self::with_config(DedupCacheConfig::default())
+    }
+
+    /// Creates a new deduplication cache with custom configuration.
+    pub fn with_config(config: DedupCacheConfig) -> Self {
+        let bloom = DedupBloomFilter::new(config.bloom_bits, config.bloom_hashes);
+        Self {
+            config,
+            bloom,
+            entries: HashMap::new(),
+            expiry_queue: VecDeque::new(),
+            stats: DedupStats::default(),
+        }
+    }
