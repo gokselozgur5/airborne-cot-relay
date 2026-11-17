@@ -522,3 +522,18 @@ fn dist_to_code(dist: usize) -> (u8, u32, u8) {
     }
     (0, 0, 0)
 }
+
+fn write_deflate_match(writer: &mut BitWriter, match_len: usize, offset: usize) {
+    let (len_code, len_extra_val, len_extra_bits) = length_to_code(match_len);
+    let (code_bits, code_len) = fixed_lit_code(len_code);
+    writer.write_bits(code_bits, code_len);
+    if len_extra_bits > 0 {
+        writer.write_bits(len_extra_val, len_extra_bits);
+    }
+    let (dist_code, dist_extra_val, dist_extra_bits) = dist_to_code(offset);
+    let dist_rev = rev_bits(dist_code as u32, 5);
+    writer.write_bits(dist_rev, 5);
+    if dist_extra_bits > 0 {
+        writer.write_bits(dist_extra_val, dist_extra_bits);
+    }
+}
