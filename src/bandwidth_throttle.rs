@@ -113,3 +113,28 @@ pub struct BandwidthThrottle {
     last_update: Instant,
     stats: ThrottleStats,
 }
+
+impl BandwidthThrottle {
+    pub fn new(config: ThrottleConfig) -> Self {
+        let initial_tokens = config.burst_allowance_bytes as f64;
+        Self {
+            config,
+            state: CongestionState::Optimal,
+            token_balance: initial_tokens,
+            last_update: Instant::now(),
+            stats: ThrottleStats::default(),
+        }
+    }
+
+    pub fn config(&self) -> &ThrottleConfig {
+        &self.config
+    }
+
+    pub fn state(&self) -> CongestionState {
+        self.state
+    }
+
+    pub fn stats(&self) -> ThrottleStats {
+        self.stats
+    }
+}
