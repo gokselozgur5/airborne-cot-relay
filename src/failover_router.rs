@@ -93,3 +93,25 @@ impl NetworkInterface {
         self
     }
 }
+
+impl NetworkInterface {
+    pub fn record_success(&mut self, bytes: usize) {
+        self.bytes_sent = self.bytes_sent.saturating_add(bytes as u64);
+        self.packets_sent = self.packets_sent.saturating_add(1);
+        self.consecutive_failures = 0;
+        self.consecutive_successes = self.consecutive_successes.saturating_add(1);
+        if !self.healthy && self.consecutive_successes >= self.recovery_threshold {
+            self.healthy = true;
+        }
+    }
+
+    pub fn record_failure(&mut self) -> bool {
+        self.consecutive_successes = 0;
+        self.consecutive_failures = self.consecutive_failures.saturating_add(1);
+        if self.healthy && self.consecutive_failures >= self.failure_threshold {
+            self.healthy = false;
+            return true;
+        }
+        false
+    }
+}
