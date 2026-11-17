@@ -182,3 +182,23 @@ impl RetransmitTracker {
             }
         }
     }
+    pub fn get_pending_retransmissions(&mut self, now_ms: u64) -> Vec<(u64, Vec<u8>)> {
+        let mut expired_keys = Vec::new();
+        let mut to_retransmit = Vec::new();
+
+        for (seq, record) in self.records.iter_mut() {
+            let elapsed = now_ms.saturating_sub(record.last_sent_ms);
+            let should_retransmit = record.force_retransmit
+                || (elapsed >= self.config.retransmit_timeout_ms);
+
+            if should_retransmit {
+                if record.retransmit_count >= self.config.max_retransmissions {
+                    expired_keys.push(*seq);
+                } else {
+                    record.retransmit_count += 1;
+                    record.last_sent_ms = now_ms;
+                    record.force_retransmit = false;
+                    to_retransmit.push((*seq, record.payload.clone()));
+                }
+            }
+        }
