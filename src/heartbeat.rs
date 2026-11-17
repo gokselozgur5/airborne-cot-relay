@@ -458,4 +458,28 @@ mod tests {
         assert!(radio.is_link_degraded());
     }
 
+
+    #[test]
+    fn test_heartbeat_generator_timing_and_xml() {
+        let cfg = HeartbeatConfig::new("UAV-ALPHA", "EAGLE-1").with_intervals(1000, 3000);
+        let plat = PlatformMetrics::new("EAGLE-1", PlatformOperationalState::Nominal, 85.0, 16.2, 45.0, 20.0, 100, None);
+        let rad = RadioMetrics::new(-65, 22.0, 25, 95, true);
+        let mut gen = HeartbeatGenerator::new(cfg, plat, rad);
+
+        assert!(gen.is_due(0));
+        assert_eq!(gen.time_until_next_ms(0), 0);
+
+        let rec = gen.generate(1000);
+        assert_eq!(rec.sequence, 1);
+        assert_eq!(rec.timestamp_ms, 1000);
+        assert_eq!(rec.stale_ms, 4000);
+        assert!(rec.cot_xml.contains("uid=\"UAV-ALPHA\""));
+        assert!(rec.cot_xml.contains("callsign=\"EAGLE-1\""));
+
+        assert!(!gen.is_due(1500));
+        assert_eq!(gen.time_until_next_ms(1500), 500);
+        assert!(gen.is_due(2000));
+        assert_eq!(gen.time_until_next_ms(2000), 0);
+    }
+
 }
