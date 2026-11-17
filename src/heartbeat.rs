@@ -87,3 +87,19 @@ impl PlatformMetrics {
         self.pose = pose;
     }
 }
+
+/// Radio telemetry link metrics and packet counters.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct RadioMetrics {
+    pub rssi_dbm: i16,
+    pub snr_db: f32,
+    pub tx_power_dbm: i16,
+    pub tx_packets: u64,
+    pub rx_packets: u64,
+    pub tx_bytes: u64,
+    pub rx_bytes: u64,
+    pub tx_errors: u64,
+    pub rx_errors: u64,
+    pub link_quality_pct: u8,
+    pub is_connected: bool,
+}
