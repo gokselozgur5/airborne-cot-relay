@@ -826,3 +826,10 @@ mod tests {
         let bad = vec![0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x05, 0x01];
         assert_eq!(CompressedPayload::from_framed_bytes(&bad), Err(CompressorError::HeaderMismatch));
     }
+
+    #[test]
+    fn test_payload_too_large() {
+        let config = CompressorConfig::default().with_max_payload_bytes(10);
+        let mut comp = CotPayloadCompressor::new(config);
+        assert!(matches!(comp.compress(SAMPLE_COT.as_bytes()), Err(CompressorError::PayloadTooLarge { .. })));
+    }
