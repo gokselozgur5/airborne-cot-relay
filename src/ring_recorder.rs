@@ -49,3 +49,26 @@ pub struct TelemetryRecord {
     /// Bitfield flags for operational alerts.
     pub error_flags: u32,
 }
+
+impl TelemetryRecord {
+    /// Construct a new telemetry record.
+    pub const fn new(
+        sequence: u64,
+        timestamp_ms: u64,
+        pose: PlatformPose,
+        battery_volts: f32,
+        cpu_temp_c: f32,
+        link_quality_pct: u8,
+        error_flags: u32,
+    ) -> Self {
+        Self {
+            sequence,
+            timestamp_ms,
+            pose,
+            battery_volts,
+            cpu_temp_c,
+            link_quality_pct,
+            error_flags,
+        }
+    }
+}
