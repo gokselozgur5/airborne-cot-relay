@@ -195,3 +195,30 @@ impl FailoverRouter {
         false
     }
 }
+
+impl FailoverRouter {
+    fn select_index(&mut self) -> Result<(usize, bool), RouterError> {
+        let h: Vec<usize> = self.interfaces.iter().enumerate()
+            .filter(|(_, i)| i.enabled && i.healthy).map(|(k, _)| k).collect();
+        if h.is_empty() { return Err(RouterError::NoHealthyInterface); }
+        match self.config.policy {
+            FailoverPolicy::PriorityPrimary => {
+                let best = *h.iter().min_by_key(|&&i| self.interfaces[i].priority).unwrap();
+                let min_pri = self.interfaces.iter().map(|i| i.priority).min().unwrap_or(0);
+                Ok((best, self.interfaces[best].priority > min_pri))
+            }
+            FailoverPolicy::RoundRobin => {
+                let idx = h[self.round_robin_idx % h.len()];
+                self.round_robin_idx = self.round_robin_idx.wrapping_add(1);
+                Ok((idx, false))
+            }
+            FailoverPolicy::BroadcastWithUnicastBackup => {
+                if let Some(&b) = h.iter().find(|&&i| self.interfaces[i].kind == RouteKind::Broadcast) {
+                    Ok((b, false))
+                } else {
+                    Ok((h[0], true))
+                }
+            }
+        }
+    }
+}
