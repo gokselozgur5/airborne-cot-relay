@@ -193,3 +193,26 @@ impl BandwidthThrottle {
         self.stats = ThrottleStats::default();
     }
 }
+
+impl BandwidthThrottle {
+    pub fn admit(&mut self, priority: CotPriority, payload_bytes: usize) -> ThrottleDecision {
+        self.replenish_tokens_at(Instant::now());
+
+        if self.config.emergency_bypass && priority == CotPriority::Emergency {
+            self.stats.packets_admitted += 1;
+            self.stats.bytes_admitted += payload_bytes as u64;
+            self.stats.admitted_by_priority[priority.as_tier()] += 1;
+            self.token_balance -= payload_bytes as f64;
+            return ThrottleDecision::Admitted;
+        }
+
+        if priority < self.state.min_allowed_priority() {
+            self.stats.packets_dropped += 1;
+            self.stats.bytes_dropped += payload_bytes as u64;
+            self.stats.dropped_by_priority[priority.as_tier()] += 1;
+            return ThrottleDecision::Dropped(DropReason::BelowPriorityFloor);
+        }
+
+        self.admit_token_budget(priority, payload_bytes)
+    }
+}
