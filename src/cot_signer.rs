@@ -510,3 +510,21 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_hmac_sha256_rfc4231_vectors() {
+        let key1 = [0x0bu8; 20];
+        let data1 = b"Hi There";
+        let hmac1 = hmac_sha256(&key1, data1);
+        assert_eq!(
+            bytes_to_hex(&hmac1),
+            "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7"
+        );
+
+        let key2 = b"Jefe";
+        let data2 = b"what do ya want for nothing?";
+        let hmac2 = hmac_sha256(key2, data2);
+        assert_eq!(
+            bytes_to_hex(&hmac2),
+            "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"
+        );
+    }
