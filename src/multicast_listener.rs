@@ -306,3 +306,25 @@ impl MulticastListener {
                 }
                 Err(e) => {
                     self.stats.record_dropped_error();
+                    return Err(MulticastListenerError::Io(e));
+                }
+            }
+        }
+        Ok(count)
+    }
+
+    pub fn pop_packet(&self) -> Option<MulticastPacket> {
+        self.ring_buffer.pop()
+    }
+
+    pub fn drain_packets(&self) -> Vec<MulticastPacket> {
+        self.ring_buffer.drain()
+    }
+
+    pub fn stats(&self) -> DroppingStatsSnapshot {
+        self.stats.snapshot()
+    }
+
+    pub fn reset_stats(&self) {
+        self.stats.reset();
+    }
