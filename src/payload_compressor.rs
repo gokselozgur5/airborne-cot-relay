@@ -94,3 +94,23 @@ impl Default for CompressorConfig {
         }
     }
 }
+
+impl CompressorConfig {
+    /// Sets compression algorithm.
+    pub fn with_algorithm(mut self, algorithm: CompressionAlgorithm) -> Self {
+        self.algorithm = algorithm;
+        self
+    }
+
+    /// Sets minimum compression threshold.
+    pub fn with_min_compress_bytes(mut self, threshold: usize) -> Self {
+        self.min_compress_bytes = threshold;
+        self
+    }
+
+    /// Sets maximum payload limit.
+    pub fn with_max_payload_bytes(mut self, max_bytes: usize) -> Self {
+        self.max_payload_bytes = max_bytes;
+        self
+    }
+}
