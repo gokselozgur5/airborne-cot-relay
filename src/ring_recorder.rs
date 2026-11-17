@@ -422,3 +422,23 @@ impl TelemetryRingRecorder {
         Ok(())
     }
 }
+
+impl TelemetryRingRecorder {
+    fn format_json_record(r: &TelemetryRecord) -> String {
+        format!(
+            "{{\"seq\":{},\"time_ms\":{},\"lat\":{:.6},\"lon\":{:.6},\"hae\":{:.2},\"roll\":{:.4},\"pitch\":{:.4},\"yaw\":{:.4},\"bat\":{:.2},\"temp\":{:.1},\"link\":{},\"flags\":{}}}",
+            r.sequence,
+            r.timestamp_ms,
+            r.pose.lat_deg,
+            r.pose.lon_deg,
+            r.pose.hae_m,
+            r.pose.roll_rad,
+            r.pose.pitch_rad,
+            r.pose.yaw_rad,
+            r.battery_volts,
+            r.cpu_temp_c,
+            r.link_quality_pct,
+            r.error_flags,
+        )
+    }
+}
