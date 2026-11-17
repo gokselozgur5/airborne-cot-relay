@@ -442,3 +442,18 @@ impl TelemetryRingRecorder {
         )
     }
 }
+
+impl TelemetryRingRecorder {
+    fn write_json_header<W: Write>(
+        report: &CrashDumpReport,
+        writer: &mut W,
+    ) -> Result<(), CrashDumpError> {
+        let esc = report.reason.replace('"', "\\\"");
+        write!(
+            writer,
+            "{{\"timestamp_ms\":{},\"reason\":\"{}\",\"fault_code\":{},\"total_recorded\":{},\"total_overwritten\":{},\"records\":[",
+            report.timestamp_ms, esc, report.fault_code,
+            report.total_recorded, report.total_overwritten,
+        ).map_err(|e| CrashDumpError::Io(e.to_string()))
+    }
+}
