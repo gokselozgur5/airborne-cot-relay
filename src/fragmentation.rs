@@ -530,3 +530,28 @@ mod tests {
         assert_eq!(engine.stats().duplicate_fragments, 1);
     }
 
+    #[test]
+    fn test_missing_query_and_timeout() {
+        let config = FragmenterConfig {
+            mtu: 32,
+            max_payload_size: 1024,
+        };
+        let mut fragmenter = PayloadFragmenter::new(config).unwrap();
+        let payload = vec![0x77; 40];
+        let fragments = fragmenter.fragment(&payload).unwrap();
+
+        let mut engine = ReassemblyEngine::new(ReassemblyConfig {
+            session_timeout_ms: 500,
+            max_concurrent_sessions: 2,
+        });
+
+        engine.process_packet(&fragments[0], 1000).unwrap();
+        let missing = engine.query_missing(fragments[0].header.msg_id).unwrap();
+        assert_eq!(missing, vec![1, 2]);
+
+        assert_eq!(engine.prune_expired(1200), 0);
+        assert_eq!(engine.prune_expired(1600), 1);
+        assert_eq!(engine.active_session_count(), 0);
+        assert_eq!(engine.stats().expired_sessions, 1);
+    }
+}
