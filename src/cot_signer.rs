@@ -528,3 +528,27 @@ mod tests {
             "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843"
         );
     }
+
+    #[test]
+    fn test_constant_time_compare_semantics() {
+        let a = [1u8, 2, 3, 4];
+        let b = [1u8, 2, 3, 4];
+        let c = [1u8, 2, 3, 5];
+        let d = [1u8, 2, 3];
+
+        assert!(constant_time_compare(&a, &b));
+        assert!(!constant_time_compare(&a, &c));
+        assert!(!constant_time_compare(&a, &d));
+    }
+
+    #[test]
+    fn test_cot_signer_raw_and_hex() {
+        let cfg = CotSignerConfig {
+            key_id: 42,
+            secret_key: b"tactical-secret-key-1234".to_vec(),
+            max_clock_skew_secs: 120,
+        };
+        let mut signer = CotSigner::new(cfg);
+        let payload = br#"<event version="2.0" uid="AIR-01"/>"#;
+        let sig = signer.sign_raw(payload);
+        let hex = signer.sign_raw_hex(payload);
