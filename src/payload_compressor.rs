@@ -791,3 +791,13 @@ mod tests {
         let xml = comp.decompress_cot_xml(&payload).unwrap();
         assert_eq!(xml, SAMPLE_COT);
     }
+
+    #[test]
+    fn test_compressor_engine_deflate() {
+        let config = CompressorConfig::default().with_algorithm(CompressionAlgorithm::Deflate);
+        let mut comp = CotPayloadCompressor::new(config);
+        let payload = comp.compress_cot_xml(SAMPLE_COT).unwrap();
+        assert_eq!(payload.algorithm, CompressionAlgorithm::Deflate);
+        let xml = comp.decompress_cot_xml(&payload).unwrap();
+        assert_eq!(xml, SAMPLE_COT);
+    }
