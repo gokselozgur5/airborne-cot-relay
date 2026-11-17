@@ -30,3 +30,22 @@ impl fmt::Display for CrashDumpError {
 }
 
 impl std::error::Error for CrashDumpError {}
+
+/// Recorded platform telemetry sample with flight status metrics.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TelemetryRecord {
+    /// Monotonic sequence identifier.
+    pub sequence: u64,
+    /// Unix millisecond timestamp.
+    pub timestamp_ms: u64,
+    /// Platform spatial pose and attitude.
+    pub pose: PlatformPose,
+    /// System battery voltage in Volts.
+    pub battery_volts: f32,
+    /// Core processor temperature in Celsius.
+    pub cpu_temp_c: f32,
+    /// Datalink radio quality percentage (0-100).
+    pub link_quality_pct: u8,
+    /// Bitfield flags for operational alerts.
+    pub error_flags: u32,
+}
