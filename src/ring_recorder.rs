@@ -225,3 +225,25 @@ impl TelemetryRingRecorder {
         ))
     }
 }
+
+impl TelemetryRingRecorder {
+    /// Clear all recorded telemetry and reset counters.
+    pub fn clear(&self) {
+        let mut inner = match self.inner.write() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        inner.buffer.clear();
+        inner.total_recorded = 0;
+        inner.total_overwritten = 0;
+    }
+
+    /// Number of active telemetry records currently in the buffer.
+    pub fn len(&self) -> usize {
+        let inner = match self.inner.read() {
+            Ok(g) => g,
+            Err(p) => p.into_inner(),
+        };
+        inner.buffer.len()
+    }
+}
