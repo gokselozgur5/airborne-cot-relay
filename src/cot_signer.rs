@@ -208,3 +208,23 @@ pub enum CotSignerError {
     TimestampExpired { age_secs: u64, max_skew_secs: u64 },
     TimestampInFuture { diff_secs: u64, max_skew_secs: u64 },
 }
+
+impl fmt::Display for CotSignerError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::FrameTooShort { actual, expected } => {
+                write!(
+                    f,
+                    "frame length {actual} shorter than required header {expected}"
+                )
+            }
+            Self::InvalidMagic(m) => write!(f, "invalid magic {m:?}"),
+            Self::UnsupportedVersion(v) => write!(f, "unsupported version {v}"),
+            Self::KeyNotFound(k) => write!(f, "signing key {k} not found in store"),
+            Self::InvalidSignature => write!(f, "cryptographic signature mismatch"),
+            Self::PayloadLengthMismatch { expected, actual } => {
+                write!(
+                    f,
+                    "payload len mismatch: header claims {expected}, got {actual}"
+                )
+            }
