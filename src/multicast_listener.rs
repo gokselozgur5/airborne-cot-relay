@@ -240,3 +240,25 @@ pub struct MulticastListener {
 }
 
 impl MulticastListener {
+    pub fn bind(config: MulticastListenerConfig) -> Result<Self, MulticastListenerError> {
+        config.validate()?;
+        let bind_addr = SocketAddr::from(([0, 0, 0, 0], config.port));
+        let socket = UdpSocket::bind(bind_addr)?;
+        socket.join_multicast_v4(&config.multicast_addr, &config.interface_addr)?;
+        if let Some(timeout) = config.read_timeout {
+            socket.set_read_timeout(Some(timeout))?;
+        }
+        if config.nonblocking {
+            socket.set_nonblocking(true)?;
+        }
+        let ring_buffer = Arc::new(AtomicRingBuffer::new(config.ring_capacity));
+        let stats = Arc::new(DroppingStats::new());
+        let recv_buf = vec![0u8; config.max_packet_size + 1];
+        Ok(Self {
+            socket,
+            config,
+            ring_buffer,
+            stats,
+            recv_buf,
+        })
+    }
