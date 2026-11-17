@@ -55,3 +55,28 @@ pub struct NetworkInterface {
     pub bytes_sent: u64,
     pub packets_sent: u64,
 }
+
+impl NetworkInterface {
+    pub fn new(
+        id: impl Into<String>,
+        name: impl Into<String>,
+        kind: RouteKind,
+        destination: SocketAddr,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            name: name.into(),
+            kind,
+            destination,
+            priority: 10,
+            enabled: true,
+            healthy: true,
+            consecutive_failures: 0,
+            consecutive_successes: 0,
+            failure_threshold: 3,
+            recovery_threshold: 2,
+            bytes_sent: 0,
+            packets_sent: 0,
+        }
+    }
+}
