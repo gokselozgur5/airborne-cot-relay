@@ -276,3 +276,24 @@ impl Default for CotSignerConfig {
             secret_key: Vec::new(),
             max_clock_skew_secs: 300,
         }
+    }
+}
+
+/// Statistics counters for signer instance.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct CotSignerStats {
+    pub signatures_generated: u64,
+    pub frames_packaged: u64,
+}
+
+/// Statistics counters for signature validator instance.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct CotValidatorStats {
+    pub frames_processed: u64,
+    pub valid_signatures: u64,
+    pub invalid_signatures: u64,
+    pub key_not_found: u64,
+    pub timestamp_expired: u64,
+    pub timestamp_future: u64,
+    pub malformed_frames: u64,
+}
