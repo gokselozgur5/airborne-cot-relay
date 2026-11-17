@@ -171,3 +171,14 @@ impl RetransmitTracker {
         }
         false
     }
+    pub fn process_selective_ack(&mut self, receiver_id: &str, cumulative_seq: u64, missing_seqs: &[u64]) {
+        let missing: HashSet<u64> = missing_seqs.iter().copied().collect();
+        let target_seqs: Vec<u64> = self.records.keys().copied().collect();
+        for s in target_seqs {
+            if s <= cumulative_seq && !missing.contains(&s) {
+                self.process_ack(s, receiver_id);
+            } else if missing.contains(&s) {
+                self.process_nack(s, receiver_id);
+            }
+        }
+    }
