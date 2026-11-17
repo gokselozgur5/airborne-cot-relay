@@ -166,3 +166,32 @@ impl FailoverRouter {
         self
     }
 }
+
+impl FailoverRouter {
+    pub fn add_interface(&mut self, iface: NetworkInterface) {
+        self.interfaces.retain(|i| i.id != iface.id);
+        self.interfaces.push(iface);
+    }
+
+    pub fn remove_interface(&mut self, id: &str) -> bool {
+        let prev = self.interfaces.len();
+        self.interfaces.retain(|i| i.id != id);
+        self.interfaces.len() < prev
+    }
+
+    pub fn get_interface(&self, id: &str) -> Option<&NetworkInterface> {
+        self.interfaces.iter().find(|i| i.id == id)
+    }
+
+    pub fn get_interface_mut(&mut self, id: &str) -> Option<&mut NetworkInterface> {
+        self.interfaces.iter_mut().find(|i| i.id == id)
+    }
+
+    pub fn set_enabled(&mut self, id: &str, enabled: bool) -> bool {
+        if let Some(iface) = self.get_interface_mut(id) {
+            iface.enabled = enabled;
+            return true;
+        }
+        false
+    }
+}
