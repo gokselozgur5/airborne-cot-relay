@@ -77,3 +77,9 @@ pub use multicast_listener::{
     DropPolicy, DroppingStats, DroppingStatsSnapshot, MulticastListener,
     MulticastListenerConfig, MulticastListenerError, MulticastPacket,
 };
+
+pub mod heartbeat;
+pub use heartbeat::{
+    HeartbeatConfig, HeartbeatGenerator, HeartbeatRecord, PlatformMetrics,
+    PlatformOperationalState, RadioMetrics,
+};
