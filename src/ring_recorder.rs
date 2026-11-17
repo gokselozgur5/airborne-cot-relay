@@ -543,4 +543,19 @@ mod tests {
         assert_eq!(recorder.oldest().unwrap().sequence, 2);
         assert_eq!(recorder.latest().unwrap().sequence, 4);
     }
+
+    #[test]
+    fn test_record_reject_new_mode() {
+        let config = RingRecorderConfig {
+            capacity: 2,
+            overwrite_mode: OverwriteMode::RejectNew,
+        };
+        let recorder = TelemetryRingRecorder::with_config(config);
+        let pose = sample_pose(40.0, -100.0);
+        assert!(recorder.record_pose(1, 100, pose, 24.0, 40.0, 90, 0));
+        assert!(recorder.record_pose(2, 200, pose, 24.0, 40.0, 90, 0));
+        assert!(!recorder.record_pose(3, 300, pose, 24.0, 40.0, 90, 0));
+        assert_eq!(recorder.len(), 2);
+        assert_eq!(recorder.latest().unwrap().sequence, 2);
+    }
 }
