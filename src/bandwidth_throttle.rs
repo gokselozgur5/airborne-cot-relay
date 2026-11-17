@@ -328,4 +328,14 @@ mod tests {
         assert_eq!(throttle.state(), CongestionState::Optimal);
         assert_eq!(throttle.stats().congestion_transitions, 3);
     }
+
+    #[test]
+    fn test_reset_stats_and_metrics_accounting() {
+        let mut throttle = BandwidthThrottle::new(ThrottleConfig::default());
+        throttle.admit(CotPriority::Normal, 120);
+        assert_eq!(throttle.stats().packets_admitted, 1);
+        assert_eq!(throttle.stats().bytes_admitted, 120);
+        throttle.reset_stats();
+        assert_eq!(throttle.stats(), ThrottleStats::default());
+    }
 }
