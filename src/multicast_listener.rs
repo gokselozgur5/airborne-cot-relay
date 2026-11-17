@@ -108,3 +108,25 @@ impl MulticastListenerConfig {
         self
     }
 
+    pub fn with_ring_capacity(mut self, capacity: usize) -> Self {
+        self.ring_capacity = capacity;
+        self
+    }
+
+    pub fn with_max_packet_size(mut self, max_size: usize) -> Self {
+        self.max_packet_size = max_size;
+        self
+    }
+
+    pub fn with_read_timeout(mut self, timeout: Duration) -> Self {
+        self.read_timeout = Some(timeout);
+        self
+    }
+
+    pub fn with_nonblocking(mut self, nonblocking: bool) -> Self {
+        self.nonblocking = nonblocking;
+        self
+    }
+
+    pub fn with_drop_policy(mut self, drop_policy: DropPolicy) -> Self {
+        self.drop_policy = drop_policy;
