@@ -839,3 +839,13 @@ mod tests {
         let corrupt = vec![0x10, 0x01, 0xff, 0xff];
         assert!(snappy_decompress(&corrupt).is_err());
     }
+
+    #[test]
+    fn test_stats_reset() {
+        let mut comp = CotPayloadCompressor::new(CompressorConfig::default());
+        comp.compress_cot_xml(SAMPLE_COT).unwrap();
+        assert!(comp.stats().total_raw_bytes > 0);
+        comp.reset_stats();
+        assert_eq!(comp.stats().total_raw_bytes, 0);
+    }
+}
