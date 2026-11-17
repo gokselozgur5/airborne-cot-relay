@@ -155,3 +155,19 @@ impl CompressedPayload {
         out
     }
 }
+
+impl CompressedPayload {
+    /// Deserializes payload from framed wire bytes.
+    pub fn from_framed_bytes(buf: &[u8]) -> Result<Self, CompressorError> {
+        if buf.len() < 7 {
+            return Err(CompressorError::CorruptPayload("frame too short"));
+        }
+        if buf[0] != Self::MAGIC[0] || buf[1] != Self::MAGIC[1] {
+            return Err(CompressorError::HeaderMismatch);
+        }
+        let algorithm = CompressionAlgorithm::from_u8(buf[2])?;
+        let uncompressed_len = u32::from_be_bytes([buf[3], buf[4], buf[5], buf[6]]) as usize;
+        let data = buf[7..].to_vec();
+        Ok(Self { algorithm, uncompressed_len, data })
+    }
+}
