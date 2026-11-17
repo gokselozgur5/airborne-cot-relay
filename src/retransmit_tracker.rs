@@ -220,3 +220,19 @@ impl RetransmitTracker {
             expected.iter().all(|recv| r.acks.contains(recv))
         })
     }
+    pub fn prune_acknowledged(&mut self, min_acks: usize) -> usize {
+        let before = self.records.len();
+        self.records.retain(|_, record| record.acks.len() < min_acks);
+        let removed = before - self.records.len();
+        self.stats.packets_completed += removed as u64;
+        removed
+    }
+
+    pub fn prune_expired(&mut self, now_ms: u64, max_age_ms: u64) -> usize {
+        let before = self.records.len();
+        self.records.retain(|_, record| now_ms.saturating_sub(record.first_sent_ms) < max_age_ms);
+        let removed = before - self.records.len();
+        self.stats.packets_dropped_max_retries += removed as u64;
+        removed
+    }
+}
