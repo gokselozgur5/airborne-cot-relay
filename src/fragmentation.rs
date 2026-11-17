@@ -170,3 +170,19 @@ impl FragmentPacket {
         out
     }
 
+    pub fn from_bytes(raw: &[u8]) -> Result<Self, FragmentationError> {
+        if raw.len() < HEADER_SIZE {
+            return Err(FragmentationError::PacketTooShort);
+        }
+        let header = FragmentHeader::decode(raw)?;
+        let data = raw[HEADER_SIZE..].to_vec();
+        let expected_crc = crc16_ccitt(&data);
+        if header.checksum != expected_crc {
+            return Err(FragmentationError::ChecksumMismatch);
+        }
+        Ok(Self { header, data })
+    }
+}
+
+/// Configuration settings for the payload fragmenter.
+#[derive(Debug, Clone, PartialEq, Eq)]
