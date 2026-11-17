@@ -150,3 +150,13 @@ impl RetransmitTracker {
         self.stats.packets_tracked += 1;
         Ok(())
     }
+    pub fn process_ack(&mut self, seq: u64, receiver_id: &str) -> bool {
+        if let Some(record) = self.records.get_mut(&seq) {
+            if record.acks.insert(receiver_id.to_string()) {
+                self.stats.acks_received += 1;
+                record.force_retransmit = false;
+                return true;
+            }
+        }
+        false
+    }
