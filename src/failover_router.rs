@@ -262,9 +262,8 @@ impl FailoverRouter {
 impl FailoverRouter {
     pub fn route(&mut self, payload: &[u8]) -> Result<RoutingDecision, RouterError> {
         self.validate_payload(payload)?;
-        let (idx, is_fo) = self.select_index().map_err(|e| {
+        let (idx, is_fo) = self.select_index().inspect_err(|_| {
             self.stats.packets_dropped = self.stats.packets_dropped.saturating_add(1);
-            e
         })?;
         let iface = &self.interfaces[idx];
         if is_fo {
