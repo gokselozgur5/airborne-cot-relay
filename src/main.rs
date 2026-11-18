@@ -1,5 +1,6 @@
 use airborne_cot_relay::app::config_boot::{boot_config_from_env, CONFIG_ERROR_EXIT};
 use airborne_cot_relay::app::exit::finish;
+use airborne_cot_relay::app::run_live::run_live;
 use airborne_cot_relay::app::run_mock::run_mock;
 use std::env;
 use std::process::ExitCode;
@@ -100,6 +101,9 @@ fn main() -> ExitCode {
         };
         if mode == MissionMode::Mock {
             return run_mock_mode(&config);
+        }
+        if mode == MissionMode::Live {
+            return run_live_mode(&config);
         }
     }
     run_mission(mode)

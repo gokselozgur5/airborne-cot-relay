@@ -36,4 +36,3 @@ impl crate::config::RelayError {
         exit_code(self)
     }
 }
-
