@@ -102,6 +102,9 @@ fn main() -> ExitCode {
         if mode == MissionMode::Mock {
             return run_mock_mode(&config);
         }
+        if mode == MissionMode::Live {
+            return run_live_mode(&config);
+        }
     }
     run_mission(mode)
 }
