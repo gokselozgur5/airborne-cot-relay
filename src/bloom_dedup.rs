@@ -68,7 +68,10 @@ impl BloomFilter {
 
     /// Returns the number of set bits (popcount) in the filter.
     pub fn count_ones(&self) -> usize {
-        self.bits.iter().map(|word| word.count_ones() as usize).sum()
+        self.bits
+            .iter()
+            .map(|word| word.count_ones() as usize)
+            .sum()
     }
 
     /// Returns true if no bits are set.
