@@ -1,4 +1,6 @@
-use airborne_cot_relay::json_cot_codec::{cot_xml_to_json, json_to_cot_xml, CotEventDto, JsonCotError};
+use airborne_cot_relay::json_cot_codec::{
+    cot_xml_to_json, json_to_cot_xml, CotEventDto, JsonCotError,
+};
 
 #[test]
 fn test_error_missing_and_malformed() {
