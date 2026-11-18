@@ -178,6 +178,7 @@ impl CotRingBuffer {
     }
 
     /// Enqueues a CoT event. Returns Err(event) if full.
+    #[allow(clippy::result_large_err)]
     pub fn push(&self, event: CotEvent) -> Result<(), CotEvent> {
         self.inner.push(event)
     }
