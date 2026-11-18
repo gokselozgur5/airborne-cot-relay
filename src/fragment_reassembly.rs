@@ -49,7 +49,11 @@ impl FragmentHeader {
         if seq_index >= total_fragments {
             return Err(ReassemblyError::IndexOutOfBounds);
         }
-        Ok(Self { msg_id, seq_index, total_fragments })
+        Ok(Self {
+            msg_id,
+            seq_index,
+            total_fragments,
+        })
     }
 
     /// Encodes header into an 8-byte big-endian array.
@@ -108,7 +112,11 @@ impl Fragment {
 }
 
 /// Fragments a contiguous payload into MTU-bounded fragments.
-pub fn fragment_payload(msg_id: u32, data: &[u8], mtu_size: usize) -> Result<Vec<Fragment>, ReassemblyError> {
+pub fn fragment_payload(
+    msg_id: u32,
+    data: &[u8],
+    mtu_size: usize,
+) -> Result<Vec<Fragment>, ReassemblyError> {
     if mtu_size <= HEADER_SIZE {
         return Err(ReassemblyError::MtuTooSmall);
     }
@@ -163,12 +171,14 @@ impl InFlightMessage {
     }
 
     fn assemble(&self) -> Vec<u8> {
-        let total_size: usize = self.slots.iter().map(|s| s.as_ref().map_or(0, |b| b.len())).sum();
+        let total_size: usize = self
+            .slots
+            .iter()
+            .map(|s| s.as_ref().map_or(0, |b| b.len()))
+            .sum();
         let mut assembled = Vec::with_capacity(total_size);
-        for slot in &self.slots {
-            if let Some(chunk) = slot {
-                assembled.extend_from_slice(chunk);
-            }
+        for chunk in self.slots.iter().flatten() {
+            assembled.extend_from_slice(chunk);
         }
         assembled
     }
@@ -252,15 +262,26 @@ impl FragmentReassembler {
     }
 
     /// Ingests a decoded fragment. Returns complete payload when all parts arrive.
-    pub fn process_fragment(&mut self, frag: Fragment, now_ms: u64) -> Result<Option<Vec<u8>>, ReassemblyError> {
+    pub fn process_fragment(
+        &mut self,
+        frag: Fragment,
+        now_ms: u64,
+    ) -> Result<Option<Vec<u8>>, ReassemblyError> {
         self.stats.packets_received += 1;
         if frag.header.total_fragments == 1 {
             self.stats.messages_completed += 1;
             return Ok(Some(frag.payload));
         }
-        let (id, total, seq) = (frag.header.msg_id, frag.header.total_fragments, frag.header.seq_index as usize);
+        let (id, total, seq) = (
+            frag.header.msg_id,
+            frag.header.total_fragments,
+            frag.header.seq_index as usize,
+        );
         self.check_capacity(id, now_ms)?;
-        let entry = self.in_flight.entry(id).or_insert_with(|| InFlightMessage::new(total, now_ms));
+        let entry = self
+            .in_flight
+            .entry(id)
+            .or_insert_with(|| InFlightMessage::new(total, now_ms));
         if entry.total_fragments != total {
             return Err(ReassemblyError::PayloadMismatch);
         }
@@ -278,7 +299,11 @@ impl FragmentReassembler {
     }
 
     /// Ingests raw packet bytes directly, decoding header and payload.
-    pub fn process_packet(&mut self, packet_bytes: &[u8], now_ms: u64) -> Result<Option<Vec<u8>>, ReassemblyError> {
+    pub fn process_packet(
+        &mut self,
+        packet_bytes: &[u8],
+        now_ms: u64,
+    ) -> Result<Option<Vec<u8>>, ReassemblyError> {
         let frag = Fragment::decode(packet_bytes)?;
         self.process_fragment(frag, now_ms)
     }
@@ -314,9 +339,18 @@ mod tests {
         let encoded = frag.encode();
         let decoded = Fragment::decode(&encoded).unwrap();
         assert_eq!(frag, decoded);
-        assert_eq!(FragmentHeader::new(1, 0, 0), Err(ReassemblyError::InvalidTotalFragments));
-        assert_eq!(FragmentHeader::new(1, 3, 2), Err(ReassemblyError::IndexOutOfBounds));
-        assert_eq!(FragmentHeader::decode(&[0; 4]), Err(ReassemblyError::PacketTooShort));
+        assert_eq!(
+            FragmentHeader::new(1, 0, 0),
+            Err(ReassemblyError::InvalidTotalFragments)
+        );
+        assert_eq!(
+            FragmentHeader::new(1, 3, 2),
+            Err(ReassemblyError::IndexOutOfBounds)
+        );
+        assert_eq!(
+            FragmentHeader::decode(&[0; 4]),
+            Err(ReassemblyError::PacketTooShort)
+        );
     }
 
     #[test]
@@ -331,17 +365,25 @@ mod tests {
         assert_eq!(frags[1].payload, b"89abcdef");
         assert_eq!(frags[2].header.seq_index, 2);
         assert_eq!(frags[2].payload, b"ghij");
-        assert_eq!(fragment_payload(1, data, 8), Err(ReassemblyError::MtuTooSmall));
+        assert_eq!(
+            fragment_payload(1, data, 8),
+            Err(ReassemblyError::MtuTooSmall)
+        );
     }
 
     #[test]
     fn test_reassembler_in_order_and_single() {
         let mut reassembler = FragmentReassembler::new(10, 1000);
         let single = fragment_payload(1, b"hello", 64).unwrap();
-        let res = reassembler.process_fragment(single[0].clone(), 100).unwrap();
+        let res = reassembler
+            .process_fragment(single[0].clone(), 100)
+            .unwrap();
         assert_eq!(res, Some(b"hello".to_vec()));
         let multi = fragment_payload(2, b"longer cot telemetry message", 16).unwrap();
-        assert_eq!(reassembler.process_fragment(multi[0].clone(), 100).unwrap(), None);
+        assert_eq!(
+            reassembler.process_fragment(multi[0].clone(), 100).unwrap(),
+            None
+        );
         assert_eq!(reassembler.in_flight_count(), 1);
         let mut final_res = None;
         for frag in multi.into_iter().skip(1) {
@@ -356,9 +398,18 @@ mod tests {
         let mut reassembler = FragmentReassembler::new(5, 500);
         let frags = fragment_payload(77, b"telemetry!", 12).unwrap();
         assert_eq!(frags.len(), 3);
-        assert_eq!(reassembler.process_fragment(frags[2].clone(), 100).unwrap(), None);
-        assert_eq!(reassembler.process_fragment(frags[0].clone(), 110).unwrap(), None);
-        assert_eq!(reassembler.process_fragment(frags[0].clone(), 120).unwrap(), None);
+        assert_eq!(
+            reassembler.process_fragment(frags[2].clone(), 100).unwrap(),
+            None
+        );
+        assert_eq!(
+            reassembler.process_fragment(frags[0].clone(), 110).unwrap(),
+            None
+        );
+        assert_eq!(
+            reassembler.process_fragment(frags[0].clone(), 120).unwrap(),
+            None
+        );
         assert_eq!(reassembler.stats().duplicate_fragments, 1);
         let res = reassembler.process_fragment(frags[1].clone(), 130).unwrap();
         assert_eq!(res, Some(b"telemetry!".to_vec()));
@@ -368,7 +419,10 @@ mod tests {
     fn test_reassembler_ttl_expiration() {
         let mut reassembler = FragmentReassembler::new(5, 50);
         let frags = fragment_payload(88, b"abandoned", 10).unwrap();
-        assert_eq!(reassembler.process_fragment(frags[0].clone(), 100).unwrap(), None);
+        assert_eq!(
+            reassembler.process_fragment(frags[0].clone(), 100).unwrap(),
+            None
+        );
         assert_eq!(reassembler.in_flight_count(), 1);
         assert_eq!(reassembler.prune_stale(120), 0);
         assert_eq!(reassembler.prune_stale(160), 1);

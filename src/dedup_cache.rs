@@ -141,7 +141,9 @@ pub struct CotDedupCache {
 }
 
 impl CotDedupCache {
+impl CotDedupCache {
     /// Creates a new deduplication cache with default configuration.
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self::with_config(DedupCacheConfig::default())
     }
@@ -247,7 +249,7 @@ impl CotDedupCache {
         }
         self.entries
             .get(key)
-            .map_or(false, |e| !e.is_expired(now_ms))
+            .is_some_and(|e| !e.is_expired(now_ms))
     }
 
     /// Convenience wrapper for string keys.

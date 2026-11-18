@@ -29,8 +29,8 @@ impl BloomFilter {
     /// Creates a new BloomFilter with specified bit capacity and hash count.
     pub fn new(num_bits: usize, num_hashes: usize) -> Self {
         let num_bits = num_bits.max(64);
-        let num_words = (num_bits + 63) / 64;
-        let num_hashes = num_hashes.max(1).min(16);
+        let num_words = num_bits.div_ceil(64);
+        let num_hashes = num_hashes.clamp(1, 16);
         Self {
             bits: vec![0u64; num_words],
             num_bits,
@@ -68,7 +68,10 @@ impl BloomFilter {
 
     /// Returns the number of set bits (popcount) in the filter.
     pub fn count_ones(&self) -> usize {
-        self.bits.iter().map(|word| word.count_ones() as usize).sum()
+        self.bits
+            .iter()
+            .map(|word| word.count_ones() as usize)
+            .sum()
     }
 
     /// Returns true if no bits are set.

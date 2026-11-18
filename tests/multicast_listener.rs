@@ -59,7 +59,9 @@ fn test_multicast_listener_integration_oversized_drop() {
     let target = SocketAddr::from(([127, 0, 0, 1], port));
 
     sender.send_to(b"SHORT_VALID", target).unwrap();
-    sender.send_to(b"THIS_IS_DEFINITELY_TOO_LONG_PACKET", target).unwrap();
+    sender
+        .send_to(b"THIS_IS_DEFINITELY_TOO_LONG_PACKET", target)
+        .unwrap();
 
     std::thread::sleep(Duration::from_millis(15));
     let read_count = listener.poll_socket().unwrap();

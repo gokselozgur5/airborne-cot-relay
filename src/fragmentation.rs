@@ -239,7 +239,7 @@ impl PayloadFragmenter {
         let total_fragments = if payload.is_empty() {
             1
         } else {
-            (payload.len() + max_chunk - 1) / max_chunk
+            payload.len().div_ceil(max_chunk)
         };
 
         if total_fragments > u16::MAX as usize {

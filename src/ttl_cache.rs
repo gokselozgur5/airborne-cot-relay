@@ -285,6 +285,9 @@ mod tests {
         let reaped = cache.drain_expired(1_160);
         assert_eq!(reaped.len(), 2);
         assert_eq!(cache.len(), 1);
-        assert_eq!(cache.peek(&"cot-003".to_string(), 1_160), Some(&vec![7, 8, 9]));
+        assert_eq!(
+            cache.peek(&"cot-003".to_string(), 1_160),
+            Some(&vec![7, 8, 9])
+        );
     }
 }
