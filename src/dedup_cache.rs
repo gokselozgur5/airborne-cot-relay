@@ -254,7 +254,7 @@ impl CotDedupCache {
         }
         self.entries
             .get(key)
-            .map_or(false, |e| !e.is_expired(now_ms))
+            .is_some_and(|e| !e.is_expired(now_ms))
     }
 
     /// Convenience wrapper for string keys.
