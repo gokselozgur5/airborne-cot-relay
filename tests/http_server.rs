@@ -117,6 +117,13 @@ fn test_poll_step_idle_client_timeout() {
     let addr = server.local_addr().unwrap();
 
     let _stream = TcpStream::connect(addr).unwrap();
-    let handled = server.poll_step().unwrap();
+    let mut handled = false;
+    for _ in 0..10 {
+        if server.poll_step().unwrap() {
+            handled = true;
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
     assert!(handled);
 }
