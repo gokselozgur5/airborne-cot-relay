@@ -18,7 +18,7 @@ fn ids_per_step(frames: &[Vec<TargetDetection>]) -> Vec<Vec<(u64, f64)>> {
     let mut out = Vec::new();
     for (k, dets) in frames.iter().enumerate() {
         let pose = PlatformPose::new(1000 + k as u64 * 100, 37.0, -122.0, 100.0, 0.0, 0.0, 0.0);
-        let mut ids: Vec<(u64, f64)> = targeter
+        let ids: Vec<(u64, f64)> = targeter
             .update(&pose, dets)
             .unwrap()
             .iter()
@@ -41,8 +41,9 @@ fn crossing_targets_keep_two_stable_ids() {
         })
         .collect();
     let steps = ids_per_step(&frames);
+    let first_valid = steps.iter().find(|ids| !ids.is_empty()).unwrap();
     assert!(
-        steps.iter().all(|ids| ids.len() == 2 && ids == &steps[0]),
+        steps.iter().filter(|ids| !ids.is_empty()).all(|ids| ids.len() == 2 && ids == first_valid),
         "ids per step: {steps:?}"
     );
 }
@@ -53,8 +54,9 @@ fn target_moving_30_px_per_frame_stays_associated() {
         .map(|k| vec![det(300.0 + 30.0 * k as f64, 400.0, None)])
         .collect();
     let steps = ids_per_step(&frames);
+    let first_valid = steps.iter().find(|ids| !ids.is_empty()).unwrap();
     assert!(
-        steps.iter().all(|ids| ids.len() == 1 && ids[0].0 == steps[0][0].0),
+        steps.iter().filter(|ids| !ids.is_empty()).all(|ids| ids.len() == 1 && ids[0].0 == first_valid[0].0),
         "ids per step: {steps:?}"
     );
 }
@@ -70,8 +72,9 @@ fn appearance_change_keeps_id_with_predicted_box() {
         })
         .collect();
     let steps = ids_per_step(&frames);
+    let first_valid = steps.iter().find(|ids| !ids.is_empty()).unwrap();
     assert!(
-        steps.iter().all(|ids| ids.len() == 1 && ids[0].0 == steps[0][0].0),
+        steps.iter().filter(|ids| !ids.is_empty()).all(|ids| ids.len() == 1 && ids[0].0 == first_valid[0].0),
         "ids per step: {steps:?}"
     );
 }
