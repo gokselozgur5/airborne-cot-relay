@@ -198,13 +198,28 @@ impl FailoverRouter {
 
 impl FailoverRouter {
     fn select_index(&mut self) -> Result<(usize, bool), RouterError> {
-        let h: Vec<usize> = self.interfaces.iter().enumerate()
-            .filter(|(_, i)| i.enabled && i.healthy).map(|(k, _)| k).collect();
-        if h.is_empty() { return Err(RouterError::NoHealthyInterface); }
+        let h: Vec<usize> = self
+            .interfaces
+            .iter()
+            .enumerate()
+            .filter(|(_, i)| i.enabled && i.healthy)
+            .map(|(k, _)| k)
+            .collect();
+        if h.is_empty() {
+            return Err(RouterError::NoHealthyInterface);
+        }
         match self.config.policy {
             FailoverPolicy::PriorityPrimary => {
-                let best = *h.iter().min_by_key(|&&i| self.interfaces[i].priority).unwrap();
-                let min_pri = self.interfaces.iter().map(|i| i.priority).min().unwrap_or(0);
+                let best = *h
+                    .iter()
+                    .min_by_key(|&&i| self.interfaces[i].priority)
+                    .unwrap();
+                let min_pri = self
+                    .interfaces
+                    .iter()
+                    .map(|i| i.priority)
+                    .min()
+                    .unwrap_or(0);
                 Ok((best, self.interfaces[best].priority > min_pri))
             }
             FailoverPolicy::RoundRobin => {
@@ -213,7 +228,10 @@ impl FailoverRouter {
                 Ok((idx, false))
             }
             FailoverPolicy::BroadcastWithUnicastBackup => {
-                if let Some(&b) = h.iter().find(|&&i| self.interfaces[i].kind == RouteKind::Broadcast) {
+                if let Some(&b) = h
+                    .iter()
+                    .find(|&&i| self.interfaces[i].kind == RouteKind::Broadcast)
+                {
                     Ok((b, false))
                 } else {
                     Ok((h[0], true))
@@ -249,7 +267,9 @@ impl FailoverRouter {
             e
         })?;
         let iface = &self.interfaces[idx];
-        if is_fo { self.stats.failover_events = self.stats.failover_events.saturating_add(1); }
+        if is_fo {
+            self.stats.failover_events = self.stats.failover_events.saturating_add(1);
+        }
         match iface.kind {
             RouteKind::Broadcast => self.stats.broadcast_dispatched += 1,
             RouteKind::Unicast => self.stats.unicast_dispatched += 1,
@@ -293,7 +313,10 @@ impl FailoverRouter {
     }
 
     pub fn healthy_count(&self) -> usize {
-        self.interfaces.iter().filter(|i| i.enabled && i.healthy).count()
+        self.interfaces
+            .iter()
+            .filter(|i| i.enabled && i.healthy)
+            .count()
     }
 
     pub fn interfaces(&self) -> &[NetworkInterface] {
@@ -333,8 +356,12 @@ mod tests {
         });
         let a1 = "127.0.0.1:8001".parse().unwrap();
         let a2 = "127.0.0.1:8002".parse().unwrap();
-        r.add_interface(NetworkInterface::new("p1", "main", RouteKind::Broadcast, a1).with_priority(5));
-        r.add_interface(NetworkInterface::new("p2", "bak", RouteKind::Unicast, a2).with_priority(20));
+        r.add_interface(
+            NetworkInterface::new("p1", "main", RouteKind::Broadcast, a1).with_priority(5),
+        );
+        r.add_interface(
+            NetworkInterface::new("p2", "bak", RouteKind::Unicast, a2).with_priority(20),
+        );
 
         let dec = r.route(b"cot1").unwrap();
         assert_eq!(dec.interface_id, "p1");
@@ -351,8 +378,18 @@ mod tests {
         let mut r = FailoverRouter::new(RouterConfig::default());
         let b_addr = "239.2.3.1:6969".parse().unwrap();
         let u_addr = "10.0.0.5:8087".parse().unwrap();
-        r.add_interface(NetworkInterface::new("bcast", "bcast", RouteKind::Broadcast, b_addr));
-        r.add_interface(NetworkInterface::new("ucast", "ucast", RouteKind::Unicast, u_addr));
+        r.add_interface(NetworkInterface::new(
+            "bcast",
+            "bcast",
+            RouteKind::Broadcast,
+            b_addr,
+        ));
+        r.add_interface(NetworkInterface::new(
+            "ucast",
+            "ucast",
+            RouteKind::Unicast,
+            u_addr,
+        ));
 
         let d1 = r.route(b"cot_broadcast").unwrap();
         assert_eq!(d1.interface_id, "bcast");
@@ -394,7 +431,10 @@ mod tests {
         assert_eq!(r.route(b""), Err(RouterError::EmptyPayload));
         assert_eq!(
             r.route(b"12345678901"),
-            Err(RouterError::PayloadTooLarge { size: 11, limit: 10 })
+            Err(RouterError::PayloadTooLarge {
+                size: 11,
+                limit: 10
+            })
         );
         assert_eq!(r.route(b"valid"), Err(RouterError::NoHealthyInterface));
     }
@@ -404,7 +444,12 @@ mod tests {
         let mut r = FailoverRouter::new(RouterConfig::default());
         let a1 = "127.0.0.1:8001".parse().unwrap();
         let a2 = "127.0.0.1:8002".parse().unwrap();
-        r.add_interface(NetworkInterface::new("b1", "bcast", RouteKind::Broadcast, a1));
+        r.add_interface(NetworkInterface::new(
+            "b1",
+            "bcast",
+            RouteKind::Broadcast,
+            a1,
+        ));
         r.add_interface(NetworkInterface::new("u1", "ucast", RouteKind::Unicast, a2));
 
         r.route(b"hello").unwrap();
@@ -428,7 +473,12 @@ mod tests {
     fn test_interface_mutation_and_counts() {
         let mut r = FailoverRouter::new(RouterConfig::default());
         let a = "127.0.0.1:8001".parse().unwrap();
-        r.add_interface(NetworkInterface::new("eth0", "lan", RouteKind::Broadcast, a));
+        r.add_interface(NetworkInterface::new(
+            "eth0",
+            "lan",
+            RouteKind::Broadcast,
+            a,
+        ));
         assert_eq!(r.healthy_count(), 1);
         assert_eq!(r.interfaces().len(), 1);
 
