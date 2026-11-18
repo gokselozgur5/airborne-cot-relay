@@ -128,7 +128,7 @@ pub fn sha256(data: &[u8]) -> [u8; 32] {
     }
     buf.extend_from_slice(&bit_len.to_be_bytes());
 
-    for chunk in buf.chunks_exact(64) {
+    for chunk in buf.as_chunks::<64>().0 {
         let mut block = [0u8; 64];
         block.copy_from_slice(chunk);
         sha256_block(&mut state, &block);
