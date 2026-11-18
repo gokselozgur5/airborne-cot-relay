@@ -177,10 +177,8 @@ impl InFlightMessage {
             .map(|s| s.as_ref().map_or(0, |b| b.len()))
             .sum();
         let mut assembled = Vec::with_capacity(total_size);
-        for slot in &self.slots {
-            if let Some(chunk) = slot {
-                assembled.extend_from_slice(chunk);
-            }
+        for chunk in self.slots.iter().flatten() {
+            assembled.extend_from_slice(chunk);
         }
         assembled
     }
