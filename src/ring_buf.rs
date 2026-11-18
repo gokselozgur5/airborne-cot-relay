@@ -80,10 +80,14 @@ impl<T> AtomicRingBuffer<T> {
             let seq = cell.sequence.load(Ordering::Acquire);
             let diff = seq as isize - pos as isize;
             if diff == 0 {
-                if self.enqueue_pos.compare_exchange_weak(
-                    pos, pos + 1, Ordering::AcqRel, Ordering::Relaxed,
-                ).is_ok() {
-                    unsafe { (*cell.value.get()).write(data); }
+                if self
+                    .enqueue_pos
+                    .compare_exchange_weak(pos, pos + 1, Ordering::AcqRel, Ordering::Relaxed)
+                    .is_ok()
+                {
+                    unsafe {
+                        (*cell.value.get()).write(data);
+                    }
                     cell.sequence.store(pos + 1, Ordering::Release);
                     return Ok(());
                 }
@@ -104,9 +108,11 @@ impl<T> AtomicRingBuffer<T> {
             let seq = cell.sequence.load(Ordering::Acquire);
             let diff = seq as isize - (pos + 1) as isize;
             if diff == 0 {
-                if self.dequeue_pos.compare_exchange_weak(
-                    pos, pos + 1, Ordering::AcqRel, Ordering::Relaxed,
-                ).is_ok() {
+                if self
+                    .dequeue_pos
+                    .compare_exchange_weak(pos, pos + 1, Ordering::AcqRel, Ordering::Relaxed)
+                    .is_ok()
+                {
                     let val = unsafe { (*cell.value.get()).assume_init_read() };
                     cell.sequence.store(pos + self.mask + 1, Ordering::Release);
                     return Some(val);
