@@ -167,7 +167,8 @@ impl DroppingStats {
 
     pub fn record_received(&self, bytes: usize) {
         self.received_packets.fetch_add(1, Ordering::Relaxed);
-        self.received_bytes.fetch_add(bytes as u64, Ordering::Relaxed);
+        self.received_bytes
+            .fetch_add(bytes as u64, Ordering::Relaxed);
     }
 
     pub fn record_enqueued(&self) {
@@ -301,7 +302,10 @@ impl MulticastListener {
                         count += 1;
                     }
                 }
-                Err(ref e) if e.kind() == io::ErrorKind::WouldBlock || e.kind() == io::ErrorKind::TimedOut => {
+                Err(ref e)
+                    if e.kind() == io::ErrorKind::WouldBlock
+                        || e.kind() == io::ErrorKind::TimedOut =>
+                {
                     break;
                 }
                 Err(e) => {
@@ -361,10 +365,18 @@ mod tests {
         assert!(cfg.validate().is_ok());
 
         let unicast: Ipv4Addr = "192.168.1.1".parse().unwrap();
-        assert!(MulticastListenerConfig::new(unicast, 5000).validate().is_err());
+        assert!(MulticastListenerConfig::new(unicast, 5000)
+            .validate()
+            .is_err());
         assert!(MulticastListenerConfig::new(group, 0).validate().is_err());
-        assert!(MulticastListenerConfig::new(group, 5000).with_ring_capacity(0).validate().is_err());
-        assert!(MulticastListenerConfig::new(group, 5000).with_max_packet_size(0).validate().is_err());
+        assert!(MulticastListenerConfig::new(group, 5000)
+            .with_ring_capacity(0)
+            .validate()
+            .is_err());
+        assert!(MulticastListenerConfig::new(group, 5000)
+            .with_max_packet_size(0)
+            .validate()
+            .is_err());
     }
 
     #[test]
@@ -420,8 +432,12 @@ mod tests {
         let listener = MulticastListener::bind(listener_cfg).unwrap();
 
         let src: SocketAddr = "127.0.0.1:8000".parse().unwrap();
-        assert!(listener.enqueue(MulticastPacket::new(b"p1".to_vec(), src)).is_ok());
-        assert!(listener.enqueue(MulticastPacket::new(b"p2".to_vec(), src)).is_ok());
+        assert!(listener
+            .enqueue(MulticastPacket::new(b"p1".to_vec(), src))
+            .is_ok());
+        assert!(listener
+            .enqueue(MulticastPacket::new(b"p2".to_vec(), src))
+            .is_ok());
         // Ring buffer with cap 2 (rounded to power of 2: 2) is full
         let p3_res = listener.enqueue(MulticastPacket::new(b"p3".to_vec(), src));
         assert!(p3_res.is_err());
@@ -441,7 +457,9 @@ mod tests {
         let mut listener = MulticastListener::bind(cfg).unwrap();
 
         let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
-        sender.send_to(b"MULTICAST_HELLO", SocketAddr::from(([127, 0, 0, 1], port))).unwrap();
+        sender
+            .send_to(b"MULTICAST_HELLO", SocketAddr::from(([127, 0, 0, 1], port)))
+            .unwrap();
 
         // give socket a tiny slice to process
         std::thread::sleep(Duration::from_millis(10));
