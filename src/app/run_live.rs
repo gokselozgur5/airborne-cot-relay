@@ -12,6 +12,13 @@ use crate::relay::{CotStreamer, TrackSummary};
 /// Runs the full live mission loop.
 pub fn run_live(config: &RelayConfig, metrics: &Metrics) -> Result<u64, RelayError> {
     println!("Starting live mission relay loop...");
-    // TODO: Connect ingest, targeter, track filter and relay_loop here.
+    
+    let mut ingest = TelemetryIngest::new(0.0, 0.0, config.ground_elevation_m, config.target_stale_timeout_ms);
+    let mut targeter = Targeter::new(&config.camera, config.ground_elevation_m);
+    let mut filter = TrackFilter::new(FilterConfig::default(), SystemClock::new());
+    let _streamer = CotStreamer::new(&config.telemetry_listen_addr, &config.cot_broadcast_addr, config.target_stale_timeout_ms)?;
+    let mut _source = UdpTelemetrySource::bind(&config.telemetry_listen_addr)?;
+    let _clock = SystemClock::new();
+    
     Ok(0)
 }
