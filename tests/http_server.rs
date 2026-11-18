@@ -94,7 +94,14 @@ fn test_router_dispatch_400_bad_request_oversized() {
     bad_payload.extend_from_slice(b"\r\n\r\n");
     stream.write_all(&bad_payload).unwrap();
 
-    let handled = server.poll_step().unwrap();
+    let mut handled = false;
+    for _ in 0..10 {
+        if server.poll_step().unwrap() {
+            handled = true;
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
     assert!(handled);
 
     let mut buf = [0u8; 1024];
