@@ -41,7 +41,14 @@ fn test_router_dispatch_404_not_found() {
     let mut stream = TcpStream::connect(addr).unwrap();
     stream.write_all(b"GET /unknown HTTP/1.1\r\n\r\n").unwrap();
 
-    let handled = server.poll_step().unwrap();
+    let mut handled = false;
+    for _ in 0..10 {
+        if server.poll_step().unwrap() {
+            handled = true;
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
     assert!(handled);
 
     let mut buf = [0u8; 1024];
