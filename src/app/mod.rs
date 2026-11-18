@@ -3,4 +3,5 @@
 pub mod config_boot;
 pub mod exit;
 pub mod mock_mission;
+pub mod run_live;
 pub mod run_mock;

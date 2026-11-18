@@ -23,7 +23,7 @@ const H256_INIT: [u32; 8] = [
 
 #[inline]
 fn rotr(x: u32, n: u32) -> u32 {
-    (x >> n) | (x << (32 - n))
+    x.rotate_right(n)
 }
 
 #[inline]
@@ -128,7 +128,7 @@ pub fn sha256(data: &[u8]) -> [u8; 32] {
     }
     buf.extend_from_slice(&bit_len.to_be_bytes());
 
-    for chunk in buf.chunks_exact(64) {
+    for chunk in buf.as_chunks::<64>().0 {
         let mut block = [0u8; 64];
         block.copy_from_slice(chunk);
         sha256_block(&mut state, &block);
