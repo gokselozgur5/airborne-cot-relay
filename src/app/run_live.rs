@@ -20,5 +20,12 @@ pub fn run_live(config: &RelayConfig, metrics: &Metrics) -> Result<u64, RelayErr
     let mut _source = UdpTelemetrySource::bind(&config.telemetry_listen_addr)?;
     let _clock = SystemClock::new();
     
-    Ok(0)
+    loop {
+        match _source.poll_chunk()? {
+            Some(_) => {}
+            None => {
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            }
+        }
+    }
 }
