@@ -81,6 +81,7 @@ impl DualBufferSampler {
         loop {
             let idx = self.active_idx.load(Ordering::Acquire);
             let v1 = self.versions[idx].load(Ordering::Acquire);
+            #[allow(clippy::manual_is_multiple_of)]
             if v1 % 2 != 0 {
                 self.retries_total.fetch_add(1, Ordering::Relaxed);
                 std::hint::spin_loop();
