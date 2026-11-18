@@ -157,10 +157,7 @@ impl PrometheusExporter {
             .replace('\n', "\\n")
     }
 
-    fn format_labels(
-        common: &[(String, String)],
-        sample: &[(String, String)],
-    ) -> String {
+    fn format_labels(common: &[(String, String)], sample: &[(String, String)]) -> String {
         if common.is_empty() && sample.is_empty() {
             return String::new();
         }
@@ -171,12 +168,7 @@ impl PrometheusExporter {
         format!("{{{}}}", parts.join(","))
     }
 
-    fn render_family(
-        &self,
-        family: &MetricFamily,
-        full_name: &str,
-        out: &mut String,
-    ) {
+    fn render_family(&self, family: &MetricFamily, full_name: &str, out: &mut String) {
         out.push_str("# HELP ");
         out.push_str(full_name);
         out.push(' ');
@@ -203,7 +195,10 @@ impl PrometheusExporter {
     /// Registers a custom counter metric with given name, description, and value.
     pub fn add_counter(&mut self, name: &str, help: &str, val: f64, labels: &[(&str, &str)]) {
         let mut fam = MetricFamily::new(name, help, MetricType::Counter);
-        let lbls = labels.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect();
+        let lbls = labels
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect();
         fam.samples.push(MetricSample::new(lbls, val));
         self.add_metric_family(fam);
     }
@@ -211,12 +206,22 @@ impl PrometheusExporter {
     /// Registers a custom gauge metric with given name, description, and value.
     pub fn add_gauge(&mut self, name: &str, help: &str, val: f64, labels: &[(&str, &str)]) {
         let mut fam = MetricFamily::new(name, help, MetricType::Gauge);
-        let lbls = labels.iter().map(|(k, v)| (k.to_string(), v.to_string())).collect();
+        let lbls = labels
+            .iter()
+            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .collect();
         fam.samples.push(MetricSample::new(lbls, val));
         self.add_metric_family(fam);
     }
 
-    fn render_single(&self, base_name: &str, help: &str, mtype: MetricType, val: f64, out: &mut String) {
+    fn render_single(
+        &self,
+        base_name: &str,
+        help: &str,
+        mtype: MetricType,
+        val: f64,
+        out: &mut String,
+    ) {
         let full = self.format_metric_name(base_name);
         let mut fam = MetricFamily::new(base_name, help, mtype);
         fam.samples.push(MetricSample::new(Vec::new(), val));
@@ -226,13 +231,49 @@ impl PrometheusExporter {
     /// Exports a metrics Snapshot into Prometheus exposition text.
     pub fn export_snapshot(&self, snapshot: &Snapshot) -> String {
         let mut out = String::with_capacity(1024);
-        self.render_single("packets_in_total", "Total incoming packets.", MetricType::Counter, snapshot.packets_in as f64, &mut out);
-        self.render_single("packets_dropped_total", "Total packets dropped.", MetricType::Counter, snapshot.dropped as f64, &mut out);
-        self.render_single("packets_sent_total", "Total packets sent.", MetricType::Counter, snapshot.sent as f64, &mut out);
-        self.render_single("reconnects_total", "Total reconnect attempts.", MetricType::Counter, snapshot.reconnects as f64, &mut out);
-        self.render_single("queue_depth", "Current queue depth.", MetricType::Gauge, snapshot.queue_depth as f64, &mut out);
+        self.render_single(
+            "packets_in_total",
+            "Total incoming packets.",
+            MetricType::Counter,
+            snapshot.packets_in as f64,
+            &mut out,
+        );
+        self.render_single(
+            "packets_dropped_total",
+            "Total packets dropped.",
+            MetricType::Counter,
+            snapshot.dropped as f64,
+            &mut out,
+        );
+        self.render_single(
+            "packets_sent_total",
+            "Total packets sent.",
+            MetricType::Counter,
+            snapshot.sent as f64,
+            &mut out,
+        );
+        self.render_single(
+            "reconnects_total",
+            "Total reconnect attempts.",
+            MetricType::Counter,
+            snapshot.reconnects as f64,
+            &mut out,
+        );
+        self.render_single(
+            "queue_depth",
+            "Current queue depth.",
+            MetricType::Gauge,
+            snapshot.queue_depth as f64,
+            &mut out,
+        );
         if let Some(age_ms) = snapshot.last_send_age_ms {
-            self.render_single("last_send_age_seconds", "Seconds since last send.", MetricType::Gauge, (age_ms as f64) / 1000.0, &mut out);
+            self.render_single(
+                "last_send_age_seconds",
+                "Seconds since last send.",
+                MetricType::Gauge,
+                (age_ms as f64) / 1000.0,
+                &mut out,
+            );
         }
         for fam in &self.custom_families {
             let full = self.format_metric_name(&fam.name);
@@ -283,11 +324,21 @@ mod tests {
     fn test_custom_counter_and_gauge() {
         let mut exp = PrometheusExporter::new(ExporterConfig::empty());
         exp.add_common_label("host", "node-1");
-        exp.add_counter("http_requests", "Total requests", 10.0, &[("method", "GET")]);
+        exp.add_counter(
+            "http_requests",
+            "Total requests",
+            10.0,
+            &[("method", "GET")],
+        );
         exp.add_gauge("cpu_load", "CPU load", 0.75, &[]);
 
         let snap = Snapshot {
-            packets_in: 0, dropped: 0, sent: 0, reconnects: 0, queue_depth: 0, last_send_age_ms: None,
+            packets_in: 0,
+            dropped: 0,
+            sent: 0,
+            reconnects: 0,
+            queue_depth: 0,
+            last_send_age_ms: None,
         };
         let rendered = exp.export_snapshot(&snap);
         assert!(rendered.contains("# HELP http_requests Total requests\n"));

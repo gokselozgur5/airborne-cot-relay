@@ -95,13 +95,10 @@ pub use bandwidth_throttle::{
 };
 
 pub mod cot_signer;
+pub use cot_signer::{bytes_to_hex, constant_time_compare, hmac_sha256, sha256};
 pub use cot_signer::{
-    bytes_to_hex, constant_time_compare, hmac_sha256, sha256,
-};
-pub use cot_signer::{
-    CotSignatureValidator, CotSigner, CotSignerConfig, CotSignerError,
-    CotSignerStats, CotValidatorStats, SignedCotFrame,
-    COT_HEADER_LEN, COT_SIG_MAGIC, COT_SIG_VERSION,
+    CotSignatureValidator, CotSigner, CotSignerConfig, CotSignerError, CotSignerStats,
+    CotValidatorStats, SignedCotFrame, COT_HEADER_LEN, COT_SIG_MAGIC, COT_SIG_VERSION,
 };
 
 pub mod ring_recorder;
@@ -118,7 +115,8 @@ pub use failover_router::{
 
 pub mod fragmentation;
 pub use fragmentation::{
-    crc16_ccitt, FragmentHeader as CotFragmentHeader, FragmentPacket, FragmentationError, FragmentationStats,
-    FragmenterConfig, InFlightSession, PayloadFragmenter, ReassemblyConfig, ReassemblyEngine,
-    DEFAULT_MTU, HEADER_SIZE as FRAG_HEADER_SIZE, MAGIC_BYTES, MIN_MTU, PROTOCOL_VERSION,
+    crc16_ccitt, FragmentHeader as CotFragmentHeader, FragmentPacket, FragmentationError,
+    FragmentationStats, FragmenterConfig, InFlightSession, PayloadFragmenter, ReassemblyConfig,
+    ReassemblyEngine, DEFAULT_MTU, HEADER_SIZE as FRAG_HEADER_SIZE, MAGIC_BYTES, MIN_MTU,
+    PROTOCOL_VERSION,
 };

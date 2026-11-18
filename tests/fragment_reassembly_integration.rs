@@ -1,8 +1,6 @@
 //! End-to-end integration test for UDP fragment reassembly.
 
-use airborne_cot_relay::fragment_reassembly::{
-    fragment_payload, FragmentReassembler, HEADER_SIZE,
-};
+use airborne_cot_relay::fragment_reassembly::{fragment_payload, FragmentReassembler, HEADER_SIZE};
 
 #[test]
 fn test_raw_packet_stream_reassembly() {
@@ -15,7 +13,9 @@ fn test_raw_packet_stream_reassembly() {
     let mut result = None;
     for frag in &fragments {
         let wire = frag.encode();
-        result = reassembler.process_packet(&wire, 1000).expect("packet processed");
+        result = reassembler
+            .process_packet(&wire, 1000)
+            .expect("packet processed");
     }
     assert_eq!(result, Some(payload.to_vec()));
     let stats = reassembler.stats();

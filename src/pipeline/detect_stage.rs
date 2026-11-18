@@ -53,6 +53,6 @@ impl Pipeline {
         let max_age_ms = self.config.target_stale_timeout_ms;
         self.ingest
             .latest_pose()
-            .map_or(false, |p| !p.is_stale(now_ms, max_age_ms))
+            .is_some_and(|p| !p.is_stale(now_ms, max_age_ms))
     }
 }
