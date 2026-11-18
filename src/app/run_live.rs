@@ -28,7 +28,26 @@ pub fn run_live(config: &RelayConfig, metrics: &Metrics) -> Result<u64, RelayErr
                 for pose in poses {
                     if let Ok(tracks) = targeter.update(&pose, &[]) {
                         for t in tracks.iter().filter(|t| t.is_confirmed) {
-                            // TODO: filter and stream
+                            let uid = format!("TRACK-{:04}", t.id);
+                            if filter.accept(&uid, t.lat_deg, t.lon_deg) {
+                                let summary = TrackSummary {
+                                    id: t.id,
+                                    classification: t.classification.clone(),
+                                    lat_deg: t.lat_deg,
+                                    lon_deg: t.lon_deg,
+                                    hae_m: t.hae_m,
+                                    ce90_m: t.ce90_m,
+                                    le90_m: 10.0,
+                                    course_deg: t.course_deg,
+                                    speed_mps: t.speed_mps,
+                                };
+                                let now_ms = clock.now_ms() as i64;
+                                if streamer.send_track(&summary, now_ms).is_ok() {
+                                    metrics.record_sent(now_ms as u64);
+                                } else {
+                                    metrics.add_dropped(1);
+                                }
+                            }
                         }
                     }
                 }
