@@ -109,8 +109,18 @@ fn step_report_total_processed_and_is_empty() {
 
 #[test]
 fn step_report_add_and_add_assign() {
-    let r1 = StepReport { sent: 1, failed: 2, filtered: 3, evicted: 4 };
-    let r2 = StepReport { sent: 10, failed: 20, filtered: 30, evicted: 40 };
+    let r1 = StepReport {
+        sent: 1,
+        failed: 2,
+        filtered: 3,
+        evicted: 4,
+    };
+    let r2 = StepReport {
+        sent: 10,
+        failed: 20,
+        filtered: 30,
+        evicted: 40,
+    };
     let mut sum = r1 + r2;
     assert_eq!(sum.sent, 11);
     assert_eq!(sum.failed, 22);
@@ -147,10 +157,8 @@ fn pipeline_step_drains_queue_and_updates_gauge() {
 #[test]
 fn outbound_step_stage_drains_queue_stage() {
     let metrics = Metrics::new();
-    let mut stage = airborne_cot_relay::pipeline::queue_stage::QueueStage::new(
-        8,
-        DropPolicy::DropOldest,
-    );
+    let mut stage =
+        airborne_cot_relay::pipeline::queue_stage::QueueStage::new(8, DropPolicy::DropOldest);
     stage.push(track(1, 35.0), &metrics);
     let mut step = stepper(false);
     let report = step.step_stage(5_000, &mut stage, &metrics, render);
