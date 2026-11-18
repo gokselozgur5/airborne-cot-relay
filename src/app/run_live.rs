@@ -26,7 +26,11 @@ pub fn run_live(config: &RelayConfig, metrics: &Metrics) -> Result<u64, RelayErr
                 metrics.add_packets_in(1);
                 let poses = ingest.process_bytes(&bytes);
                 for pose in poses {
-                    // TODO: process pose
+                    if let Ok(tracks) = targeter.update(&pose, &[]) {
+                        for t in tracks.iter().filter(|t| t.is_confirmed) {
+                            // TODO: filter and stream
+                        }
+                    }
                 }
             }
             None => {
