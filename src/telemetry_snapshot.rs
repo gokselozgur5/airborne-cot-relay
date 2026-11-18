@@ -15,11 +15,7 @@ pub struct TelemetrySnapshot {
 
 impl TelemetrySnapshot {
     /// Create a new snapshot instance.
-    pub const fn new(
-        pose: PlatformPose,
-        sequence: u64,
-        timestamp_ns: u64,
-    ) -> Self {
+    pub const fn new(pose: PlatformPose, sequence: u64, timestamp_ns: u64) -> Self {
         Self {
             pose,
             sequence,
