@@ -141,14 +141,9 @@ pub struct CotDedupCache {
 }
 
 impl CotDedupCache {
-    /// Creates a new deduplication cache with default configuration.
-    impl Default for CotDedupCache {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl CotDedupCache {
+    /// Creates a new deduplication cache with default configuration.
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self::with_config(DedupCacheConfig::default())
     }
