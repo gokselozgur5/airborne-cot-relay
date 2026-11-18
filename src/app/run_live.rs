@@ -22,7 +22,13 @@ pub fn run_live(config: &RelayConfig, metrics: &Metrics) -> Result<u64, RelayErr
     
     loop {
         match _source.poll_chunk()? {
-            Some(_) => {}
+            Some(bytes) => {
+                metrics.add_packets_in(1);
+                let poses = ingest.process_bytes(&bytes);
+                for pose in poses {
+                    // TODO: process pose
+                }
+            }
             None => {
                 std::thread::sleep(std::time::Duration::from_millis(10));
             }
