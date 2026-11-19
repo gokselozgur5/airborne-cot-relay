@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TcpClientConfig {
     pub connect_timeout: Option<Duration>,
+    pub write_timeout: Option<Duration>,
     pub backoff_base_ms: u64,
     pub backoff_max_ms: u64,
 }
@@ -16,6 +17,7 @@ impl Default for TcpClientConfig {
     fn default() -> Self {
         Self {
             connect_timeout: Some(Duration::from_millis(500)),
+            write_timeout: Some(Duration::from_millis(500)),
             backoff_base_ms: 100,
             backoff_max_ms: 5000,
         }
@@ -29,6 +31,11 @@ impl TcpClientConfig {
 
     pub fn with_connect_timeout(mut self, timeout: Duration) -> Self {
         self.connect_timeout = Some(timeout);
+        self
+    }
+
+    pub fn with_write_timeout(mut self, timeout: Duration) -> Self {
+        self.write_timeout = Some(timeout);
         self
     }
 
