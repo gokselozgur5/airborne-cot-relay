@@ -426,14 +426,25 @@ fn decode_snappy_step(
 
 /// Decompresses Snappy raw block payload into uncompressed bytes.
 pub fn snappy_decompress(input: &[u8]) -> Result<Vec<u8>, CompressorError> {
+    snappy_decompress_bounded(input, usize::MAX)
+}
+
+fn snappy_decompress_bounded(input: &[u8], max_bytes: usize) -> Result<Vec<u8>, CompressorError> {
     let (expected_len, mut cursor) = decode_varint_u32(input)?;
-    let mut out = Vec::with_capacity(expected_len as usize);
-    while cursor < input.len() && out.len() < expected_len as usize {
+    let exp_len = expected_len as usize;
+    if exp_len > max_bytes {
+        return Err(CompressorError::PayloadTooLarge {
+            len: exp_len,
+            max: max_bytes,
+        });
+    }
+    let mut out = Vec::with_capacity(exp_len);
+    while cursor < input.len() && out.len() < exp_len {
         let tag = input[cursor];
         cursor += 1;
         decode_snappy_step(tag, input, &mut cursor, &mut out)?;
     }
-    if out.len() != expected_len as usize {
+    if out.len() != exp_len {
         return Err(CompressorError::DecompressionFailed(
             "snappy length mismatch",
         ));
