@@ -402,6 +402,11 @@ impl ReassemblyEngine {
             self.stats.duplicate_fragments += 1;
         }
 
+        if session.buffered_bytes > self.config.max_message_bytes {
+            self.sessions.remove(&msg_id);
+            return Err(FragmentationError::PayloadTooLarge);
+        }
+
         if session.is_complete() {
             let session = self.sessions.remove(&msg_id).unwrap();
             self.stats.messages_completed += 1;
