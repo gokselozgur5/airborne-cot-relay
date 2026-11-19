@@ -204,21 +204,22 @@ impl CotEventDto {
 impl CotEventDto {
     /// Serializes this `CotEventDto` into a Cursor-on-Target XML string.
     pub fn to_xml(&self) -> String {
+        let esc = crate::xml_sanitize::sanitize_and_escape_attr;
         let mut detail = String::new();
         if let (Some(c), Some(s)) = (self.course, self.speed) {
             detail.push_str(&format!(r#"<track course="{c:.2}" speed="{s:.2}"/>"#));
         }
         if let Some(cs) = &self.callsign {
-            detail.push_str(&format!(r#"<contact callsign="{cs}"/>"#));
+            detail.push_str(&format!(r#"<contact callsign="{}"/>"#, esc(cs)));
         }
         format!(
             r#"<event version="2.0" uid="{}" type="{}" how="{}" time="{}" start="{}" stale="{}"><point lat="{:.7}" lon="{:.7}" hae="{:.2}" ce="{:.2}" le="{:.2}"/><detail>{detail}</detail></event>"#,
-            self.uid,
-            self.cot_type,
-            self.how,
-            self.time,
-            self.start,
-            self.stale,
+            esc(&self.uid),
+            esc(&self.cot_type),
+            esc(&self.how),
+            esc(&self.time),
+            esc(&self.start),
+            esc(&self.stale),
             self.lat,
             self.lon,
             self.hae,
