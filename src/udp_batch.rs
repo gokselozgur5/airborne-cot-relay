@@ -128,18 +128,27 @@ impl UdpBatchQueue {
 
 impl UdpBatchQueue {
     pub fn flush_batch(&mut self, socket: &UdpSocket) -> std::io::Result<usize> {
-        let batch = self.drain_batch();
-        if batch.is_empty() {
-            return Ok(0);
-        }
-        let count = batch.len();
-        for packet in batch {
-            let n = socket.send_to(&packet.payload, packet.destination)?;
+        let mut sent = 0;
+        let mut batch_bytes = 0;
+        while let Some(front) = self.queue.front() {
+            if sent > 0 && sent >= self.policy.max_batch_packets {
+                break;
+            }
+            if sent > 0 && batch_bytes + front.payload.len() > self.policy.max_batch_bytes {
+                break;
+            }
+            let n = socket.send_to(&front.payload, front.destination)?;
+            let packet = self.queue.pop_front().unwrap();
+            batch_bytes += packet.payload.len();
+            self.queued_bytes = self.queued_bytes.saturating_sub(packet.payload.len());
             self.stats.sent_packets += 1;
             self.stats.sent_bytes += n;
+            sent += 1;
         }
-        self.stats.batches_sent += 1;
-        Ok(count)
+        if sent > 0 {
+            self.stats.batches_sent += 1;
+        }
+        Ok(sent)
     }
 }
 
