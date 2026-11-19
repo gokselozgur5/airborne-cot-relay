@@ -3,6 +3,7 @@ use std::process::Command;
 fn run(args: &[&str]) -> std::process::Output {
     Command::new(env!("CARGO_BIN_EXE_airborne-cot-relay"))
         .args(args)
+        .env("RELAY_COT_ADDR", "127.0.0.1:0")
         .output()
         .unwrap()
 }
