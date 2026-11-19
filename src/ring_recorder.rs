@@ -204,6 +204,7 @@ impl TelemetryRingRecorder {
 
 impl TelemetryRingRecorder {
     /// Convenience helper to record a new pose with sensor metrics.
+    #[allow(clippy::too_many_arguments)]
     pub fn record_pose(
         &self,
         sequence: u64,
