@@ -236,10 +236,14 @@ impl PayloadFragmenter {
             return Err(FragmentationError::PayloadTooLarge);
         }
         let max_chunk = self.config.mtu - HEADER_SIZE;
+        let mut stream = payload.to_vec();
+        if payload.len() > max_chunk {
+            stream.extend_from_slice(&crc16_ccitt(payload).to_be_bytes());
+        }
         let total_fragments = if payload.is_empty() {
             1
         } else {
-            payload.len().div_ceil(max_chunk)
+            stream.len().div_ceil(max_chunk)
         };
 
         if total_fragments > u16::MAX as usize {
@@ -256,7 +260,7 @@ impl PayloadFragmenter {
             return Ok(packets);
         }
 
-        for (idx, chunk) in payload.chunks(max_chunk).enumerate() {
+        for (idx, chunk) in stream.chunks(max_chunk).enumerate() {
             let crc = crc16_ccitt(chunk);
             let header = FragmentHeader::new(msg_id, idx as u16, total_u16, crc)?;
             packets.push(FragmentPacket::new(header, chunk.to_vec()));
@@ -409,8 +413,17 @@ impl ReassemblyEngine {
 
         if session.is_complete() {
             let session = self.sessions.remove(&msg_id).unwrap();
+            let mut payload = session.assemble();
+            if total > 1 {
+                let split = payload.len().saturating_sub(2);
+                let tail = payload.split_off(split);
+                if tail.len() != 2 || tail != crc16_ccitt(&payload).to_be_bytes() {
+                    self.stats.corrupt_fragments += 1;
+                    return Err(FragmentationError::ChecksumMismatch);
+                }
+            }
             self.stats.messages_completed += 1;
-            Ok(Some(session.assemble()))
+            Ok(Some(payload))
         } else {
             Ok(None)
         }
