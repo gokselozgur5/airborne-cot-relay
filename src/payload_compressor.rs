@@ -715,10 +715,7 @@ pub fn deflate_decompress(input: &[u8]) -> Result<Vec<u8>, CompressorError> {
     deflate_decompress_bounded(input, usize::MAX)
 }
 
-fn deflate_decompress_bounded(
-    input: &[u8],
-    max_bytes: usize,
-) -> Result<Vec<u8>, CompressorError> {
+fn deflate_decompress_bounded(input: &[u8], max_bytes: usize) -> Result<Vec<u8>, CompressorError> {
     let mut reader = BitReader::new(input);
     let _bfinal = reader.read_bits(1)?;
     let btype = reader.read_bits(2)?;
@@ -845,11 +842,18 @@ impl CotPayloadCompressor {
                 max: self.config.max_payload_bytes,
             });
         }
-        match compressed.algorithm {
-            CompressionAlgorithm::None => Ok(compressed.data.clone()),
-            CompressionAlgorithm::Snappy => snappy_decompress(&compressed.data),
-            CompressionAlgorithm::Deflate => deflate_decompress(&compressed.data),
+        let max = self.config.max_payload_bytes;
+        let out = match compressed.algorithm {
+            CompressionAlgorithm::None => compressed.data.clone(),
+            CompressionAlgorithm::Snappy => snappy_decompress_bounded(&compressed.data, max)?,
+            CompressionAlgorithm::Deflate => deflate_decompress_bounded(&compressed.data, max)?,
+        };
+        if out.len() != compressed.uncompressed_len {
+            return Err(CompressorError::DecompressionFailed(
+                "decompressed length mismatch",
+            ));
         }
+        Ok(out)
     }
 }
 
