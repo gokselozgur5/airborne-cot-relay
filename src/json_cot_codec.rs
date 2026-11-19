@@ -100,24 +100,23 @@ struct EventTagAttrs {
 }
 
 fn parse_event_tag(event_tag: &str) -> Result<EventTagAttrs, JsonCotError> {
+    let unesc = crate::xml_sanitize::unescape_xml;
     let uid = extract_xml_attr(event_tag, "uid")
-        .ok_or(JsonCotError::MissingField("uid"))?
-        .to_string();
+        .map(unesc)
+        .ok_or(JsonCotError::MissingField("uid"))?;
     let cot_type = extract_xml_attr(event_tag, "type")
-        .ok_or(JsonCotError::MissingField("type"))?
-        .to_string();
-    let how = extract_xml_attr(event_tag, "how")
-        .unwrap_or("m-g")
-        .to_string();
+        .map(unesc)
+        .ok_or(JsonCotError::MissingField("type"))?;
+    let how = extract_xml_attr(event_tag, "how").map_or_else(|| "m-g".to_string(), unesc);
     let time = extract_xml_attr(event_tag, "time")
-        .ok_or(JsonCotError::MissingField("time"))?
-        .to_string();
+        .map(unesc)
+        .ok_or(JsonCotError::MissingField("time"))?;
     let start = extract_xml_attr(event_tag, "start")
-        .unwrap_or(&time)
-        .to_string();
+        .map(unesc)
+        .unwrap_or_else(|| time.clone());
     let stale = extract_xml_attr(event_tag, "stale")
-        .unwrap_or(&time)
-        .to_string();
+        .map(unesc)
+        .unwrap_or_else(|| time.clone());
     Ok(EventTagAttrs {
         uid,
         cot_type,
