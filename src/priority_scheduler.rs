@@ -34,8 +34,6 @@ impl CotPriority {
             CotPriority::Critical
         } else if t.starts_with("a-f") || t.starts_with("a-n") {
             CotPriority::High
-        } else if t.starts_with("a-u") {
-            CotPriority::Normal
         } else {
             CotPriority::Normal
         }
