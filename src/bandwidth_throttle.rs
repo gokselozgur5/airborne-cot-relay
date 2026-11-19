@@ -214,6 +214,13 @@ impl BandwidthThrottle {
             return ThrottleDecision::Dropped(DropReason::BelowPriorityFloor);
         }
 
+        if payload_bytes > self.config.burst_allowance_bytes {
+            self.stats.packets_dropped += 1;
+            self.stats.bytes_dropped += payload_bytes as u64;
+            self.stats.dropped_by_priority[priority.as_tier()] += 1;
+            return ThrottleDecision::Dropped(DropReason::PayloadExceedsBurst);
+        }
+
         self.admit_token_budget(priority, payload_bytes)
     }
 }
