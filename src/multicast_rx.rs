@@ -8,6 +8,7 @@ pub enum MulticastRxError {
     InvalidGroup(Ipv4Addr),
     InvalidPort,
     InvalidBufferSize,
+    OversizedDatagram(usize),
     Io(io::Error),
 }
 
@@ -17,6 +18,7 @@ impl fmt::Display for MulticastRxError {
             Self::InvalidGroup(ip) => write!(f, "invalid multicast address: {}", ip),
             Self::InvalidPort => write!(f, "multicast port must be non-zero"),
             Self::InvalidBufferSize => write!(f, "buffer size must be non-zero"),
+            Self::OversizedDatagram(sz) => write!(f, "received oversized datagram: {} bytes", sz),
             Self::Io(err) => write!(f, "multicast io error: {}", err),
         }
     }
