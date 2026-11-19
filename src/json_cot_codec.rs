@@ -307,18 +307,13 @@ impl CotEventDto {
         if !trimmed.starts_with('{') || !trimmed.ends_with('}') {
             return Err(JsonCotError::MalformedJson("expected root JSON object"));
         }
-        let uid = extract_json_str(json, "uid")
-            .ok_or(JsonCotError::MissingField("uid"))?
-            .to_string();
-        let cot_type = extract_json_str(json, "type")
-            .ok_or(JsonCotError::MissingField("type"))?
-            .to_string();
-        let how = extract_json_str(json, "how").unwrap_or("m-g").to_string();
-        let time = extract_json_str(json, "time")
-            .ok_or(JsonCotError::MissingField("time"))?
-            .to_string();
-        let start = extract_json_str(json, "start").unwrap_or(&time).to_string();
-        let stale = extract_json_str(json, "stale").unwrap_or(&time).to_string();
+        let uid = extract_json_string(json, "uid").ok_or(JsonCotError::MissingField("uid"))?;
+        let cot_type =
+            extract_json_string(json, "type").ok_or(JsonCotError::MissingField("type"))?;
+        let how = extract_json_string(json, "how").unwrap_or_else(|| "m-g".to_string());
+        let time = extract_json_string(json, "time").ok_or(JsonCotError::MissingField("time"))?;
+        let start = extract_json_string(json, "start").unwrap_or_else(|| time.clone());
+        let stale = extract_json_string(json, "stale").unwrap_or_else(|| time.clone());
         let lat = extract_json_f64(json, "lat").ok_or(JsonCotError::MissingField("lat"))?;
         let lon = extract_json_f64(json, "lon").ok_or(JsonCotError::MissingField("lon"))?;
         let hae = extract_json_f64(json, "hae").unwrap_or(0.0);
@@ -326,7 +321,7 @@ impl CotEventDto {
         let le = extract_json_f64(json, "le").unwrap_or(10.0);
         let course = extract_json_f64(json, "course");
         let speed = extract_json_f64(json, "speed");
-        let callsign = extract_json_str(json, "callsign").map(ToString::to_string);
+        let callsign = extract_json_string(json, "callsign");
         Ok(Self {
             uid,
             cot_type,
