@@ -237,7 +237,8 @@ impl Targeter {
         detections: &[TargetDetection],
     ) -> Result<Vec<TrackedObject>, RelayError> {
         if let Some(prev) = self.last_timestamp_ms {
-            if pose.timestamp_ms < prev {
+            let back = prev - pose.timestamp_ms.min(prev);
+            if back > 0 && back <= 5000 {
                 return self.extract_tracked_objects(pose, &[]);
             }
         }
