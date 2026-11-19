@@ -5,5 +5,12 @@ use std::net::UdpSocket;
 
 #[test]
 fn test_mission_e2e() {
-    assert!(false, "placeholder replacement pending");
+    let rx = UdpSocket::bind("127.0.0.1:0").unwrap();
+    let config = RelayConfig {
+        cot_broadcast_addr: rx.local_addr().unwrap().to_string(),
+        ..RelayConfig::default()
+    };
+    let metrics = Metrics::new();
+    let sent = run_mock::run_mock(&config, &metrics).unwrap();
+    assert!(sent > 0);
 }
