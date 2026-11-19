@@ -10,23 +10,23 @@ use std::sync::Arc;
 /// Source of time in milliseconds.
 pub trait Clock {
     /// Returns the current time in milliseconds.
-    fn now_ms(&self) -> u64;
+    fn now_ms(&self) -> i64;
 }
 
 impl<C: Clock + ?Sized> Clock for &C {
-    fn now_ms(&self) -> u64 {
+    fn now_ms(&self) -> i64 {
         (**self).now_ms()
     }
 }
 
 impl<C: Clock + ?Sized> Clock for Arc<C> {
-    fn now_ms(&self) -> u64 {
+    fn now_ms(&self) -> i64 {
         (**self).now_ms()
     }
 }
 
 impl<C: Clock + ?Sized> Clock for Box<C> {
-    fn now_ms(&self) -> u64 {
+    fn now_ms(&self) -> i64 {
         (**self).now_ms()
     }
 }
@@ -45,13 +45,13 @@ impl SystemClock {
 }
 
 impl Clock for SystemClock {
-    fn now_ms(&self) -> u64 {
+    fn now_ms(&self) -> i64 {
         let wall = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| u64::try_from(d.as_millis()).unwrap_or(u64::MAX))
+            .map(|d| i64::try_from(d.as_millis()).unwrap_or(i64::MAX))
             .unwrap_or(0);
-        let prev = self.last_ms.fetch_max(wall, Ordering::Relaxed);
-        prev.max(wall)
+        let prev = self.last_ms.fetch_max(wall as u64, Ordering::Relaxed);
+        prev.max(wall as u64) as i64
     }
 }
 
@@ -63,21 +63,21 @@ pub struct ManualClock {
 
 impl ManualClock {
     /// Creates a clock frozen at `start_ms`.
-    pub fn new(start_ms: u64) -> Self {
+    pub fn new(start_ms: i64) -> Self {
         Self {
-            now_ms: AtomicU64::new(start_ms),
+            now_ms: AtomicU64::new(start_ms as u64),
         }
     }
 }
 
 impl Clock for ManualClock {
-    fn now_ms(&self) -> u64 {
-        self.now_ms.load(Ordering::SeqCst)
+    fn now_ms(&self) -> i64 {
+        self.now_ms.load(Ordering::SeqCst) as i64
     }
 }
 
 impl ManualClock {
-    /// Moves the clock forward by `delta_ms`, saturating at `u64::MAX`.
+    /// Moves the clock forward by `delta_ms`, saturating at `i64::MAX`.
     pub fn advance_ms(&self, delta_ms: u64) {
         let mut cur = self.now_ms.load(Ordering::SeqCst);
         let next = |t: u64| t.saturating_add(delta_ms);
@@ -90,8 +90,8 @@ impl ManualClock {
     }
 
     /// Sets the clock to `now_ms`; backward steps are allowed.
-    pub fn set_ms(&self, now_ms: u64) {
-        self.now_ms.store(now_ms, Ordering::SeqCst);
+    pub fn set_ms(&self, now_ms: i64) {
+        self.now_ms.store(now_ms as u64, Ordering::SeqCst);
     }
 }
 
