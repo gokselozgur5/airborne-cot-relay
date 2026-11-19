@@ -57,12 +57,17 @@ fn decode_error_carries_the_error_text() {
 #[test]
 fn pipeline_event_display_formats_all_variants() {
     let degraded = PipelineEvent::SinkDegraded { failures: 5 };
-    assert_eq!(degraded.to_string(), "sink degraded after 5 consecutive failures");
+    assert_eq!(
+        degraded.to_string(),
+        "sink degraded after 5 consecutive failures"
+    );
     let recovered = PipelineEvent::SinkRecovered;
     assert_eq!(recovered.to_string(), "sink recovered");
     let stale = PipelineEvent::TelemetryStale { age_ms: 1200 };
     assert_eq!(stale.to_string(), "telemetry stale: age 1200 ms");
-    let decode = PipelineEvent::DecodeError { message: "corrupt".into() };
+    let decode = PipelineEvent::DecodeError {
+        message: "corrupt".into(),
+    };
     assert_eq!(decode.to_string(), "decode error: corrupt");
 }
 
@@ -92,7 +97,10 @@ fn event_tracker_pending_inspection_and_reset() {
     tracker.record_send(false);
     assert!(!tracker.is_empty());
     assert_eq!(tracker.pending_count(), 1);
-    assert_eq!(tracker.pending()[0], PipelineEvent::SinkDegraded { failures: 1 });
+    assert_eq!(
+        tracker.pending()[0],
+        PipelineEvent::SinkDegraded { failures: 1 }
+    );
     tracker.reset();
     assert!(tracker.is_empty());
     assert_eq!(tracker.pending_count(), 0);
@@ -112,7 +120,9 @@ fn event_tracker_default_and_pipeline_event_predicates() {
     assert!(recovered.is_sink_recovered());
     let stale = PipelineEvent::TelemetryStale { age_ms: 500 };
     assert!(stale.is_telemetry_stale());
-    let decode = PipelineEvent::DecodeError { message: "err".into() };
+    let decode = PipelineEvent::DecodeError {
+        message: "err".into(),
+    };
     assert!(decode.is_decode_error());
 }
 

@@ -47,7 +47,3 @@ fn pipeline_implements_debug() {
     let dbg = format!("{:?}", pipeline);
     assert!(dbg.contains("Pipeline"));
 }
-
-
-
-

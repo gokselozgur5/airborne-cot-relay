@@ -31,4 +31,3 @@ fn error_method_and_clean_exit_code() {
     let err = RelayError::InvalidConfig("test".into());
     assert_eq!(err.exit_code(), 2);
 }
-
