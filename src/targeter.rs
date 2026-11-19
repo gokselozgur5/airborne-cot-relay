@@ -105,10 +105,22 @@ impl Targeter {
 
 impl Targeter {
     fn make_camera_pose(pose: &PlatformPose) -> CameraPose {
+        let (sr, cr) = (pose.roll_rad.sin(), pose.roll_rad.cos());
+        let (sp, cp) = (pose.pitch_rad.sin(), pose.pitch_rad.cos());
+        let (sy, cy) = (pose.yaw_rad.sin(), pose.yaw_rad.cos());
+        let pitch_c = (cr * cp).clamp(-1.0, 1.0).acos();
+        let (roll_c, yaw_c) = if pitch_c.sin() > 1e-6 {
+            (
+                (sr * cp).atan2(sp),
+                (-(cr * sp * sy - sr * cy)).atan2(-(cr * sp * cy + sr * sy)),
+            )
+        } else {
+            (0.0, -pose.yaw_rad)
+        };
         CameraPose {
-            roll_rad: pose.roll_rad,
-            pitch_rad: pose.pitch_rad,
-            yaw_rad: pose.yaw_rad,
+            roll_rad: roll_c,
+            pitch_rad: pitch_c,
+            yaw_rad: yaw_c,
             cam_up_m: pose.hae_m,
         }
     }
