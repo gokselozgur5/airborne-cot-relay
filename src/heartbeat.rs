@@ -228,11 +228,7 @@ pub struct HeartbeatGenerator {
 
 impl HeartbeatGenerator {
     /// Create a new heartbeat generator instance.
-    pub fn new(
-        config: HeartbeatConfig,
-        platform: PlatformMetrics,
-        radio: RadioMetrics,
-    ) -> Self {
+    pub fn new(config: HeartbeatConfig, platform: PlatformMetrics, radio: RadioMetrics) -> Self {
         Self {
             config,
             sequence: 0,
@@ -289,7 +285,8 @@ impl HeartbeatGenerator {
                 p.lat_deg, p.lon_deg, p.hae_m
             )
         } else {
-            r#"<point lat="0.0000000" lon="0.0000000" hae="0.00" ce="9999999" le="9999999"/>"#.to_string()
+            r#"<point lat="0.0000000" lon="0.0000000" hae="0.00" ce="9999999" le="9999999"/>"#
+                .to_string()
         }
     }
 }
@@ -436,7 +433,6 @@ mod tests {
         assert!(m.pose.is_some());
     }
 
-
     #[test]
     fn test_radio_metrics_and_counters() {
         let mut radio = RadioMetrics::new(-75, 18.2, 20, 85, true);
@@ -458,11 +454,19 @@ mod tests {
         assert!(radio.is_link_degraded());
     }
 
-
     #[test]
     fn test_heartbeat_generator_timing_and_xml() {
         let cfg = HeartbeatConfig::new("UAV-ALPHA", "EAGLE-1").with_intervals(1000, 3000);
-        let plat = PlatformMetrics::new("EAGLE-1", PlatformOperationalState::Nominal, 85.0, 16.2, 45.0, 20.0, 100, None);
+        let plat = PlatformMetrics::new(
+            "EAGLE-1",
+            PlatformOperationalState::Nominal,
+            85.0,
+            16.2,
+            45.0,
+            20.0,
+            100,
+            None,
+        );
         let rad = RadioMetrics::new(-65, 22.0, 25, 95, true);
         let mut gen = HeartbeatGenerator::new(cfg, plat, rad);
 
@@ -481,5 +485,4 @@ mod tests {
         assert!(gen.is_due(2000));
         assert_eq!(gen.time_until_next_ms(2000), 0);
     }
-
 }

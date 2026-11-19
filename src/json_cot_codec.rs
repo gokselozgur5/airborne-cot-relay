@@ -101,15 +101,31 @@ struct EventTagAttrs {
 
 fn parse_event_tag(event_tag: &str) -> Result<EventTagAttrs, JsonCotError> {
     let uid = extract_xml_attr(event_tag, "uid")
-        .ok_or(JsonCotError::MissingField("uid"))?.to_string();
+        .ok_or(JsonCotError::MissingField("uid"))?
+        .to_string();
     let cot_type = extract_xml_attr(event_tag, "type")
-        .ok_or(JsonCotError::MissingField("type"))?.to_string();
-    let how = extract_xml_attr(event_tag, "how").unwrap_or("m-g").to_string();
+        .ok_or(JsonCotError::MissingField("type"))?
+        .to_string();
+    let how = extract_xml_attr(event_tag, "how")
+        .unwrap_or("m-g")
+        .to_string();
     let time = extract_xml_attr(event_tag, "time")
-        .ok_or(JsonCotError::MissingField("time"))?.to_string();
-    let start = extract_xml_attr(event_tag, "start").unwrap_or(&time).to_string();
-    let stale = extract_xml_attr(event_tag, "stale").unwrap_or(&time).to_string();
-    Ok(EventTagAttrs { uid, cot_type, how, time, start, stale })
+        .ok_or(JsonCotError::MissingField("time"))?
+        .to_string();
+    let start = extract_xml_attr(event_tag, "start")
+        .unwrap_or(&time)
+        .to_string();
+    let stale = extract_xml_attr(event_tag, "stale")
+        .unwrap_or(&time)
+        .to_string();
+    Ok(EventTagAttrs {
+        uid,
+        cot_type,
+        how,
+        time,
+        start,
+        stale,
+    })
 }
 
 struct PointTagAttrs {
@@ -123,35 +139,64 @@ struct PointTagAttrs {
 fn parse_point_tag(point_tag: &str) -> Result<PointTagAttrs, JsonCotError> {
     let lat = extract_xml_attr(point_tag, "lat")
         .ok_or(JsonCotError::MissingField("lat"))?
-        .parse::<f64>().map_err(|_| JsonCotError::NumericParseError("lat"))?;
+        .parse::<f64>()
+        .map_err(|_| JsonCotError::NumericParseError("lat"))?;
     let lon = extract_xml_attr(point_tag, "lon")
         .ok_or(JsonCotError::MissingField("lon"))?
-        .parse::<f64>().map_err(|_| JsonCotError::NumericParseError("lon"))?;
+        .parse::<f64>()
+        .map_err(|_| JsonCotError::NumericParseError("lon"))?;
     let hae = extract_xml_attr(point_tag, "hae")
-        .and_then(|v| v.parse().ok()).unwrap_or(0.0);
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0.0);
     let ce = extract_xml_attr(point_tag, "ce")
-        .and_then(|v| v.parse().ok()).unwrap_or(10.0);
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(10.0);
     let le = extract_xml_attr(point_tag, "le")
-        .and_then(|v| v.parse().ok()).unwrap_or(10.0);
-    Ok(PointTagAttrs { lat, lon, hae, ce, le })
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(10.0);
+    Ok(PointTagAttrs {
+        lat,
+        lon,
+        hae,
+        ce,
+        le,
+    })
 }
 
 impl CotEventDto {
     /// Deserializes a Cursor-on-Target XML string into a `CotEventDto`.
     pub fn from_xml(xml: &str) -> Result<Self, JsonCotError> {
-        let ev = parse_event_tag(extract_xml_tag(xml, "event")
-            .ok_or(JsonCotError::MalformedXml("missing event tag"))?)?;
-        let pt = parse_point_tag(extract_xml_tag(xml, "point")
-            .ok_or(JsonCotError::MalformedXml("missing point tag"))?)?;
+        let ev = parse_event_tag(
+            extract_xml_tag(xml, "event").ok_or(JsonCotError::MalformedXml("missing event tag"))?,
+        )?;
+        let pt = parse_point_tag(
+            extract_xml_tag(xml, "point").ok_or(JsonCotError::MalformedXml("missing point tag"))?,
+        )?;
         let track_tag = extract_xml_tag(xml, "track");
-        let course = track_tag.and_then(|t| extract_xml_attr(t, "course")).and_then(|v| v.parse().ok());
-        let speed = track_tag.and_then(|t| extract_xml_attr(t, "speed")).and_then(|v| v.parse().ok());
+        let course = track_tag
+            .and_then(|t| extract_xml_attr(t, "course"))
+            .and_then(|v| v.parse().ok());
+        let speed = track_tag
+            .and_then(|t| extract_xml_attr(t, "speed"))
+            .and_then(|v| v.parse().ok());
         let callsign = extract_xml_tag(xml, "contact")
-            .and_then(|t| extract_xml_attr(t, "callsign")).map(ToString::to_string);
+            .and_then(|t| extract_xml_attr(t, "callsign"))
+            .map(ToString::to_string);
         Ok(Self {
-            uid: ev.uid, cot_type: ev.cot_type, how: ev.how, time: ev.time,
-            start: ev.start, stale: ev.stale, lat: pt.lat, lon: pt.lon, hae: pt.hae,
-            ce: pt.ce, le: pt.le, course, speed, callsign,
+            uid: ev.uid,
+            cot_type: ev.cot_type,
+            how: ev.how,
+            time: ev.time,
+            start: ev.start,
+            stale: ev.stale,
+            lat: pt.lat,
+            lon: pt.lon,
+            hae: pt.hae,
+            ce: pt.ce,
+            le: pt.le,
+            course,
+            speed,
+            callsign,
         })
     }
 }
@@ -168,8 +213,17 @@ impl CotEventDto {
         }
         format!(
             r#"<event version="2.0" uid="{}" type="{}" how="{}" time="{}" start="{}" stale="{}"><point lat="{:.7}" lon="{:.7}" hae="{:.2}" ce="{:.2}" le="{:.2}"/><detail>{detail}</detail></event>"#,
-            self.uid, self.cot_type, self.how, self.time, self.start, self.stale,
-            self.lat, self.lon, self.hae, self.ce, self.le
+            self.uid,
+            self.cot_type,
+            self.how,
+            self.time,
+            self.start,
+            self.stale,
+            self.lat,
+            self.lon,
+            self.hae,
+            self.ce,
+            self.le
         )
     }
 }
@@ -207,10 +261,16 @@ impl CotEventDto {
         if !trimmed.starts_with('{') || !trimmed.ends_with('}') {
             return Err(JsonCotError::MalformedJson("expected root JSON object"));
         }
-        let uid = extract_json_str(json, "uid").ok_or(JsonCotError::MissingField("uid"))?.to_string();
-        let cot_type = extract_json_str(json, "type").ok_or(JsonCotError::MissingField("type"))?.to_string();
+        let uid = extract_json_str(json, "uid")
+            .ok_or(JsonCotError::MissingField("uid"))?
+            .to_string();
+        let cot_type = extract_json_str(json, "type")
+            .ok_or(JsonCotError::MissingField("type"))?
+            .to_string();
         let how = extract_json_str(json, "how").unwrap_or("m-g").to_string();
-        let time = extract_json_str(json, "time").ok_or(JsonCotError::MissingField("time"))?.to_string();
+        let time = extract_json_str(json, "time")
+            .ok_or(JsonCotError::MissingField("time"))?
+            .to_string();
         let start = extract_json_str(json, "start").unwrap_or(&time).to_string();
         let stale = extract_json_str(json, "stale").unwrap_or(&time).to_string();
         let lat = extract_json_f64(json, "lat").ok_or(JsonCotError::MissingField("lat"))?;
@@ -221,7 +281,22 @@ impl CotEventDto {
         let course = extract_json_f64(json, "course");
         let speed = extract_json_f64(json, "speed");
         let callsign = extract_json_str(json, "callsign").map(ToString::to_string);
-        Ok(Self { uid, cot_type, how, time, start, stale, lat, lon, hae, ce, le, course, speed, callsign })
+        Ok(Self {
+            uid,
+            cot_type,
+            how,
+            time,
+            start,
+            stale,
+            lat,
+            lon,
+            hae,
+            ce,
+            le,
+            course,
+            speed,
+            callsign,
+        })
     }
 }
 
@@ -230,8 +305,17 @@ impl CotEventDto {
     pub fn to_json(&self) -> String {
         let mut fields = format!(
             r#""uid":"{}","type":"{}","how":"{}","time":"{}","start":"{}","stale":"{}","lat":{:.7},"lon":{:.7},"hae":{:.2},"ce":{:.2},"le":{:.2}"#,
-            self.uid, self.cot_type, self.how, self.time, self.start, self.stale,
-            self.lat, self.lon, self.hae, self.ce, self.le
+            self.uid,
+            self.cot_type,
+            self.how,
+            self.time,
+            self.start,
+            self.stale,
+            self.lat,
+            self.lon,
+            self.hae,
+            self.ce,
+            self.le
         );
         if let Some(c) = self.course {
             fields.push_str(&format!(r#","course":{c:.2}"#));
@@ -264,17 +348,23 @@ pub struct JsonToCotStream {
 
 impl JsonToCotStream {
     /// Constructs a new empty `JsonToCotStream`.
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     /// Feeds incremental chunk of text/bytes into the stream buffer.
-    pub fn feed(&mut self, chunk: &str) { self.buf.push_str(chunk); }
+    pub fn feed(&mut self, chunk: &str) {
+        self.buf.push_str(chunk);
+    }
 
     /// Decodes the next available CoT XML event if a complete JSON line is buffered.
     pub fn decode_next(&mut self) -> Result<Option<String>, JsonCotError> {
         if let Some(pos) = self.buf.find('\n') {
             let line = self.buf[..pos].trim().to_string();
             self.buf.drain(..=pos);
-            if line.is_empty() { return Ok(None); }
+            if line.is_empty() {
+                return Ok(None);
+            }
             return json_to_cot_xml(&line).map(Some);
         }
         Ok(None)
@@ -289,10 +379,14 @@ pub struct CotToJsonStream {
 
 impl CotToJsonStream {
     /// Constructs a new empty `CotToJsonStream`.
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     /// Feeds incremental chunk of text/bytes into the stream buffer.
-    pub fn feed(&mut self, chunk: &str) { self.buf.push_str(chunk); }
+    pub fn feed(&mut self, chunk: &str) {
+        self.buf.push_str(chunk);
+    }
 
     /// Decodes the next available JSON object if a complete CoT XML event is buffered.
     pub fn decode_next(&mut self) -> Result<Option<String>, JsonCotError> {
