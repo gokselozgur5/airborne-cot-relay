@@ -181,7 +181,7 @@ impl CotEventDto {
             .and_then(|v| v.parse().ok());
         let callsign = extract_xml_tag(xml, "contact")
             .and_then(|t| extract_xml_attr(t, "callsign"))
-            .map(ToString::to_string);
+            .map(crate::xml_sanitize::unescape_xml);
         Ok(Self {
             uid: ev.uid,
             cot_type: ev.cot_type,
