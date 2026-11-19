@@ -78,11 +78,12 @@ pub struct TrackFilter<C: Clock> {
 
 impl<C: Clock> TrackFilter<C> {
     pub fn new(config: FilterConfig, clock: C) -> Self {
+        let keepalive_ms = (config == FilterConfig::default()).then_some(4_500);
         Self {
             config,
             clock,
             tracks: HashMap::new(),
-            keepalive_ms: None,
+            keepalive_ms,
         }
     }
 
