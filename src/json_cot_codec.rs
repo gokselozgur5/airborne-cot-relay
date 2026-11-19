@@ -242,6 +242,23 @@ fn extract_json_str<'a>(json: &'a str, key: &str) -> Option<&'a str> {
     Some(&after_quote[..end_quote])
 }
 
+/// Escapes a string for use inside a JSON string literal (RFC 8259 section 7).
+fn escape_json(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c if (c as u32) < 0x20 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out
+}
+
 fn extract_json_f64(json: &str, key: &str) -> Option<f64> {
     let key_pat = format!("\"{key}\"");
     let key_idx = json.find(&key_pat)?;
@@ -324,7 +341,7 @@ impl CotEventDto {
             fields.push_str(&format!(r#","speed":{s:.2}"#));
         }
         if let Some(cs) = &self.callsign {
-            fields.push_str(&format!(r#","callsign":"{cs}""#));
+            fields.push_str(&format!(r#","callsign":"{}""#, escape_json(cs)));
         }
         format!("{{{fields}}}")
     }
