@@ -2,6 +2,7 @@
 
 use crate::clock::adapters::RelayClockAdapter;
 use crate::config::RelayError;
+use crate::error::class::classify;
 use crate::pipeline::step::{OutboundStep, StepReport};
 use crate::pipeline::Pipeline;
 use crate::relay::{BoundedQueue, CotSink, TrackSummary};
@@ -175,11 +176,16 @@ where
             if !self.limit.should_continue(&adapter) {
                 break;
             }
-            let r = self.step()?;
-            acc.sent += r.sent;
-            acc.failed += r.failed;
-            acc.filtered += r.filtered;
-            acc.evicted += r.evicted;
+            match self.step() {
+                Ok(r) => {
+                    acc.sent += r.sent;
+                    acc.failed += r.failed;
+                    acc.filtered += r.filtered;
+                    acc.evicted += r.evicted;
+                }
+                Err(err) if classify(&err).is_fatal() => return Err(err),
+                Err(_) => {}
+            }
         }
         Ok(acc)
     }
