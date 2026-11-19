@@ -75,7 +75,8 @@ fn emitted_cot_carries_uid_and_type() {
         }
     }
     let xml = recv(&rx);
-    assert!(xml.contains("uid=\"TRACK-0001\""));
+    let expected_uid = format!("TRACK-{}-0001", s.uid_prefix);
+    assert!(xml.contains(&format!(r#"uid="{expected_uid}""#)));
     assert!(xml.contains("type=\"a-f-G-E-V-C\""));
 }
 
@@ -121,7 +122,8 @@ fn stale_follows_event_time_and_count_matches_confirmed_frames() {
     let xml = recv(&rx);
     assert_eq!(attr(&xml, "time"), "2023-11-14T22:13:20.100Z");
     assert_eq!(attr(&xml, "stale"), "2023-11-14T22:13:25.100Z");
+    let expected_uid = format!("TRACK-{}-0001", s.uid_prefix);
     for _ in 1..sent {
-        assert!(recv(&rx).contains("TRACK-0001"));
+        assert!(recv(&rx).contains(&format!(r#"uid="{expected_uid}""#)));
     }
 }
