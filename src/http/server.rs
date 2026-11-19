@@ -58,6 +58,7 @@ impl HttpServer {
 impl HttpServer {
     fn handle_connection(&self, mut stream: TcpStream) -> io::Result<()> {
         stream.set_read_timeout(Some(Duration::from_millis(50)))?;
+        stream.set_write_timeout(Some(Duration::from_millis(500)))?;
         stream.set_nonblocking(false)?;
         let mut buf = [0u8; 8192];
         let n = match stream.read(&mut buf) {
