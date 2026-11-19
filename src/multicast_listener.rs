@@ -98,7 +98,7 @@ impl MulticastListenerConfig {
             ring_capacity: 128,
             max_packet_size: 4096,
             read_timeout: None,
-            nonblocking: false,
+            nonblocking: true,
             drop_policy: DropPolicy::DropNewest,
         }
     }
