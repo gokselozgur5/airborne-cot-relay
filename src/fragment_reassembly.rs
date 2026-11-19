@@ -1,6 +1,6 @@
 //! UDP payload MTU fragmentation reassembler for Cursor-on-Target telemetry.
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fmt;
 
 /// Errors produced during fragment encoding, decoding, or reassembly.
@@ -151,12 +151,11 @@ impl ReassemblyStats {
     }
 }
 
-/// In-flight message entry storing received fragment slots.
+/// In-flight message entry storing received fragments in a sparse map.
 #[derive(Debug, Clone)]
 struct InFlightMessage {
     total_fragments: u16,
-    received_count: u16,
-    slots: Vec<Option<Vec<u8>>>,
+    fragments: BTreeMap<u16, Vec<u8>>,
     last_updated_ms: u64,
 }
 
@@ -164,29 +163,23 @@ impl InFlightMessage {
     fn new(total: u16, now_ms: u64) -> Self {
         Self {
             total_fragments: total,
-            received_count: 0,
-            slots: vec![None; total as usize],
+            fragments: BTreeMap::new(),
             last_updated_ms: now_ms,
         }
     }
 
     fn assemble(&self) -> Vec<u8> {
-        let total_size: usize = self
-            .slots
-            .iter()
-            .map(|s| s.as_ref().map_or(0, |b| b.len()))
-            .sum();
+        let total_size: usize = self.fragments.values().map(|b| b.len()).sum();
         let mut assembled = Vec::with_capacity(total_size);
-        for chunk in self.slots.iter().flatten() {
+        for chunk in self.fragments.values() {
             assembled.extend_from_slice(chunk);
         }
         assembled
     }
 
-    fn insert(&mut self, seq: usize, payload: Vec<u8>) -> bool {
-        if seq < self.slots.len() && self.slots[seq].is_none() {
-            self.slots[seq] = Some(payload);
-            self.received_count += 1;
+    fn insert(&mut self, seq: u16, payload: Vec<u8>) -> bool {
+        if seq < self.total_fragments && !self.fragments.contains_key(&seq) {
+            self.fragments.insert(seq, payload);
             true
         } else {
             false
@@ -194,7 +187,7 @@ impl InFlightMessage {
     }
 
     fn is_complete(&self) -> bool {
-        self.received_count == self.total_fragments
+        self.fragments.len() == self.total_fragments as usize
     }
 }
 
@@ -275,7 +268,7 @@ impl FragmentReassembler {
         let (id, total, seq) = (
             frag.header.msg_id,
             frag.header.total_fragments,
-            frag.header.seq_index as usize,
+            frag.header.seq_index,
         );
         self.check_capacity(id, now_ms)?;
         let entry = self
