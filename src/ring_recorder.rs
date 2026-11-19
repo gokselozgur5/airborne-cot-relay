@@ -445,11 +445,26 @@ impl TelemetryRingRecorder {
 }
 
 impl TelemetryRingRecorder {
+    fn escape_json_str(s: &str) -> String {
+        let mut out = String::with_capacity(s.len());
+        for c in s.chars() {
+            match c {
+                '"' => out.push_str("\\\""),
+                '\\' => out.push_str("\\\\"),
+                '\n' => out.push_str("\\n"),
+                '\r' => out.push_str("\\r"),
+                '\t' => out.push_str("\\t"),
+                c => out.push(c),
+            }
+        }
+        out
+    }
+
     fn write_json_header<W: Write>(
         report: &CrashDumpReport,
         writer: &mut W,
     ) -> Result<(), CrashDumpError> {
-        let esc = report.reason.replace('"', "\\\"");
+        let esc = Self::escape_json_str(&report.reason);
         write!(
             writer,
             "{{\"timestamp_ms\":{},\"reason\":\"{}\",\"fault_code\":{},\"total_recorded\":{},\"total_overwritten\":{},\"records\":[",
