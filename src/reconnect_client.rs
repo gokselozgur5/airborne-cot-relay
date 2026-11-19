@@ -376,6 +376,11 @@ impl ReconnectClient {
 
 impl CotSink for ReconnectClient {
     fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
+        let _ = self.flush();
+        if !self.queue.is_empty() {
+            let _ = self.enqueue(payload.to_vec());
+            return Err(RelayError::from(ReconnectClientError::NotConnected));
+        }
         match self.send_immediate(payload) {
             Ok(bytes) => Ok(bytes),
             Err(e) => {
