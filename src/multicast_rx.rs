@@ -120,8 +120,11 @@ impl MulticastReceiver {
     }
 
     pub fn recv_datagram(&self) -> Result<(Vec<u8>, SocketAddr), MulticastRxError> {
-        let mut buf = vec![0u8; self.config.buffer_size];
+        let mut buf = vec![0u8; self.config.buffer_size.saturating_add(1)];
         let (bytes_read, src) = self.recv(&mut buf)?;
+        if bytes_read > self.config.buffer_size {
+            return Err(MulticastRxError::OversizedDatagram(bytes_read));
+        }
         buf.truncate(bytes_read);
         Ok((buf, src))
     }
