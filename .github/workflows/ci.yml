@@ -10,6 +10,20 @@ permissions:
   contents: read
 
 jobs:
+  fmt:
+    name: Verify formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: airborne-cot-relay
+      - uses: dtolnay/rust-toolchain@1.85.0
+        with:
+          components: rustfmt
+      - name: Verify formatting
+        run: cargo fmt --all -- --check
+        working-directory: airborne-cot-relay
+
   check:
     name: Check, Lint & Test
     runs-on: ubuntu-latest
