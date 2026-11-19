@@ -22,3 +22,16 @@ fn snappy_round_trips_incompressible_payload_over_64k() {
     let out = comp.decompress(&packed);
     assert_eq!(out.as_ref(), Ok(&data));
 }
+
+#[test]
+fn snappy_round_trips_boundary_literal_lengths() {
+    for len in [65_535, 65_536, 65_537] {
+        let data = pseudo_random_payload(len);
+        let mut comp = CotPayloadCompressor::new(CompressorConfig::default());
+        let packed = comp
+            .compress(&data)
+            .expect("boundary len is below max_payload_bytes");
+        let out = comp.decompress(&packed);
+        assert_eq!(out.as_ref(), Ok(&data));
+    }
+}
