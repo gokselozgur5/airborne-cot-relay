@@ -38,3 +38,13 @@ fn test_integration_roundtrip_unescape_and_edge_cases() {
     assert_eq!(escape_xml_attr(""), "");
     assert_eq!(unescape_xml(""), "");
 }
+
+#[test]
+fn test_json_to_cot_xml_escapes_attribute_values() {
+    let json = r#"{"uid":"U1","type":"a-f-G","time":"2026-11-16T08:00:00Z","lat":1.0,"lon":2.0,"callsign":"Tom & Jerry <1>"}"#;
+    let xml = airborne_cot_relay::json_to_cot_xml(json).unwrap();
+    assert!(
+        xml.contains(r#"callsign="Tom &amp; Jerry &lt;1&gt;""#),
+        "{xml}"
+    );
+}
