@@ -1,6 +1,7 @@
 use airborne_cot_relay::app::config_boot::{boot_config_from_env, CONFIG_ERROR_EXIT};
 use airborne_cot_relay::app::exit::finish;
 use airborne_cot_relay::app::run_mock::run_mock;
+use airborne_cot_relay::app::run_live::run_live;
 use std::env;
 use std::process::ExitCode;
 
@@ -65,14 +66,6 @@ fn run_mission(mode: MissionMode) -> ExitCode {
             println!("airborne-cot-relay {}", env!("CARGO_PKG_VERSION"));
             ExitCode::SUCCESS
         }
-        MissionMode::Mock => {
-            println!("Starting simulated 60-second flight path...");
-            ExitCode::SUCCESS
-        }
-        MissionMode::Live => {
-            println!("Listening for live telemetry and camera streams...");
-            ExitCode::SUCCESS
-        }
     }
 }
 
@@ -101,6 +94,7 @@ fn main() -> ExitCode {
         if mode == MissionMode::Mock {
             return run_mock_mode(&config);
         }
+        return run_live_mode(&config);
     }
     run_mission(mode)
 }
@@ -110,6 +104,17 @@ fn boot_or_exit() -> Result<airborne_cot_relay::RelayConfig, ExitCode> {
         eprintln!("error: {e}");
         ExitCode::from(CONFIG_ERROR_EXIT)
     })
+}
+
+fn run_live_mode(config: &airborne_cot_relay::RelayConfig) -> ExitCode {
+    let metrics = airborne_cot_relay::metrics::Metrics::new();
+    match run_live(config, &metrics) {
+        Ok(_) => ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("error: {e}");
+            ExitCode::from(1)
+        }
+    }
 }
 
 fn run_mock_mode(config: &airborne_cot_relay::RelayConfig) -> ExitCode {
