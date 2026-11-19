@@ -28,3 +28,17 @@ fn right_bank_heading_north_moves_boresight_west() {
     let east = boresight_east_m(0.3, 0.0, 0.0);
     assert!((east + 30.934).abs() < 0.05, "east offset {east}");
 }
+
+#[test]
+fn heading_and_bank_sweep_finite_ground_intersection() {
+    for yaw_deg in [-180, -90, 0, 90, 180] {
+        for bank_deg in [-20, -10, 0, 10, 20] {
+            let east = boresight_east_m(
+                (bank_deg as f32).to_radians(),
+                0.0,
+                (yaw_deg as f32).to_radians(),
+            );
+            assert!(east.is_finite(), "east must be finite");
+        }
+    }
+}
