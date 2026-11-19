@@ -271,6 +271,7 @@ impl PayloadFragmenter {
 pub struct ReassemblyConfig {
     pub session_timeout_ms: u64,
     pub max_concurrent_sessions: usize,
+    pub max_message_bytes: usize,
 }
 
 impl Default for ReassemblyConfig {
@@ -278,6 +279,7 @@ impl Default for ReassemblyConfig {
         Self {
             session_timeout_ms: 5000,
             max_concurrent_sessions: 128,
+            max_message_bytes: 1024 * 1024,
         }
     }
 }
@@ -543,6 +545,7 @@ mod tests {
         let mut engine = ReassemblyEngine::new(ReassemblyConfig {
             session_timeout_ms: 500,
             max_concurrent_sessions: 2,
+            max_message_bytes: 1024,
         });
 
         engine.process_packet(&fragments[0], 1000).unwrap();
