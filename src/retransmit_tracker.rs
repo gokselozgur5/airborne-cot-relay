@@ -227,13 +227,13 @@ impl RetransmitTracker {
     pub fn is_acked_by(&self, seq: u64, receiver_id: &str) -> bool {
         self.records
             .get(&seq)
-            .map_or(false, |r| r.acks.contains(receiver_id))
+            .is_some_and(|r| r.acks.contains(receiver_id))
     }
 
     pub fn is_fully_acked(&self, seq: u64, expected: &[String]) -> bool {
         self.records
             .get(&seq)
-            .map_or(false, |r| expected.iter().all(|recv| r.acks.contains(recv)))
+            .is_some_and(|r| expected.iter().all(|recv| r.acks.contains(recv)))
     }
     pub fn prune_acknowledged(&mut self, min_acks: usize) -> usize {
         let before = self.records.len();
