@@ -127,8 +127,12 @@ impl ReconnectPolicy {
         }
         let factor = self.backoff_multiplier.powi(consecutive_failures as i32);
         let computed_secs = self.initial_backoff.as_secs_f64() * factor;
-        let candidate = Duration::from_secs_f64(computed_secs);
-        candidate.min(self.max_backoff)
+        let max_secs = self.max_backoff.as_secs_f64();
+        if !computed_secs.is_finite() || computed_secs >= max_secs {
+            self.max_backoff
+        } else {
+            Duration::from_secs_f64(computed_secs)
+        }
     }
 }
 
