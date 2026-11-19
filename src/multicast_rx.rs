@@ -48,7 +48,7 @@ impl MulticastRxConfig {
             interface_addr: Ipv4Addr::UNSPECIFIED,
             port,
             read_timeout: None,
-            buffer_size: 2048,
+            buffer_size: 4096,
         }
     }
 
