@@ -20,7 +20,18 @@ impl TcpTelemetrySource {
     }
 
     pub fn connect<A: ToSocketAddrs>(addr: A) -> Result<Self, RelayError> {
-        let stream = TcpStream::connect(addr)?;
+        Self::connect_timeout(addr, std::time::Duration::from_secs(5))
+    }
+
+    pub fn connect_timeout<A: ToSocketAddrs>(
+        addr: A,
+        timeout: std::time::Duration,
+    ) -> Result<Self, RelayError> {
+        let socket_addr = addr
+            .to_socket_addrs()?
+            .next()
+            .ok_or_else(|| RelayError::IoError("could not resolve address".into()))?;
+        let stream = TcpStream::connect_timeout(&socket_addr, timeout)?;
         Self::new(stream)
     }
 
