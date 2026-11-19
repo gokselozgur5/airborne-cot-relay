@@ -72,6 +72,7 @@ fn recv(rx: &UdpSocket) -> String {
 fn crossing_emits_two_datagrams_per_frame_with_two_uids() {
     let (mut targeter, rx, s) = rig();
     let mut uids = std::collections::BTreeSet::new();
+    let uid_prefix = &s.uid_prefix; // Extract before the loop
     for i in 0..21u64 {
         let objs = targeter
             .update(&pose(1000 + i * 100), &crossing(i))
@@ -80,7 +81,7 @@ fn crossing_emits_two_datagrams_per_frame_with_two_uids() {
         for o in objs.iter().filter(|o| o.is_confirmed) {
             emit(&s, o, T0_MS + (i as i64) * 100);
             let xml = recv(&rx);
-            assert!(xml.contains(&format!("TRACK-{:04}", o.id)));
+            assert!(xml.contains(&format!("TRACK-{}-{:04}", uid_prefix, o.id)));
             uids.insert(o.id);
         }
     }
