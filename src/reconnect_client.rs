@@ -308,7 +308,7 @@ impl ReconnectClient {
         while self.queue.len() >= self.policy.max_queue_messages
             || (self.queued_bytes + msg_len > self.policy.max_queue_bytes && !self.queue.is_empty())
         {
-            if self.policy.drop_oldest_on_full {
+            if self.policy.drop_oldest_on_full && !self.queue.is_empty() {
                 self.drop_oldest_message();
             } else {
                 return Err(ReconnectClientError::QueueFull {
