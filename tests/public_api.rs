@@ -78,7 +78,8 @@ fn cot_streamer_builds_event_with_track_uid() {
         speed_mps: 12.0,
     };
     let xml = streamer.build_cot_xml(&track, 0);
-    assert!(xml.contains(r#"uid="TRACK-0007""#));
+    let expected_uid = format!("TRACK-{}-0007", streamer.uid_prefix);
+    assert!(xml.contains(&format!(r#"uid="{expected_uid}""#)));
     assert!(xml.contains(r#"type="a-f-G-E-V-C""#));
 }
 
