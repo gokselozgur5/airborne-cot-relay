@@ -180,7 +180,10 @@ mod tests {
     fn test_config_validation_invalid_group() {
         let unicast: Ipv4Addr = "192.168.1.1".parse().unwrap();
         let cfg = MulticastRxConfig::new(unicast, 8080);
-        assert!(matches!(cfg.validate(), Err(MulticastRxError::InvalidGroup(_))));
+        assert!(matches!(
+            cfg.validate(),
+            Err(MulticastRxError::InvalidGroup(_))
+        ));
     }
 
     #[test]
@@ -194,7 +197,10 @@ mod tests {
     fn test_config_validation_zero_buffer() {
         let group: Ipv4Addr = "239.2.3.1".parse().unwrap();
         let cfg = MulticastRxConfig::new(group, 8080).with_buffer_size(0);
-        assert!(matches!(cfg.validate(), Err(MulticastRxError::InvalidBufferSize)));
+        assert!(matches!(
+            cfg.validate(),
+            Err(MulticastRxError::InvalidBufferSize)
+        ));
     }
 
     #[test]
@@ -235,12 +241,16 @@ mod tests {
         let port = temp.local_addr().unwrap().port();
         drop(temp);
 
-        let cfg = MulticastRxConfig::new(group, port)
-            .with_read_timeout(Duration::from_millis(200));
+        let cfg = MulticastRxConfig::new(group, port).with_read_timeout(Duration::from_millis(200));
         let rx = MulticastReceiver::bind(cfg).unwrap();
 
         let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
-        sender.send_to(b"COT_MULTICAST_TEST", SocketAddr::from(([127, 0, 0, 1], port))).unwrap();
+        sender
+            .send_to(
+                b"COT_MULTICAST_TEST",
+                SocketAddr::from(([127, 0, 0, 1], port)),
+            )
+            .unwrap();
 
         let (payload, _src) = rx.recv_datagram().unwrap();
         assert_eq!(&payload, b"COT_MULTICAST_TEST");

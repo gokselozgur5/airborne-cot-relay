@@ -30,10 +30,16 @@ fn test_cot_to_json_streaming_events() {
     assert_eq!(stream.decode_next().unwrap(), None);
 
     stream.feed(&xml1[50..]);
-    let j1 = stream.decode_next().unwrap().expect("event 1 json available");
+    let j1 = stream
+        .decode_next()
+        .unwrap()
+        .expect("event 1 json available");
     assert!(j1.contains(r#""uid":"DEV-A""#));
 
     stream.feed(xml2);
-    let j2 = stream.decode_next().unwrap().expect("event 2 json available");
+    let j2 = stream
+        .decode_next()
+        .unwrap()
+        .expect("event 2 json available");
     assert!(j2.contains(r#""uid":"DEV-B""#));
 }

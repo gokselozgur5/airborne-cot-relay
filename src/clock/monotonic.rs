@@ -45,12 +45,12 @@ impl<C> MonotonicClock<C> {
 }
 
 impl<C: Clock> Clock for MonotonicClock<C> {
-    fn now_ms(&self) -> u64 {
+    fn now_ms(&self) -> i64 {
         let now = self.inner.now_ms();
-        let prev = self.last_ms.fetch_max(now, Ordering::SeqCst);
-        if now < prev {
+        let prev = self.last_ms.fetch_max(now as u64, Ordering::SeqCst);
+        if (now as u64) < prev {
             self.backward_steps.fetch_add(1, Ordering::SeqCst);
-            return prev;
+            return prev as i64;
         }
         now
     }

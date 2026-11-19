@@ -89,19 +89,29 @@ impl FrameDecoder {
 
 impl FrameDecoder {
     /// Returns the maximum allowed frame length.
-    pub const fn max_frame_len(&self) -> usize { self.max_frame_len }
+    pub const fn max_frame_len(&self) -> usize {
+        self.max_frame_len
+    }
 
     /// Returns configured length prefix format.
-    pub const fn length_field(&self) -> LengthField { self.length_field }
+    pub const fn length_field(&self) -> LengthField {
+        self.length_field
+    }
 
     /// Returns configured endianness.
-    pub const fn endianness(&self) -> Endianness { self.endianness }
+    pub const fn endianness(&self) -> Endianness {
+        self.endianness
+    }
 
     /// Number of buffered unparsed bytes.
-    pub fn buffer_len(&self) -> usize { self.buffer.len() }
+    pub fn buffer_len(&self) -> usize {
+        self.buffer.len()
+    }
 
     /// Clears any unparsed buffered bytes.
-    pub fn clear(&mut self) { self.buffer.clear(); }
+    pub fn clear(&mut self) {
+        self.buffer.clear();
+    }
 }
 
 impl FrameDecoder {
@@ -135,7 +145,11 @@ impl FrameDecoder {
         if self.buffer.len() < prefix_len {
             return Ok(None);
         }
-        let frame_len = Self::parse_length(&self.buffer[..prefix_len], self.length_field, self.endianness);
+        let frame_len = Self::parse_length(
+            &self.buffer[..prefix_len],
+            self.length_field,
+            self.endianness,
+        );
         if frame_len > self.max_frame_len {
             return Err(FrameCodecError::FrameTooLarge {
                 frame_len,
@@ -166,24 +180,40 @@ impl FrameDecoder {
 
 impl FrameDecoder {
     /// Encodes a payload with the specified prefix configuration.
-    pub fn encode(payload: &[u8], field: LengthField, endian: Endianness) -> Result<Vec<u8>, FrameCodecError> {
+    pub fn encode(
+        payload: &[u8],
+        field: LengthField,
+        endian: Endianness,
+    ) -> Result<Vec<u8>, FrameCodecError> {
         let len = payload.len();
         let mut out = Vec::with_capacity(field.byte_len() + len);
         match (field, endian) {
             (LengthField::U16, Endianness::BigEndian) => {
-                let val = u16::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge { frame_len: len, max_len: u16::MAX as usize })?;
+                let val = u16::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge {
+                    frame_len: len,
+                    max_len: u16::MAX as usize,
+                })?;
                 out.extend_from_slice(&val.to_be_bytes());
             }
             (LengthField::U16, Endianness::LittleEndian) => {
-                let val = u16::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge { frame_len: len, max_len: u16::MAX as usize })?;
+                let val = u16::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge {
+                    frame_len: len,
+                    max_len: u16::MAX as usize,
+                })?;
                 out.extend_from_slice(&val.to_le_bytes());
             }
             (LengthField::U32, Endianness::BigEndian) => {
-                let val = u32::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge { frame_len: len, max_len: u32::MAX as usize })?;
+                let val = u32::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge {
+                    frame_len: len,
+                    max_len: u32::MAX as usize,
+                })?;
                 out.extend_from_slice(&val.to_be_bytes());
             }
             (LengthField::U32, Endianness::LittleEndian) => {
-                let val = u32::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge { frame_len: len, max_len: u32::MAX as usize })?;
+                let val = u32::try_from(len).map_err(|_| FrameCodecError::FrameTooLarge {
+                    frame_len: len,
+                    max_len: u32::MAX as usize,
+                })?;
                 out.extend_from_slice(&val.to_le_bytes());
             }
         }

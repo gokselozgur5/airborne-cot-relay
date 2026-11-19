@@ -139,14 +139,22 @@ impl RetransmitTracker {
         self.records.len()
     }
 
-    pub fn track_packet(&mut self, seq: u64, payload: Vec<u8>, now_ms: u64) -> Result<(), TrackerError> {
+    pub fn track_packet(
+        &mut self,
+        seq: u64,
+        payload: Vec<u8>,
+        now_ms: u64,
+    ) -> Result<(), TrackerError> {
         if self.records.contains_key(&seq) {
             return Err(TrackerError::DuplicateSequence(seq));
         }
         if self.records.len() >= self.config.max_tracked_packets {
-            return Err(TrackerError::CapacityExceeded(self.config.max_tracked_packets));
+            return Err(TrackerError::CapacityExceeded(
+                self.config.max_tracked_packets,
+            ));
         }
-        self.records.insert(seq, PacketRecord::new(seq, payload, now_ms));
+        self.records
+            .insert(seq, PacketRecord::new(seq, payload, now_ms));
         self.stats.packets_tracked += 1;
         Ok(())
     }
@@ -171,7 +179,12 @@ impl RetransmitTracker {
         }
         false
     }
-    pub fn process_selective_ack(&mut self, receiver_id: &str, cumulative_seq: u64, missing_seqs: &[u64]) {
+    pub fn process_selective_ack(
+        &mut self,
+        receiver_id: &str,
+        cumulative_seq: u64,
+        missing_seqs: &[u64],
+    ) {
         let missing: HashSet<u64> = missing_seqs.iter().copied().collect();
         let target_seqs: Vec<u64> = self.records.keys().copied().collect();
         for s in target_seqs {
@@ -188,8 +201,8 @@ impl RetransmitTracker {
 
         for (seq, record) in self.records.iter_mut() {
             let elapsed = now_ms.saturating_sub(record.last_sent_ms);
-            let should_retransmit = record.force_retransmit
-                || (elapsed >= self.config.retransmit_timeout_ms);
+            let should_retransmit =
+                record.force_retransmit || (elapsed >= self.config.retransmit_timeout_ms);
 
             if should_retransmit {
                 if record.retransmit_count >= self.config.max_retransmissions {
@@ -212,17 +225,20 @@ impl RetransmitTracker {
     }
 
     pub fn is_acked_by(&self, seq: u64, receiver_id: &str) -> bool {
-        self.records.get(&seq).map_or(false, |r| r.acks.contains(receiver_id))
+        self.records
+            .get(&seq)
+            .map_or(false, |r| r.acks.contains(receiver_id))
     }
 
     pub fn is_fully_acked(&self, seq: u64, expected: &[String]) -> bool {
-        self.records.get(&seq).map_or(false, |r| {
-            expected.iter().all(|recv| r.acks.contains(recv))
-        })
+        self.records
+            .get(&seq)
+            .map_or(false, |r| expected.iter().all(|recv| r.acks.contains(recv)))
     }
     pub fn prune_acknowledged(&mut self, min_acks: usize) -> usize {
         let before = self.records.len();
-        self.records.retain(|_, record| record.acks.len() < min_acks);
+        self.records
+            .retain(|_, record| record.acks.len() < min_acks);
         let removed = before - self.records.len();
         self.stats.packets_completed += removed as u64;
         removed
@@ -230,7 +246,8 @@ impl RetransmitTracker {
 
     pub fn prune_expired(&mut self, now_ms: u64, max_age_ms: u64) -> usize {
         let before = self.records.len();
-        self.records.retain(|_, record| now_ms.saturating_sub(record.first_sent_ms) < max_age_ms);
+        self.records
+            .retain(|_, record| now_ms.saturating_sub(record.first_sent_ms) < max_age_ms);
         let removed = before - self.records.len();
         self.stats.packets_dropped_max_retries += removed as u64;
         removed

@@ -168,7 +168,11 @@ impl CompressedPayload {
         let algorithm = CompressionAlgorithm::from_u8(buf[2])?;
         let uncompressed_len = u32::from_be_bytes([buf[3], buf[4], buf[5], buf[6]]) as usize;
         let data = buf[7..].to_vec();
-        Ok(Self { algorithm, uncompressed_len, data })
+        Ok(Self {
+            algorithm,
+            uncompressed_len,
+            data,
+        })
     }
 }
 
@@ -263,7 +267,10 @@ fn emit_snappy_copy(offset: usize, len: usize, out: &mut Vec<u8>) {
 
 fn find_snappy_match(input: &[u8], pos: usize, cand: usize) -> usize {
     let mut match_len = 4;
-    while pos + match_len < input.len() && match_len < 64 && input[cand + match_len] == input[pos + match_len] {
+    while pos + match_len < input.len()
+        && match_len < 64
+        && input[cand + match_len] == input[pos + match_len]
+    {
         match_len += 1;
     }
     match_len
@@ -314,7 +321,11 @@ pub fn snappy_compress(input: &[u8]) -> Vec<u8> {
     out
 }
 
-fn decode_snappy_literal_len(tag: u8, input: &[u8], cursor: &mut usize) -> Result<usize, CompressorError> {
+fn decode_snappy_literal_len(
+    tag: u8,
+    input: &[u8],
+    cursor: &mut usize,
+) -> Result<usize, CompressorError> {
     let high = tag >> 2;
     match high {
         0..=59 => Ok((high as usize) + 1),
@@ -334,7 +345,9 @@ fn decode_snappy_literal_len(tag: u8, input: &[u8], cursor: &mut usize) -> Resul
             *cursor += 2;
             Ok(val)
         }
-        _ => Err(CompressorError::CorruptPayload("unsupported literal length code")),
+        _ => Err(CompressorError::CorruptPayload(
+            "unsupported literal length code",
+        )),
     }
 }
 
@@ -350,7 +363,12 @@ fn copy_snappy_bytes(out: &mut Vec<u8>, offset: usize, len: usize) -> Result<(),
     Ok(())
 }
 
-fn decode_snappy_copy_tag(tag: u8, input: &[u8], cursor: &mut usize, out: &mut Vec<u8>) -> Result<(), CompressorError> {
+fn decode_snappy_copy_tag(
+    tag: u8,
+    input: &[u8],
+    cursor: &mut usize,
+    out: &mut Vec<u8>,
+) -> Result<(), CompressorError> {
     match tag & 0x03 {
         0x01 => {
             if *cursor >= input.len() {
@@ -363,7 +381,9 @@ fn decode_snappy_copy_tag(tag: u8, input: &[u8], cursor: &mut usize, out: &mut V
         }
         0x02 => {
             if *cursor + 2 > input.len() {
-                return Err(CompressorError::CorruptPayload("truncated 2-byte copy offset"));
+                return Err(CompressorError::CorruptPayload(
+                    "truncated 2-byte copy offset",
+                ));
             }
             let len = ((tag >> 2) as usize) + 1;
             let offset = u16::from_le_bytes([input[*cursor], input[*cursor + 1]]) as usize;
@@ -374,7 +394,12 @@ fn decode_snappy_copy_tag(tag: u8, input: &[u8], cursor: &mut usize, out: &mut V
     }
 }
 
-fn decode_snappy_step(tag: u8, input: &[u8], cursor: &mut usize, out: &mut Vec<u8>) -> Result<(), CompressorError> {
+fn decode_snappy_step(
+    tag: u8,
+    input: &[u8],
+    cursor: &mut usize,
+    out: &mut Vec<u8>,
+) -> Result<(), CompressorError> {
     if (tag & 0x03) == 0x00 {
         let lit_len = decode_snappy_literal_len(tag, input, cursor)?;
         if *cursor + lit_len > input.len() {
@@ -398,7 +423,9 @@ pub fn snappy_decompress(input: &[u8]) -> Result<Vec<u8>, CompressorError> {
         decode_snappy_step(tag, input, &mut cursor, &mut out)?;
     }
     if out.len() != expected_len as usize {
-        return Err(CompressorError::DecompressionFailed("snappy length mismatch"));
+        return Err(CompressorError::DecompressionFailed(
+            "snappy length mismatch",
+        ));
     }
     Ok(out)
 }
@@ -411,7 +438,11 @@ struct BitWriter {
 
 impl BitWriter {
     fn new() -> Self {
-        Self { buf: Vec::new(), bit_buf: 0, bits: 0 }
+        Self {
+            buf: Vec::new(),
+            bit_buf: 0,
+            bits: 0,
+        }
     }
 }
 
@@ -443,7 +474,12 @@ struct BitReader<'a> {
 
 impl<'a> BitReader<'a> {
     fn new(data: &'a [u8]) -> Self {
-        Self { data, pos: 0, bit_buf: 0, bits: 0 }
+        Self {
+            data,
+            pos: 0,
+            bit_buf: 0,
+            bits: 0,
+        }
     }
 }
 
@@ -451,7 +487,9 @@ impl<'a> BitReader<'a> {
     fn read_bits(&mut self, count: u8) -> Result<u32, CompressorError> {
         while self.bits < count {
             if self.pos >= self.data.len() {
-                return Err(CompressorError::CorruptPayload("unexpected eof in bitstream"));
+                return Err(CompressorError::CorruptPayload(
+                    "unexpected eof in bitstream",
+                ));
             }
             self.bit_buf |= (self.data[self.pos] as u32) << self.bits;
             self.pos += 1;
@@ -486,7 +524,8 @@ fn fixed_lit_code(sym: u16) -> (u32, u8) {
 }
 
 const LENGTH_BASE: [u16; 29] = [
-    3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258,
+    3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131,
+    163, 195, 227, 258,
 ];
 const LENGTH_EXTRA: [u8; 29] = [
     0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0,
@@ -505,10 +544,12 @@ fn length_to_code(len: usize) -> (u16, u32, u8) {
 }
 
 const DIST_BASE: [u16; 30] = [
-    1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577,
+    1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537,
+    2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577,
 ];
 const DIST_EXTRA: [u8; 30] = [
-    0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13,
+    0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13,
+    13,
 ];
 
 fn dist_to_code(dist: usize) -> (u8, u32, u8) {
@@ -538,17 +579,26 @@ fn write_deflate_match(writer: &mut BitWriter, match_len: usize, offset: usize) 
     }
 }
 
-fn step_deflate_compress(input: &[u8], pos: &mut usize, table: &mut [u32; 4096], writer: &mut BitWriter) {
+fn step_deflate_compress(
+    input: &[u8],
+    pos: &mut usize,
+    table: &mut [u32; 4096],
+    writer: &mut BitWriter,
+) {
     let p = *pos;
     if p + 3 <= input.len() {
-        let chunk = (input[p] as u32) | ((input[p + 1] as u32) << 8) | ((input[p + 2] as u32) << 16);
+        let chunk =
+            (input[p] as u32) | ((input[p + 1] as u32) << 8) | ((input[p + 2] as u32) << 16);
         let hash = ((chunk.wrapping_mul(0x1e35a7bd)) >> 20) as usize & 4095;
         let cand = table[hash] as usize;
         table[hash] = p as u32;
         if p > cand && (p - cand) <= 32768 && input[cand..cand + 3] == input[p..p + 3] {
             let offset = p - cand;
             let mut match_len = 3;
-            while p + match_len < input.len() && match_len < 258 && input[cand + match_len] == input[p + match_len] {
+            while p + match_len < input.len()
+                && match_len < 258
+                && input[cand + match_len] == input[p + match_len]
+            {
                 match_len += 1;
             }
             write_deflate_match(writer, match_len, offset);
@@ -599,17 +649,33 @@ fn decode_fixed_huffman_sym(reader: &mut BitReader<'_>) -> Result<u16, Compresso
     }
 }
 
-fn decode_deflate_copy(reader: &mut BitReader<'_>, out: &mut Vec<u8>, sym: u16) -> Result<(), CompressorError> {
+fn decode_deflate_copy(
+    reader: &mut BitReader<'_>,
+    out: &mut Vec<u8>,
+    sym: u16,
+) -> Result<(), CompressorError> {
     let len_idx = (sym - 257) as usize;
-    if len_idx >= 29 { return Err(CompressorError::CorruptPayload("invalid length code")); }
+    if len_idx >= 29 {
+        return Err(CompressorError::CorruptPayload("invalid length code"));
+    }
     let extra_bits = LENGTH_EXTRA[len_idx];
-    let extra_val = if extra_bits > 0 { reader.read_bits(extra_bits)? } else { 0 };
+    let extra_val = if extra_bits > 0 {
+        reader.read_bits(extra_bits)?
+    } else {
+        0
+    };
     let length = LENGTH_BASE[len_idx] as usize + extra_val as usize;
     let dist_bits = reader.read_bits(5)?;
     let dist_code = rev_bits(dist_bits, 5) as usize;
-    if dist_code >= 30 { return Err(CompressorError::CorruptPayload("invalid distance code")); }
+    if dist_code >= 30 {
+        return Err(CompressorError::CorruptPayload("invalid distance code"));
+    }
     let dist_extra_bits = DIST_EXTRA[dist_code];
-    let dist_extra_val = if dist_extra_bits > 0 { reader.read_bits(dist_extra_bits)? } else { 0 };
+    let dist_extra_val = if dist_extra_bits > 0 {
+        reader.read_bits(dist_extra_bits)?
+    } else {
+        0
+    };
     let distance = DIST_BASE[dist_code] as usize + dist_extra_val as usize;
     if distance == 0 || distance > out.len() {
         return Err(CompressorError::CorruptPayload("invalid backward distance"));
@@ -753,7 +819,10 @@ impl CotPayloadCompressor {
     }
 
     /// Decompresses payload into a valid UTF-8 Cursor-on-Target XML string.
-    pub fn decompress_cot_xml(&self, compressed: &CompressedPayload) -> Result<String, CompressorError> {
+    pub fn decompress_cot_xml(
+        &self,
+        compressed: &CompressedPayload,
+    ) -> Result<String, CompressorError> {
         let bytes = self.decompress(compressed)?;
         String::from_utf8(bytes).map_err(|_| CompressorError::InvalidUtf8)
     }
@@ -824,14 +893,20 @@ mod tests {
     #[test]
     fn test_framed_bad_header() {
         let bad = vec![0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x05, 0x01];
-        assert_eq!(CompressedPayload::from_framed_bytes(&bad), Err(CompressorError::HeaderMismatch));
+        assert_eq!(
+            CompressedPayload::from_framed_bytes(&bad),
+            Err(CompressorError::HeaderMismatch)
+        );
     }
 
     #[test]
     fn test_payload_too_large() {
         let config = CompressorConfig::default().with_max_payload_bytes(10);
         let mut comp = CotPayloadCompressor::new(config);
-        assert!(matches!(comp.compress(SAMPLE_COT.as_bytes()), Err(CompressorError::PayloadTooLarge { .. })));
+        assert!(matches!(
+            comp.compress(SAMPLE_COT.as_bytes()),
+            Err(CompressorError::PayloadTooLarge { .. })
+        ));
     }
 
     #[test]
