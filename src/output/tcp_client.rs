@@ -96,10 +96,11 @@ impl TcpClientSink {
             }
             let stream = match self.config.connect_timeout {
                 Some(timeout) => TcpStream::connect_timeout(&self.target_addr, timeout),
-                None => TcpStream::connect(self.target_addr),
+                None => TcpStream::connect_timeout(&self.target_addr, Duration::from_secs(5)),
             };
             match stream {
                 Ok(s) => {
+                    let _ = s.set_write_timeout(self.config.write_timeout);
                     self.backoff.reset();
                     self.next_connect_deadline = None;
                     self.stream = Some(s);
