@@ -322,12 +322,12 @@ impl CotEventDto {
     pub fn to_json(&self) -> String {
         let mut fields = format!(
             r#""uid":"{}","type":"{}","how":"{}","time":"{}","start":"{}","stale":"{}","lat":{:.7},"lon":{:.7},"hae":{:.2},"ce":{:.2},"le":{:.2}"#,
-            self.uid,
-            self.cot_type,
-            self.how,
-            self.time,
-            self.start,
-            self.stale,
+            escape_json(&self.uid),
+            escape_json(&self.cot_type),
+            escape_json(&self.how),
+            escape_json(&self.time),
+            escape_json(&self.start),
+            escape_json(&self.stale),
             self.lat,
             self.lon,
             self.hae,
