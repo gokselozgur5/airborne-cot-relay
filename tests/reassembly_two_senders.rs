@@ -4,7 +4,10 @@ use airborne_cot_relay::fragmentation::{
 
 #[test]
 fn fragments_of_two_senders_are_not_spliced_into_one_message() {
-    let cfg = FragmenterConfig { mtu: 24, max_payload_size: 1024 };
+    let cfg = FragmenterConfig {
+        mtu: 24,
+        max_payload_size: 1024,
+    };
     let mut sender_a = PayloadFragmenter::new(cfg.clone()).unwrap();
     let mut sender_b = PayloadFragmenter::new(cfg).unwrap();
     let a = sender_a.fragment(b"AAAAAAAAAAAAAAAA").unwrap();
@@ -16,5 +19,8 @@ fn fragments_of_two_senders_are_not_spliced_into_one_message() {
             delivered.push(String::from_utf8(message).unwrap());
         }
     }
-    assert!(!delivered.contains(&"AAAAAAAABBBBBBBB".to_string()), "delivered {delivered:?}");
+    assert!(
+        !delivered.contains(&"AAAAAAAABBBBBBBB".to_string()),
+        "delivered {delivered:?}"
+    );
 }
