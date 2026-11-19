@@ -1,4 +1,4 @@
-//! Callsign template parser and <contact> element generator.
+//! Callsign template parser and `<contact>` element generator.
 
 use crate::enrich::DetailElement;
 use std::fmt;
