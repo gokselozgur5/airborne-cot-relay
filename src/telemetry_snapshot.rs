@@ -3,6 +3,7 @@
 use crate::PlatformPose;
 use std::cell::UnsafeCell;
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use std::sync::Mutex;
 
 /// Snapshot of platform telemetry at a specific sequence.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -36,6 +37,7 @@ pub struct SamplerStats {
 /// Lock-free dual-buffer telemetry snapshot sampler.
 pub struct DualBufferSampler {
     buffers: [UnsafeCell<TelemetrySnapshot>; 2],
+    snapshot: Mutex<TelemetrySnapshot>,
     versions: [AtomicU64; 2],
     active_idx: AtomicUsize,
     writes_total: AtomicU64,
@@ -52,6 +54,7 @@ impl DualBufferSampler {
         let snap = TelemetrySnapshot::new(initial_pose, 0, timestamp_ns);
         Self {
             buffers: [UnsafeCell::new(snap), UnsafeCell::new(snap)],
+            snapshot: Mutex::new(snap),
             versions: [AtomicU64::new(0), AtomicU64::new(0)],
             active_idx: AtomicUsize::new(0),
             writes_total: AtomicU64::new(0),
@@ -78,23 +81,10 @@ impl DualBufferSampler {
     /// Sample the latest consistent telemetry snapshot.
     pub fn sample(&self) -> TelemetrySnapshot {
         self.reads_total.fetch_add(1, Ordering::Relaxed);
-        loop {
-            let idx = self.active_idx.load(Ordering::Acquire);
-            let v1 = self.versions[idx].load(Ordering::Acquire);
-            #[allow(clippy::manual_is_multiple_of)]
-            if v1 % 2 != 0 {
-                self.retries_total.fetch_add(1, Ordering::Relaxed);
-                std::hint::spin_loop();
-                continue;
-            }
-            let snap = unsafe { *self.buffers[idx].get() };
-            let v2 = self.versions[idx].load(Ordering::Acquire);
-            if v1 == v2 {
-                return snap;
-            }
-            self.retries_total.fetch_add(1, Ordering::Relaxed);
-            std::hint::spin_loop();
-        }
+        *self
+            .snapshot
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
     }
 
     /// Return current operational statistics.
