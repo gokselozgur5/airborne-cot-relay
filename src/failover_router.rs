@@ -198,13 +198,23 @@ impl FailoverRouter {
 
 impl FailoverRouter {
     fn select_index(&mut self) -> Result<(usize, bool), RouterError> {
-        let h: Vec<usize> = self
+        let mut h: Vec<usize> = self
             .interfaces
             .iter()
             .enumerate()
             .filter(|(_, i)| i.enabled && i.healthy)
             .map(|(k, _)| k)
             .collect();
+        let is_probe = h.is_empty();
+        if is_probe {
+            h = self
+                .interfaces
+                .iter()
+                .enumerate()
+                .filter(|(_, i)| i.enabled)
+                .map(|(k, _)| k)
+                .collect();
+        }
         if h.is_empty() {
             return Err(RouterError::NoHealthyInterface);
         }
