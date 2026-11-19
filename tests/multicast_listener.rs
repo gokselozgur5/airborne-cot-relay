@@ -72,3 +72,18 @@ fn test_multicast_listener_integration_oversized_drop() {
     assert_eq!(stats.enqueued_packets, 1);
     assert_eq!(stats.dropped_oversized, 1);
 }
+
+#[test]
+fn poll_socket_returns_after_draining_with_default_config() {
+    let tmp = UdpSocket::bind("127.0.0.1:0").unwrap();
+    let port = tmp.local_addr().unwrap().port();
+    drop(tmp);
+    let cfg = MulticastListenerConfig::new("239.255.77.1".parse().unwrap(), port);
+    let mut listener = MulticastListener::bind(cfg).unwrap();
+    let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
+    sender.send_to(b"<event/>", ("127.0.0.1", port)).unwrap();
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || tx.send(listener.poll_socket().map_err(|e| e.to_string())));
+    let got = rx.recv_timeout(Duration::from_secs(2));
+    assert_eq!(got, Ok(Ok(1)), "poll_socket did not return within 2 s");
+}
