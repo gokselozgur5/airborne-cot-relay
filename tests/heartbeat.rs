@@ -63,3 +63,23 @@ fn test_integration_heartbeat_pose_and_radio_update() {
     assert!(second.cot_xml.contains("conn=\"0\""));
     assert!(second.cot_xml.contains("q=\"30\""));
 }
+
+#[test]
+fn heartbeat_resumes_after_backward_clock_step() {
+    let config = HeartbeatConfig::new("RELAY-1", "EAGLE-1");
+    let state = PlatformOperationalState::Nominal;
+    let platform = PlatformMetrics::new("EAGLE-1", state, 90.0, 16.0, 40.0, 10.0, 60, None);
+    let radio = RadioMetrics::new(-60, 20.0, 20, 90, true);
+    let mut generator = HeartbeatGenerator::new(config, platform, radio);
+    let before_step_ms = 1_790_000_000_000u64;
+    generator.generate(before_step_ms);
+    let after_step_ms = before_step_ms - 3_600_000;
+    let emitted = (0..=60_000u64)
+        .step_by(250)
+        .filter(|dt| generator.generate_if_due(after_step_ms + dt).is_some())
+        .count();
+    assert!(
+        emitted >= 59,
+        "{emitted} heartbeats in 60 s after the clock step"
+    );
+}
