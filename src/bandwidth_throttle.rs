@@ -43,6 +43,7 @@ pub enum DropReason {
     BelowPriorityFloor,
     BandwidthExhausted,
     EmergencyPreempted,
+    PayloadExceedsBurst,
 }
 
 /// Decision made when admitting a CoT message.
