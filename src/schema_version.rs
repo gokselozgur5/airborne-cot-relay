@@ -202,10 +202,16 @@ fn strip_flow_tags_element(xml: &str) -> String {
     while let Some(pos) = xml[cursor..].find("<_flow-tags_") {
         let start = cursor + pos;
         out.push_str(&xml[cursor..start]);
-        if let Some(end_pos) = xml[start..].find("/>") {
-            cursor = start + end_pos + 2;
-        } else if let Some(close_pos) = xml[start..].find("</_flow-tags_>") {
-            cursor = start + close_pos + "</_flow-tags_>".len();
+        let Some(gt_pos) = xml[start..].find('>') else {
+            out.push_str(&xml[start..]);
+            cursor = xml.len();
+            break;
+        };
+        let tag_end = start + gt_pos + 1;
+        if xml[start..tag_end].ends_with("/>") {
+            cursor = tag_end;
+        } else if let Some(close_pos) = xml[tag_end..].find("</_flow-tags_>") {
+            cursor = tag_end + close_pos + "</_flow-tags_>".len();
         } else {
             out.push_str(&xml[start..]);
             cursor = xml.len();
