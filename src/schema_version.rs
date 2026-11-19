@@ -201,15 +201,20 @@ fn strip_flow_tags_element(xml: &str) -> String {
     let mut cursor = 0;
     while let Some(pos) = xml[cursor..].find("<_flow-tags_") {
         let start = cursor + pos;
+        let tag_close = match xml[start..].find('>') {
+            Some(idx) => start + idx,
+            None => {
+                out.push_str(&xml[cursor..]);
+                return out;
+            }
+        };
         out.push_str(&xml[cursor..start]);
-        if let Some(end_pos) = xml[start..].find("/>") {
-            cursor = start + end_pos + 2;
-        } else if let Some(close_pos) = xml[start..].find("</_flow-tags_>") {
-            cursor = start + close_pos + "</_flow-tags_>".len();
+        if xml[start..=tag_close].ends_with("/>") {
+            cursor = tag_close + 1;
+        } else if let Some(close_pos) = xml[tag_close..].find("</_flow-tags_>") {
+            cursor = tag_close + close_pos + "</_flow-tags_>".len();
         } else {
-            out.push_str(&xml[start..]);
-            cursor = xml.len();
-            break;
+            cursor = tag_close + 1;
         }
     }
     out.push_str(&xml[cursor..]);
