@@ -383,6 +383,9 @@ impl ReassemblyEngine {
 
         if !self.sessions.contains_key(&msg_id) {
             if self.sessions.len() >= self.config.max_concurrent_sessions {
+                self.prune_expired(now_ms);
+            }
+            if self.sessions.len() >= self.config.max_concurrent_sessions {
                 return Err(FragmentationError::CapacityExceeded);
             }
             self.sessions
