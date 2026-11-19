@@ -98,8 +98,3 @@ fn push_batch_enqueues_and_returns_discarded() {
     assert_eq!(metrics.snapshot(0).dropped, 1);
     assert_eq!(stage.drain(&metrics), vec![20, 30]);
 }
-
-
-
-
-

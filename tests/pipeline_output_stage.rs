@@ -105,8 +105,3 @@ fn output_stage_send_one_sends_single_track() {
     assert_eq!(metrics.snapshot(5_000).sent, 1);
     assert!(!stage.send_one(&mut sink, &metrics, &track(42)));
 }
-
-
-
-
-

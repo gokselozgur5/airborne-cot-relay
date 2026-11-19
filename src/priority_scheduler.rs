@@ -258,7 +258,10 @@ mod tests {
 
     #[test]
     fn test_from_cot_type_and_xml() {
-        assert_eq!(CotPriority::from_cot_type("b-a-o-tbl"), CotPriority::Emergency);
+        assert_eq!(
+            CotPriority::from_cot_type("b-a-o-tbl"),
+            CotPriority::Emergency
+        );
         assert_eq!(CotPriority::from_cot_type("a-h-G"), CotPriority::Critical);
         assert_eq!(CotPriority::from_cot_type("a-f-G-E-V"), CotPriority::High);
         assert_eq!(CotPriority::from_cot_type("a-u-G"), CotPriority::Normal);
@@ -270,9 +273,15 @@ mod tests {
     #[test]
     fn test_fifo_within_tier() {
         let mut sched = PriorityPacketScheduler::new(10);
-        sched.push(b"pkt1".to_vec(), CotPriority::Normal, 100).unwrap();
-        sched.push(b"pkt2".to_vec(), CotPriority::Normal, 101).unwrap();
-        sched.push(b"pkt3".to_vec(), CotPriority::Normal, 102).unwrap();
+        sched
+            .push(b"pkt1".to_vec(), CotPriority::Normal, 100)
+            .unwrap();
+        sched
+            .push(b"pkt2".to_vec(), CotPriority::Normal, 101)
+            .unwrap();
+        sched
+            .push(b"pkt3".to_vec(), CotPriority::Normal, 102)
+            .unwrap();
 
         assert_eq!(sched.pop().unwrap().payload, b"pkt1");
         assert_eq!(sched.pop().unwrap().payload, b"pkt2");
@@ -283,9 +292,15 @@ mod tests {
     #[test]
     fn test_emergency_preemption() {
         let mut sched = PriorityPacketScheduler::new(10);
-        sched.push(b"normal_pos".to_vec(), CotPriority::Normal, 10).unwrap();
-        sched.push(b"high_track".to_vec(), CotPriority::High, 11).unwrap();
-        sched.push(b"emergency_911".to_vec(), CotPriority::Emergency, 12).unwrap();
+        sched
+            .push(b"normal_pos".to_vec(), CotPriority::Normal, 10)
+            .unwrap();
+        sched
+            .push(b"high_track".to_vec(), CotPriority::High, 11)
+            .unwrap();
+        sched
+            .push(b"emergency_911".to_vec(), CotPriority::Emergency, 12)
+            .unwrap();
 
         assert_eq!(sched.pop().unwrap().payload, b"emergency_911");
         assert_eq!(sched.pop().unwrap().payload, b"high_track");
@@ -296,9 +311,13 @@ mod tests {
     fn test_buffer_full_eviction() {
         let mut sched = PriorityPacketScheduler::new(2);
         sched.push(b"low1".to_vec(), CotPriority::Low, 1).unwrap();
-        sched.push(b"norm2".to_vec(), CotPriority::Normal, 2).unwrap();
+        sched
+            .push(b"norm2".to_vec(), CotPriority::Normal, 2)
+            .unwrap();
 
-        sched.push(b"emerg3".to_vec(), CotPriority::Emergency, 3).unwrap();
+        sched
+            .push(b"emerg3".to_vec(), CotPriority::Emergency, 3)
+            .unwrap();
         assert_eq!(sched.len(), 2);
         assert_eq!(sched.stats().dropped[CotPriority::Low.as_tier()], 1);
 
@@ -309,8 +328,12 @@ mod tests {
     #[test]
     fn test_queue_full_rejection() {
         let mut sched = PriorityPacketScheduler::new(2);
-        sched.push(b"emerg1".to_vec(), CotPriority::Emergency, 1).unwrap();
-        sched.push(b"emerg2".to_vec(), CotPriority::Emergency, 2).unwrap();
+        sched
+            .push(b"emerg1".to_vec(), CotPriority::Emergency, 1)
+            .unwrap();
+        sched
+            .push(b"emerg2".to_vec(), CotPriority::Emergency, 2)
+            .unwrap();
 
         let err = sched.push(b"low3".to_vec(), CotPriority::Low, 3);
         assert_eq!(err, Err(SchedulerError::QueueFull));

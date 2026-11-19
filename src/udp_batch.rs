@@ -113,7 +113,8 @@ impl UdpBatchQueue {
             if !batch.is_empty() && batch.len() >= self.policy.max_batch_packets {
                 break;
             }
-            if !batch.is_empty() && batch_bytes + front.payload.len() > self.policy.max_batch_bytes {
+            if !batch.is_empty() && batch_bytes + front.payload.len() > self.policy.max_batch_bytes
+            {
                 break;
             }
             let packet = self.queue.pop_front().unwrap();
@@ -280,7 +281,10 @@ mod tests {
         let receiver = UdpSocket::bind("127.0.0.1:0").unwrap();
         let target = receiver.local_addr().unwrap();
         let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
-        let policy = BatchPolicy { max_batch_packets: 2, ..Default::default() };
+        let policy = BatchPolicy {
+            max_batch_packets: 2,
+            ..Default::default()
+        };
         let mut queue = UdpBatchQueue::new(policy);
         for i in 0..5 {
             queue.enqueue(UdpPacket::new(target, vec![i])).unwrap();
