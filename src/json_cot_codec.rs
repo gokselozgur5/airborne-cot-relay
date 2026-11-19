@@ -259,6 +259,35 @@ fn escape_json(s: &str) -> String {
     out
 }
 
+fn extract_json_string(json: &str, key: &str) -> Option<String> {
+    let key_pat = format!("\"{key}\"");
+    let key_idx = json.find(&key_pat)?;
+    let rest = &json[key_idx + key_pat.len()..];
+    let colon_idx = rest.find(':')?;
+    let val_part = rest[colon_idx + 1..].trim_start();
+    let mut chars = val_part.strip_prefix('"')?.chars();
+    let mut out = String::new();
+    loop {
+        match chars.next()? {
+            '"' => return Some(out),
+            '\\' => match chars.next()? {
+                'n' => out.push('\n'),
+                'r' => out.push('\r'),
+                't' => out.push('\t'),
+                'b' => out.push('\u{8}'),
+                'f' => out.push('\u{c}'),
+                'u' => {
+                    let hex: String = chars.by_ref().take(4).collect();
+                    let cp = u32::from_str_radix(&hex, 16).ok()?;
+                    out.push(char::from_u32(cp)?);
+                }
+                c => out.push(c),
+            },
+            c => out.push(c),
+        }
+    }
+}
+
 fn extract_json_f64(json: &str, key: &str) -> Option<f64> {
     let key_pat = format!("\"{key}\"");
     let key_idx = json.find(&key_pat)?;
