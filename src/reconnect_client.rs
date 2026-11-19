@@ -57,6 +57,7 @@ pub struct ReconnectPolicy {
     pub backoff_multiplier: f64,
     pub max_retries: Option<usize>,
     pub connect_timeout: Duration,
+    pub write_timeout: Duration,
     pub max_queue_messages: usize,
     pub max_queue_bytes: usize,
     pub drop_oldest_on_full: bool,
@@ -70,6 +71,7 @@ impl Default for ReconnectPolicy {
             backoff_multiplier: 2.0,
             max_retries: None,
             connect_timeout: Duration::from_secs(1),
+            write_timeout: Duration::from_millis(500),
             max_queue_messages: 1024,
             max_queue_bytes: 1024 * 1024,
             drop_oldest_on_full: true,
@@ -104,6 +106,11 @@ impl ReconnectPolicy {
 
     pub fn with_connect_timeout(mut self, timeout: Duration) -> Self {
         self.connect_timeout = timeout;
+        self
+    }
+
+    pub fn with_write_timeout(mut self, timeout: Duration) -> Self {
+        self.write_timeout = timeout;
         self
     }
 
