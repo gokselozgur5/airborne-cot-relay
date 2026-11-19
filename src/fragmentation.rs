@@ -312,6 +312,7 @@ impl InFlightSession {
         if self.received_fragments.contains_key(&seq_index) {
             return false;
         }
+        self.buffered_bytes += data.len();
         self.received_fragments.insert(seq_index, data);
         true
     }
