@@ -10,6 +10,7 @@ pub struct ReconnectingRelayLoop<S, C, F> {
     sink: S,
     factory: F,
     queue: BoundedQueue<Vec<u8>>,
+    staged: Option<Vec<u8>>,
     health: SendHealth,
     backoff: Backoff,
     clock: C,
@@ -33,6 +34,7 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
             sink,
             factory,
             queue,
+            staged: None,
             health: SendHealth::new(3),
             backoff: Backoff::new(50, 2000),
             clock,
@@ -95,6 +97,11 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
             self.metrics.record_sent(self.clock.now_ms() as u64);
             return Ok(sent);
         }
+        if let Err(RelayError::IoError(ref m)) = res {
+            if m.contains("WouldBlock") {
+                return res;
+            }
+        }
         self.health.record(&res);
         res
     }
@@ -109,11 +116,11 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
                 return Ok(());
             }
         }
-        while let Some(payload) = self.queue.pop() {
+        while let Some(payload) = self.staged.take().or_else(|| self.queue.pop()) {
             match self.send_one(&payload) {
                 Ok(_) => continue,
                 Err(RelayError::IoError(ref m)) if m.contains("WouldBlock") => {
-                    self.queue.push(payload);
+                    self.staged = Some(payload);
                     break;
                 }
                 Err(_) => {
@@ -122,7 +129,8 @@ impl<S: CotSink, C: Clock, F: FnMut() -> Result<S, RelayError>> ReconnectingRela
                 }
             }
         }
-        self.metrics.set_queue_depth(self.queue.len() as u64);
+        let depth = (self.queue.len() + usize::from(self.staged.is_some())) as u64;
+        self.metrics.set_queue_depth(depth);
         Ok(())
     }
 }
