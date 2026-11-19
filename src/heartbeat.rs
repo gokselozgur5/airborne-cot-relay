@@ -260,7 +260,7 @@ impl HeartbeatGenerator {
     pub fn is_due(&self, now_ms: u64) -> bool {
         match self.last_generated_ms {
             None => true,
-            Some(last) => now_ms.saturating_sub(last) >= self.config.interval_ms,
+            Some(last) => now_ms < last || now_ms - last >= self.config.interval_ms,
         }
     }
 }
@@ -271,8 +271,12 @@ impl HeartbeatGenerator {
         match self.last_generated_ms {
             None => 0,
             Some(last) => {
-                let elapsed = now_ms.saturating_sub(last);
-                self.config.interval_ms.saturating_sub(elapsed)
+                if now_ms < last {
+                    0
+                } else {
+                    let elapsed = now_ms - last;
+                    self.config.interval_ms.saturating_sub(elapsed)
+                }
             }
         }
     }
