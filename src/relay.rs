@@ -212,6 +212,7 @@ pub struct CotStreamer {
     socket: UdpSocket,
     target_addr: SocketAddr,
     stale_timeout_ms: u64,
+    pub uid_prefix: String,
 }
 
 impl CotStreamer {
@@ -236,10 +237,19 @@ impl CotStreamer {
             .ok_or_else(|| {
                 RelayError::IoError(format!("no address resolved for {target_addr_str}"))
             })?;
+
+        let uid_prefix = format!(
+            "{:x}",
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        );
         Ok(Self {
             socket,
             target_addr,
             stale_timeout_ms,
+            uid_prefix,
         })
     }
 
@@ -248,7 +258,7 @@ impl CotStreamer {
         let stale_ms = now_ms + self.stale_timeout_ms as i64;
         let time_str = format_iso8601_utc(now_ms);
         let stale_str = format_iso8601_utc(stale_ms);
-        let uid = format!("TRACK-{:04}", track.id);
+        let uid = format!("TRACK-{}-{:04}", self.uid_prefix, track.id);
         format!(
             r#"<event version="2.0" uid="{}" type="{}" how="m-g" time="{}" start="{}" stale="{}"><point lat="{:.7}" lon="{:.7}" hae="{:.2}" ce="{:.2}" le="{:.2}"/><detail><track course="{:.2}" speed="{:.2}"/></detail></event>"#,
             escape_xml_attr(&uid),
@@ -446,11 +456,12 @@ mod tests {
         };
         let now_ms = 1731369600000;
         let xml = streamer.build_cot_xml(&track, now_ms);
-        assert!(xml.contains(r#"uid="TRACK-0042""#));
+        let expected_uid = format!("TRACK-{}-0042", streamer.uid_prefix);
+        assert!(xml.contains(&format!(r#"uid="{expected_uid}""#)));
         assert!(xml.contains(r#"type="a-f-G-E-V-C""#));
         assert!(xml.contains(r#"lat="37.7749000""#));
         let parsed = CotEvent::from_xml(&xml).expect("valid CoT 2.0 XML");
-        assert_eq!(parsed.uid, "TRACK-0042");
+        assert_eq!(parsed.uid, expected_uid);
         assert_eq!(parsed.cot_type, "a-f-G-E-V-C");
     }
 
@@ -504,6 +515,7 @@ mod tests {
         let mut buf = [0u8; 1024];
         let (len, _) = rx_sock.recv_from(&mut buf).unwrap();
         let received_xml = std::str::from_utf8(&buf[..len]).unwrap();
-        assert!(received_xml.contains(r#"uid="TRACK-0001""#));
+        let expected_uid = format!("TRACK-{}-0001", streamer.uid_prefix);
+        assert!(received_xml.contains(&format!(r#"uid="{expected_uid}""#)));
     }
 }
