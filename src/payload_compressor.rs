@@ -345,6 +345,17 @@ fn decode_snappy_literal_len(
             *cursor += 2;
             Ok(val)
         }
+        62 => {
+            if *cursor + 3 > input.len() {
+                return Err(CompressorError::CorruptPayload("truncated literal length"));
+            }
+            let val =
+                u32::from_le_bytes([input[*cursor], input[*cursor + 1], input[*cursor + 2], 0])
+                    as usize
+                    + 1;
+            *cursor += 3;
+            Ok(val)
+        }
         _ => Err(CompressorError::CorruptPayload(
             "unsupported literal length code",
         )),
