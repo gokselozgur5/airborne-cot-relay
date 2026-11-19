@@ -261,6 +261,7 @@ impl ReconnectClient {
     }
 
     fn handle_connect_success(&mut self, stream: TcpStream) {
+        let _ = stream.set_write_timeout(Some(self.policy.write_timeout));
         self.stream = Some(stream);
         self.consecutive_failures = 0;
         self.next_connect_deadline = None;
