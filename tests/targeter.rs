@@ -22,3 +22,9 @@ fn nose_up_heading_east_moves_boresight_east() {
     let east = boresight_east_m(0.0, 10f32.to_radians(), std::f32::consts::FRAC_PI_2);
     assert!((east - 17.633).abs() < 0.05, "east offset {east}");
 }
+
+#[test]
+fn right_bank_heading_north_moves_boresight_west() {
+    let east = boresight_east_m(0.3, 0.0, 0.0);
+    assert!((east + 30.934).abs() < 0.05, "east offset {east}");
+}
