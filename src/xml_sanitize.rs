@@ -16,6 +16,9 @@ pub fn escape_xml_entity(c: char) -> Option<&'static str> {
         '>' => Some("&gt;"),
         '"' => Some("&quot;"),
         '\'' => Some("&apos;"),
+        '\t' => Some("&#9;"),
+        '\n' => Some("&#10;"),
+        '\r' => Some("&#13;"),
         _ => None,
     }
 }
