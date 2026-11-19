@@ -425,9 +425,19 @@ impl TelemetryRingRecorder {
 }
 
 impl TelemetryRingRecorder {
+    fn format_json_float(val: f32, prec: usize) -> String {
+        if val.is_finite() {
+            format!("{val:.prec$}")
+        } else {
+            "null".to_string()
+        }
+    }
+
     fn format_json_record(r: &TelemetryRecord) -> String {
+        let bat = Self::format_json_float(r.battery_volts, 2);
+        let temp = Self::format_json_float(r.cpu_temp_c, 1);
         format!(
-            "{{\"seq\":{},\"time_ms\":{},\"lat\":{:.6},\"lon\":{:.6},\"hae\":{:.2},\"roll\":{:.4},\"pitch\":{:.4},\"yaw\":{:.4},\"bat\":{:.2},\"temp\":{:.1},\"link\":{},\"flags\":{}}}",
+            "{{\"seq\":{},\"time_ms\":{},\"lat\":{:.6},\"lon\":{:.6},\"hae\":{:.2},\"roll\":{:.4},\"pitch\":{:.4},\"yaw\":{:.4},\"bat\":{},\"temp\":{},\"link\":{},\"flags\":{}}}",
             r.sequence,
             r.timestamp_ms,
             r.pose.lat_deg,
@@ -436,8 +446,8 @@ impl TelemetryRingRecorder {
             r.pose.roll_rad,
             r.pose.pitch_rad,
             r.pose.yaw_rad,
-            r.battery_volts,
-            r.cpu_temp_c,
+            bat,
+            temp,
             r.link_quality_pct,
             r.error_flags,
         )
