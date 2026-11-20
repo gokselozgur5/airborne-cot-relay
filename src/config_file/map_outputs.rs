@@ -1,7 +1,6 @@
 //! Maps `[output.NAME]` sections to output destination specifications.
 
 use crate::config::RelayError;
-use crate::config_file::lexer::{IniSection, ParsedIni};
 
 /// Output format for CoT streaming.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -40,9 +39,7 @@ impl OutputSpec {
             format,
         }
     }
-}
 
-impl OutputSpec {
     pub fn validate(&self) -> Result<(), RelayError> {
         if self.name.trim().is_empty() {
             return Err(RelayError::InvalidConfig("empty output name".into()));
