@@ -115,6 +115,31 @@ impl UdpMulticastSink {
         }
         Ok(())
     }
+
+    pub fn multicast_if_v4(&self) -> Result<Ipv4Addr, RelayError> {
+        #[cfg(unix)]
+        {
+            use std::os::fd::AsRawFd;
+            #[cfg(target_os = "linux")]
+            const IP_MULTICAST_IF: i32 = 32;
+            #[cfg(not(target_os = "linux"))]
+            const IP_MULTICAST_IF: i32 = 9;
+            extern "C" {
+                fn getsockopt(s: i32, l: i32, o: i32, v: *mut std::ffi::c_void, n: *mut u32) -> i32;
+            }
+            let mut octets = [0u8; 4];
+            let mut len = 4u32;
+            let ret = unsafe {
+                getsockopt(self.socket.as_raw_fd(), 0, IP_MULTICAST_IF, octets.as_mut_ptr() as *mut _, &mut len)
+            };
+            if ret != 0 {
+                return Err(RelayError::from(std::io::Error::last_os_error()));
+            }
+            return Ok(Ipv4Addr::from(octets));
+        }
+        #[allow(unreachable_code)]
+        Ok(Ipv4Addr::UNSPECIFIED)
+    }
 }
 
 impl CotSink for UdpMulticastSink {
