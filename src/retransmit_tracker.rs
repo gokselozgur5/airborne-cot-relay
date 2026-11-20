@@ -162,7 +162,10 @@ impl RetransmitTracker {
         if let Some(record) = self.records.get_mut(&seq) {
             if record.acks.insert(receiver_id.to_string()) {
                 self.stats.acks_received += 1;
-                record.force_retransmit = false;
+                record.nacks.remove(receiver_id);
+                if record.nacks.is_empty() {
+                    record.force_retransmit = false;
+                }
                 return true;
             }
         }
