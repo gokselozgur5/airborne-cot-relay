@@ -176,6 +176,11 @@ impl CotDedupCache {
     pub fn bloom(&self) -> &DedupBloomFilter {
         &self.bloom
     }
+
+    /// Returns the number of entries waiting in the expiry queue.
+    pub fn expiry_queue_len(&self) -> usize {
+        self.expiry_queue.len()
+    }
     fn evict_if_needed(&mut self) {
         if self.entries.len() >= self.config.max_capacity {
             if let Some((_, oldest_key)) = self.expiry_queue.pop_front() {
@@ -223,8 +228,6 @@ impl CotDedupCache {
             if let Some(entry) = self.entries.get_mut(key) {
                 if !entry.is_expired(now_ms) {
                     entry.refresh(now_ms, self.config.sliding_window_ms);
-                    self.expiry_queue
-                        .push_back((entry.expires_at_ms, key.to_vec()));
                     self.stats.duplicates_dropped += 1;
                     return false;
                 }
