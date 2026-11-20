@@ -1,6 +1,7 @@
 //! Non-blocking UDP socket source for target detections.
 
 use crate::config::RelayError;
+use crate::ingest::SourceFilter;
 use crate::runtime::source::DetectionSource;
 use crate::targeter::TargetDetection;
 use std::io::ErrorKind;
@@ -42,6 +43,7 @@ pub struct UdpDetectionSource {
     socket: UdpSocket,
     buffer: Vec<u8>,
     bad_lines: u64,
+    filter: Option<SourceFilter>,
 }
 
 impl UdpDetectionSource {
@@ -51,7 +53,17 @@ impl UdpDetectionSource {
             socket,
             buffer: vec![0u8; 65535],
             bad_lines: 0,
+            filter: None,
         })
+    }
+
+    pub fn with_source_filter(mut self, filter: SourceFilter) -> Self {
+        self.filter = Some(filter);
+        self
+    }
+
+    pub fn rejected_count(&self) -> u64 {
+        self.filter.as_ref().map_or(0, |f| f.rejected_count())
     }
 
     pub fn bind<A: ToSocketAddrs>(addr: A) -> Result<Self, RelayError> {
