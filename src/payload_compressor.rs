@@ -710,6 +710,32 @@ fn decode_deflate_copy(
     Ok(())
 }
 
+fn decode_deflate_stored(
+    reader: &mut BitReader<'_>,
+    out: &mut Vec<u8>,
+    max_bytes: usize,
+) -> Result<(), CompressorError> {
+    let skip = reader.bits % 8;
+    if skip > 0 {
+        reader.read_bits(skip)?;
+    }
+    let len = reader.read_bits(16)? as u16;
+    let nlen = reader.read_bits(16)? as u16;
+    if (len ^ 0xffff) != nlen {
+        return Err(CompressorError::CorruptPayload("invalid stored block length"));
+    }
+    for _ in 0..len {
+        if out.len() >= max_bytes {
+            return Err(CompressorError::PayloadTooLarge {
+                len: out.len(),
+                max: max_bytes,
+            });
+        }
+        out.push(reader.read_bits(8)? as u8);
+    }
+    Ok(())
+}
+
 /// Decompresses RFC 1951 Deflate stream payload into uncompressed bytes.
 pub fn deflate_decompress(input: &[u8]) -> Result<Vec<u8>, CompressorError> {
     deflate_decompress_bounded(input, usize::MAX)
