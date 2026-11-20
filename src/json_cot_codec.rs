@@ -402,6 +402,9 @@ pub fn cot_xml_to_json(xml: &str) -> Result<String, JsonCotError> {
     CotEventDto::from_xml(xml).map(|dto| dto.to_json())
 }
 
+/// Default maximum buffer size for streaming decoders (16 MiB).
+pub const DEFAULT_MAX_STREAM_BUFFER_SIZE: usize = 16 * 1024 * 1024;
+
 /// Streaming converter from newline-delimited JSON into Cursor-on-Target XML events.
 #[derive(Debug, Default)]
 pub struct JsonToCotStream {
