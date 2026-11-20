@@ -171,10 +171,22 @@ impl FrameDecoder {
     pub fn decode_all(&mut self, data: &[u8]) -> Result<Vec<Vec<u8>>, FrameCodecError> {
         self.feed(data);
         let mut frames = Vec::new();
-        while let Some(frame) = self.decode_next()? {
-            frames.push(frame);
+        loop {
+            match self.decode_next() {
+                Ok(Some(frame)) => frames.push(frame),
+                Ok(None) => return Ok(frames),
+                Err(err) => {
+                    let mut restored = Vec::new();
+                    for f in frames {
+                        let enc = Self::encode(&f, self.length_field, self.endianness)?;
+                        restored.extend_from_slice(&enc);
+                    }
+                    restored.extend_from_slice(&self.buffer);
+                    self.buffer = restored;
+                    return Err(err);
+                }
+            }
         }
-        Ok(frames)
     }
 }
 
