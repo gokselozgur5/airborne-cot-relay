@@ -101,12 +101,23 @@ pub fn parse_detection_lines(text: &str) -> (Vec<TargetDetection>, u64) {
 
 impl DetectionSource for UdpDetectionSource {
     fn poll_batch(&mut self) -> Result<Option<Vec<TargetDetection>>, RelayError> {
-        let n = match self.socket.recv_from(&mut self.buffer) {
-            Ok((n, _)) => n,
-            Err(ref e) if e.kind() == ErrorKind::WouldBlock || e.kind() == ErrorKind::TimedOut => {
-                return Ok(None);
+        let n = loop {
+            match self.socket.recv_from(&mut self.buffer) {
+                Ok((n, src)) => {
+                    if let Some(ref mut filter) = self.filter {
+                        if !filter.check(&src.ip()) {
+                            continue;
+                        }
+                    }
+                    break n;
+                }
+                Err(ref e)
+                    if e.kind() == ErrorKind::WouldBlock || e.kind() == ErrorKind::TimedOut =>
+                {
+                    return Ok(None);
+                }
+                Err(e) => return Err(RelayError::from(e)),
             }
-            Err(e) => return Err(RelayError::from(e)),
         };
         let mut batch = Vec::new();
         for raw_line in self.buffer[..n].split(|&b| b == b'\n') {
