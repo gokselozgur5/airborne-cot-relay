@@ -329,13 +329,13 @@ impl CotEventDto {
         let time = extract_json_string(json, "time").ok_or(JsonCotError::MissingField("time"))?;
         let start = extract_json_string(json, "start").unwrap_or_else(|| time.clone());
         let stale = extract_json_string(json, "stale").unwrap_or_else(|| time.clone());
-        let lat = extract_json_f64(json, "lat").ok_or(JsonCotError::MissingField("lat"))?;
-        let lon = extract_json_f64(json, "lon").ok_or(JsonCotError::MissingField("lon"))?;
-        let hae = extract_json_f64(json, "hae").unwrap_or(0.0);
-        let ce = extract_json_f64(json, "ce").unwrap_or(10.0);
-        let le = extract_json_f64(json, "le").unwrap_or(10.0);
-        let course = extract_json_f64(json, "course");
-        let speed = extract_json_f64(json, "speed");
+        let lat = extract_coord(json, "lat", -90.0, 90.0)?;
+        let lon = extract_coord(json, "lon", -180.0, 180.0)?;
+        let hae = extract_json_f64_field(json, "hae")?.unwrap_or(0.0);
+        let ce = extract_json_f64_field(json, "ce")?.unwrap_or(10.0);
+        let le = extract_json_f64_field(json, "le")?.unwrap_or(10.0);
+        let course = extract_json_f64_field(json, "course")?;
+        let speed = extract_json_f64_field(json, "speed")?;
         let callsign = extract_json_string(json, "callsign");
         Ok(Self {
             uid,
