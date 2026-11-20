@@ -499,6 +499,13 @@ impl CotSignatureValidator {
             return Err(CotSignerError::InvalidSignature);
         }
 
+        self.prune_replays(current_time_secs);
+        let replay_key = (key_id, timestamp, signature);
+        if !self.seen_frames.insert(replay_key) {
+            return Err(CotSignerError::ReplayedFrame);
+        }
+        self.seen_ordered.push(replay_key);
+
         self.stats.valid_signatures += 1;
         Ok(SignedCotFrame {
             key_id,
