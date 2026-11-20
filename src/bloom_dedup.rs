@@ -84,6 +84,9 @@ impl BloomFilter {
 #[derive(Debug, Clone)]
 pub struct CotBloomDeduplicator {
     filter: BloomFilter,
+    previous: BloomFilter,
+    items_in_window: usize,
+    max_items: usize,
     total_checked: u64,
     duplicates_dropped: u64,
     unique_passed: u64,
@@ -92,8 +95,12 @@ pub struct CotBloomDeduplicator {
 impl CotBloomDeduplicator {
     /// Creates a deduplicator with specified filter capacity and hash function count.
     pub fn new(capacity_bits: usize, hash_count: usize) -> Self {
+        let max_items = (capacity_bits / (2 * hash_count.max(1))).max(1);
         Self {
             filter: BloomFilter::new(capacity_bits, hash_count),
+            previous: BloomFilter::new(capacity_bits, hash_count),
+            items_in_window: 0,
+            max_items,
             total_checked: 0,
             duplicates_dropped: 0,
             unique_passed: 0,
