@@ -44,11 +44,8 @@ impl CotPriority {
         if xml.contains("<emergency") {
             return CotPriority::Emergency;
         }
-        if let Some(idx) = xml.find("type=\"") {
-            let rem = &xml[idx + 6..];
-            if let Some(end) = rem.find('"') {
-                return Self::from_cot_type(&rem[..end]);
-            }
+        if let Some(cot_type) = crate::json_cot_codec::extract_xml_attr(xml, "type") {
+            return Self::from_cot_type(cot_type);
         }
         CotPriority::Normal
     }
