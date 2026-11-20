@@ -736,6 +736,29 @@ fn decode_deflate_stored(
     Ok(())
 }
 
+fn decode_deflate_fixed(
+    reader: &mut BitReader<'_>,
+    out: &mut Vec<u8>,
+    max_bytes: usize,
+) -> Result<(), CompressorError> {
+    loop {
+        if out.len() > max_bytes {
+            return Err(CompressorError::PayloadTooLarge {
+                len: out.len(),
+                max: max_bytes,
+            });
+        }
+        let sym = decode_fixed_huffman_sym(reader)?;
+        if sym == 256 {
+            return Ok(());
+        } else if sym < 256 {
+            out.push(sym as u8);
+        } else {
+            decode_deflate_copy(reader, out, sym)?;
+        }
+    }
+}
+
 /// Decompresses RFC 1951 Deflate stream payload into uncompressed bytes.
 pub fn deflate_decompress(input: &[u8]) -> Result<Vec<u8>, CompressorError> {
     deflate_decompress_bounded(input, usize::MAX)
