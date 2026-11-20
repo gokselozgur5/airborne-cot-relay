@@ -3,7 +3,7 @@
 //! Pure-Rust FIPS 180-4 SHA-256 and RFC 2104 HMAC-SHA256 implementation
 //! with wire framing, anti-replay skew checks, and constant-time verify.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 const K256: [u32; 64] = [
@@ -357,6 +357,8 @@ pub struct CotSignatureValidator {
     keys: HashMap<u32, Vec<u8>>,
     max_clock_skew_secs: u64,
     stats: CotValidatorStats,
+    seen_frames: HashSet<(u32, u64, [u8; 32])>,
+    seen_ordered: Vec<(u32, u64, [u8; 32])>,
 }
 
 impl CotSignatureValidator {
@@ -365,6 +367,8 @@ impl CotSignatureValidator {
             keys: HashMap::new(),
             max_clock_skew_secs,
             stats: CotValidatorStats::default(),
+            seen_frames: HashSet::new(),
+            seen_ordered: Vec::new(),
         }
     }
 
