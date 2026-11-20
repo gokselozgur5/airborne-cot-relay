@@ -182,10 +182,15 @@ impl CotDedupCache {
         self.expiry_queue.len()
     }
     fn evict_if_needed(&mut self) {
-        if self.entries.len() >= self.config.max_capacity {
-            if let Some((_, oldest_key)) = self.expiry_queue.pop_front() {
-                if self.entries.remove(&oldest_key).is_some() {
+        while self.entries.len() >= self.config.max_capacity {
+            let Some((queued_exp, oldest_key)) = self.expiry_queue.pop_front() else {
+                break;
+            };
+            if let Some(entry) = self.entries.get(&oldest_key) {
+                if entry.expires_at_ms == queued_exp {
+                    self.entries.remove(&oldest_key);
                     self.stats.evictions += 1;
+                    break;
                 }
             }
         }
