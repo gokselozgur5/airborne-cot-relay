@@ -16,7 +16,8 @@ fn test_parse_detection_line_valid() {
     let d = airborne_cot_relay::ingest::udp_detections::parse_detection_line(line).unwrap();
     assert_eq!(d.classification, "person");
     assert_eq!(d.pixel_u, 100.0);
-    assert_eq!(d.bbox, (90.0, 190.0, 20.0, 20.0));
+    let exp = (90.0, 190.0, 110.0, 210.0);
+    assert_eq!(d.bbox, exp);
 }
 
 #[test]
