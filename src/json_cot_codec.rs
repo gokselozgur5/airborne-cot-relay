@@ -11,6 +11,8 @@ pub enum JsonCotError {
     MalformedXml(&'static str),
     /// Failed to parse numeric value.
     NumericParseError(&'static str),
+    /// Payload exceeded maximum allowable buffer size.
+    PayloadTooLarge(usize),
 }
 
 impl std::fmt::Display for JsonCotError {
@@ -20,6 +22,7 @@ impl std::fmt::Display for JsonCotError {
             Self::MalformedJson(msg) => write!(f, "malformed json: {msg}"),
             Self::MalformedXml(msg) => write!(f, "malformed xml: {msg}"),
             Self::NumericParseError(field) => write!(f, "invalid numeric value for: {field}"),
+            Self::PayloadTooLarge(size) => write!(f, "payload exceeded maximum buffer size: {size}"),
         }
     }
 }
