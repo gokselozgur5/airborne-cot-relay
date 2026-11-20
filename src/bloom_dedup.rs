@@ -110,11 +110,17 @@ impl CotBloomDeduplicator {
     /// Checks a raw byte slice. Returns true if unique (new), false if duplicate.
     pub fn check_and_record_raw(&mut self, data: &[u8]) -> bool {
         self.total_checked += 1;
-        if self.filter.contains(data) {
+        if self.filter.contains(data) || self.previous.contains(data) {
             self.duplicates_dropped += 1;
             false
         } else {
+            if self.items_in_window >= self.max_items {
+                std::mem::swap(&mut self.previous, &mut self.filter);
+                self.filter.clear();
+                self.items_in_window = 0;
+            }
             self.filter.insert(data);
+            self.items_in_window += 1;
             self.unique_passed += 1;
             true
         }
