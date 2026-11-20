@@ -10,6 +10,14 @@ use crate::track_filter::{FilterConfig, ManualClock, TrackFilter};
 /// Geodetic origin of the mock telemetry frames.
 const MOCK_ORIGIN: (f64, f64, f64) = (37.7749, -122.4194, 0.0);
 
+/// Wildcard bind address in the address family of the target.
+fn bind_addr(target: &str) -> &'static str {
+    match target.parse::<std::net::SocketAddr>() {
+        Ok(a) if a.is_ipv6() => "[::]:0",
+        _ => "0.0.0.0:0",
+    }
+}
+
 /// Library stages wired together for one mock run.
 struct MockRelay {
     ingest: TelemetryIngest,
@@ -26,7 +34,11 @@ impl MockRelay {
             ingest: TelemetryIngest::new(lat, lon, alt, stale_ms),
             targeter: Targeter::new(&config.camera, config.ground_elevation_m),
             filter: TrackFilter::new(FilterConfig::default(), ManualClock::new(0)),
-            streamer: CotStreamer::new("0.0.0.0:0", &config.cot_broadcast_addr, stale_ms)?,
+            streamer: CotStreamer::new(
+                bind_addr(&config.cot_broadcast_addr),
+                &config.cot_broadcast_addr,
+                stale_ms,
+            )?,
         })
     }
 }
@@ -90,7 +102,11 @@ impl MockRelay {
 /// Runs the full mock mission and returns the number of CoT events sent.
 pub fn run_mock(config: &RelayConfig, metrics: &Metrics) -> Result<u64, RelayError> {
     let mut relay = MockRelay::new(config)?;
-    Ok(generate().iter().map(|s| relay.step(s, metrics)).sum())
+    let sent: u64 = generate().iter().map(|s| relay.step(s, metrics)).sum();
+    if sent == 0 {
+        return Err(RelayError::IoError("no CoT event could be sent".into()));
+    }
+    Ok(sent)
 }
 
 #[cfg(test)]
