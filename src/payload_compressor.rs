@@ -766,26 +766,19 @@ pub fn deflate_decompress(input: &[u8]) -> Result<Vec<u8>, CompressorError> {
 
 fn deflate_decompress_bounded(input: &[u8], max_bytes: usize) -> Result<Vec<u8>, CompressorError> {
     let mut reader = BitReader::new(input);
-    let _bfinal = reader.read_bits(1)?;
-    let btype = reader.read_bits(2)?;
-    if btype != 1 {
-        return Err(CompressorError::CorruptPayload("unsupported deflate btype"));
-    }
     let mut out = Vec::new();
     loop {
-        if out.len() > max_bytes {
-            return Err(CompressorError::PayloadTooLarge {
-                len: out.len(),
-                max: max_bytes,
-            });
-        }
-        let sym = decode_fixed_huffman_sym(&mut reader)?;
-        if sym == 256 {
-            break;
-        } else if sym < 256 {
-            out.push(sym as u8);
+        let bfinal = reader.read_bits(1)?;
+        let btype = reader.read_bits(2)?;
+        if btype == 0 {
+            decode_deflate_stored(&mut reader, &mut out, max_bytes)?;
+        } else if btype == 1 {
+            decode_deflate_fixed(&mut reader, &mut out, max_bytes)?;
         } else {
-            decode_deflate_copy(&mut reader, &mut out, sym)?;
+            return Err(CompressorError::CorruptPayload("unsupported deflate btype"));
+        }
+        if bfinal != 0 {
+            break;
         }
     }
     if out.len() > max_bytes {
