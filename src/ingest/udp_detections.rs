@@ -96,15 +96,21 @@ impl DetectionSource for UdpDetectionSource {
             }
             Err(e) => return Err(RelayError::from(e)),
         };
-        let text = match std::str::from_utf8(&self.buffer[..n]) {
-            Ok(s) => s,
-            Err(_) => {
-                self.bad_lines += 1;
-                return Ok(Some(Vec::new()));
+        let mut batch = Vec::new();
+        for raw_line in self.buffer[..n].split(|&b| b == b'\n') {
+            match std::str::from_utf8(raw_line) {
+                Ok(s) => {
+                    let t = s.trim();
+                    if !t.is_empty() {
+                        match parse_detection_line(t) {
+                            Ok(det) => batch.push(det),
+                            Err(_) => self.bad_lines += 1,
+                        }
+                    }
+                }
+                Err(_) => self.bad_lines += 1,
             }
-        };
-        let (batch, bad) = parse_detection_lines(text);
-        self.bad_lines += bad;
+        }
         Ok(Some(batch))
     }
 }
