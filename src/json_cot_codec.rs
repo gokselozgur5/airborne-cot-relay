@@ -295,6 +295,14 @@ fn extract_json_f64_field(json: &str, key: &'static str) -> Result<Option<f64>, 
         .map(Some)
 }
 
+fn extract_coord(json: &str, key: &'static str, min: f64, max: f64) -> Result<f64, JsonCotError> {
+    let v = extract_json_f64_field(json, key)?.ok_or(JsonCotError::MissingField(key))?;
+    (min..=max)
+        .contains(&v)
+        .then_some(v)
+        .ok_or(JsonCotError::NumericParseError(key))
+}
+
 fn extract_json_f64(json: &str, key: &str) -> Option<f64> {
     let key_pat = format!("\"{key}\"");
     let key_idx = json.find(&key_pat)?;
