@@ -2,6 +2,8 @@ use airborne_cot_relay::config::RelayError;
 use airborne_cot_relay::output::{TlsClientConfig, TlsClientSink, TlsConnector};
 use airborne_cot_relay::relay::{Backoff, CotSink};
 use std::io::Write;
+use std::thread::sleep;
+use std::time::Duration;
 
 struct Failing;
 impl TlsConnector for Failing {
@@ -35,6 +37,7 @@ fn backoff_grows_on_failure() {
     .unwrap();
     assert!(s.send(b"x").is_err());
     assert_eq!(s.retry_delay_ms(), 100);
+    sleep(Duration::from_millis(105));
     assert!(s.send(b"x").is_err());
     assert_eq!(s.retry_delay_ms(), 200);
 }
