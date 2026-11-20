@@ -1,5 +1,7 @@
 //! Layered configuration precedence and field-level provenance.
 
+use crate::config::CameraIntrinsics;
+
 /// Provenance of a configuration field value.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Provenance {
@@ -32,10 +34,6 @@ impl<T> LayeredValue<T> {
         Self { value, provenance }
     }
 }
-
-use crate::config::{CameraIntrinsics, RelayConfig, RelayError};
-use crate::config_file::lexer::ParsedIni;
-use crate::config_file::map_relay::map_relay_config;
 
 /// Provenance tracking for camera intrinsics fields.
 #[derive(Debug, Clone, PartialEq)]
