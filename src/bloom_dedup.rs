@@ -195,5 +195,6 @@ mod tests {
         assert_eq!(dedup.total_checked(), 3);
         assert_eq!(dedup.unique_passed(), 2);
         assert_eq!(dedup.duplicates_dropped(), 1);
+        assert!(dedup.estimated_false_positive_rate() < 0.05);
     }
 }
