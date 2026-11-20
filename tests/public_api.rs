@@ -27,6 +27,13 @@ fn classification_maps_to_cot_type() {
 }
 
 #[test]
+fn test_classification_to_cot_type_repro_person_and_unknown() {
+    assert_eq!(classification_to_cot_type("person"), "a-u-G-U-C-I");
+    assert_eq!(classification_to_cot_type("pedestrian"), "a-u-G-U-C-I");
+    assert_eq!(classification_to_cot_type("human"), "a-u-G-U-C-I");
+}
+
+#[test]
 fn relay_error_display_uses_prefix() {
     let err = RelayError::IoError("network down".into());
     assert_eq!(err.to_string(), "IO error: network down");
