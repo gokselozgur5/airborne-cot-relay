@@ -270,6 +270,12 @@ impl FragmentReassembler {
             frag.header.total_fragments,
             frag.header.seq_index,
         );
+        if let Some(msg) = self.in_flight.get(&id) {
+            if now_ms.saturating_sub(msg.last_updated_ms) > self.ttl_ms {
+                self.in_flight.remove(&id);
+                self.stats.stale_dropped_messages += 1;
+            }
+        }
         self.check_capacity(id, now_ms)?;
         let entry = self
             .in_flight
