@@ -383,6 +383,18 @@ impl CotSignatureValidator {
     pub fn stats(&self) -> &CotValidatorStats {
         &self.stats
     }
+
+    fn prune_replays(&mut self, current_time_secs: u64) {
+        let cutoff = current_time_secs.saturating_sub(self.max_clock_skew_secs);
+        let split = self
+            .seen_ordered
+            .iter()
+            .position(|&(_, ts, _)| ts >= cutoff)
+            .unwrap_or(self.seen_ordered.len());
+        for item in self.seen_ordered.drain(..split) {
+            self.seen_frames.remove(&item);
+        }
+    }
     pub fn verify_raw(
         &mut self,
         key_id: u32,
