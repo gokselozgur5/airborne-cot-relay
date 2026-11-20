@@ -1,6 +1,7 @@
 //! Non-blocking UDP socket source for telemetry datagrams.
 
 use crate::config::RelayError;
+use crate::ingest::SourceFilter;
 use crate::runtime::source::TelemetrySource;
 use std::io::ErrorKind;
 use std::net::{SocketAddr, ToSocketAddrs, UdpSocket};
@@ -8,6 +9,7 @@ use std::net::{SocketAddr, ToSocketAddrs, UdpSocket};
 pub struct UdpTelemetrySource {
     socket: UdpSocket,
     buffer: Vec<u8>,
+    filter: Option<SourceFilter>,
 }
 
 impl UdpTelemetrySource {
@@ -16,7 +18,17 @@ impl UdpTelemetrySource {
         Ok(Self {
             socket,
             buffer: vec![0u8; 65535],
+            filter: None,
         })
+    }
+
+    pub fn with_source_filter(mut self, filter: SourceFilter) -> Self {
+        self.filter = Some(filter);
+        self
+    }
+
+    pub fn rejected_count(&self) -> u64 {
+        self.filter.as_ref().map_or(0, |f| f.rejected_count())
     }
 
     pub fn bind<A: ToSocketAddrs>(addr: A) -> Result<Self, RelayError> {
