@@ -138,6 +138,15 @@ impl CotBloomDeduplicator {
     /// Resets the internal Bloom filter for a new telemetry epoch.
     pub fn reset_window(&mut self) {
         self.filter.clear();
+        self.previous.clear();
+        self.items_in_window = 0;
+    }
+
+    /// Returns estimated false-positive rate based on bit set densities.
+    pub fn estimated_false_positive_rate(&self) -> f64 {
+        let p_curr = (self.filter.count_ones() as f64 / self.filter.num_bits as f64).powi(self.filter.num_hashes as i32);
+        let p_prev = (self.previous.count_ones() as f64 / self.previous.num_bits as f64).powi(self.previous.num_hashes as i32);
+        1.0 - (1.0 - p_curr) * (1.0 - p_prev)
     }
 
     /// Total packets checked since creation.
