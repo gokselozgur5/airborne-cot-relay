@@ -303,18 +303,6 @@ fn extract_coord(json: &str, key: &'static str, min: f64, max: f64) -> Result<f6
         .ok_or(JsonCotError::NumericParseError(key))
 }
 
-fn extract_json_f64(json: &str, key: &str) -> Option<f64> {
-    let key_pat = format!("\"{key}\"");
-    let key_idx = json.find(&key_pat)?;
-    let rest = &json[key_idx + key_pat.len()..];
-    let colon_idx = rest.find(':')?;
-    let val_part = rest[colon_idx + 1..].trim_start();
-    let end_idx = val_part
-        .find(|c: char| c == ',' || c == '}' || c.is_whitespace())
-        .unwrap_or(val_part.len());
-    val_part[..end_idx].trim().parse::<f64>().ok()
-}
-
 impl CotEventDto {
     /// Deserializes a JSON string into a `CotEventDto`.
     pub fn from_json(json: &str) -> Result<Self, JsonCotError> {
