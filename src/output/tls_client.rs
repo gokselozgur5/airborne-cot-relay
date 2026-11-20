@@ -98,15 +98,26 @@ impl<C: TlsConnector> TlsClientSink<C> {
 impl<C: TlsConnector> CotSink for TlsClientSink<C> {
     fn send(&mut self, payload: &[u8]) -> Result<usize, RelayError> {
         if self.stream.is_none() {
+            let now = Instant::now();
+            if let Some(deadline) = self.next_connect_deadline {
+                if now < deadline {
+                    return Err(RelayError::IoError("Reconnect backoff active".to_string()));
+                }
+            }
             match self.connector.connect(&self.cfg) {
-                Ok(s) => self.stream = Some(s),
+                Ok(s) => {
+                    self.backoff.reset();
+                    self.last_delay_ms = 0;
+                    self.next_connect_deadline = None;
+                    self.stream = Some(s);
+                }
                 Err(e) => {
-                    self.last_delay_ms = self.backoff.next_delay_ms();
+                    let delay = self.backoff.next_delay_ms();
+                    self.last_delay_ms = delay;
+                    self.next_connect_deadline = Some(now + Duration::from_millis(delay));
                     return Err(e);
                 }
             }
-            self.backoff.reset();
-            self.last_delay_ms = 0;
         }
         let stream = self.stream.as_mut().expect("connected");
         match stream.write_all(payload).and_then(|_| stream.flush()) {
