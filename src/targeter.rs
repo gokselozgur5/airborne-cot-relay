@@ -245,6 +245,14 @@ impl Targeter {
         let dt_s = self.compute_dt_s(pose.timestamp_ms);
         let mut tracker_dets = Vec::with_capacity(detections.len());
         for d in detections {
+            let (x1, y1, x2, y2) = d.bbox;
+            let finite_box = x1.is_finite() && y1.is_finite() && x2.is_finite() && y2.is_finite();
+            let finite_emb = d
+                .embedding
+                .map_or(true, |emb| emb.iter().all(|v| v.is_finite()));
+            if !finite_box || !finite_emb {
+                continue;
+            }
             if let Ok(gi) = self.project_pixel(d.pixel_u, d.pixel_v, pose) {
                 tracker_dets.push(Self::build_detection(d, &gi));
             }
