@@ -230,21 +230,21 @@ impl DowngradeTransformer {
             .ok_or(SchemaVersionError::MalformedXml("unclosed event tag"))?
             + s;
         let (before, tag, after) = (&xml[..s], &xml[s..=e], &xml[e + 1..]);
-        let new_tag = if let Some((_, vs, ve)) =
-            crate::json_cot_codec::find_xml_attr_span(tag, "version")
-        {
-            format!(
-                "{}{}{}",
-                &tag[..vs],
-                self.target_version.as_str(),
-                &tag[ve..]
-            )
-        } else {
-            format!(
+        let new_tag = match crate::json_cot_codec::find_xml_attr_span(tag, "version") {
+            Some((_, vs, ve)) if current_ver > self.target_version => {
+                format!(
+                    "{}{}{}",
+                    &tag[..vs],
+                    self.target_version.as_str(),
+                    &tag[ve..]
+                )
+            }
+            Some(_) => tag.to_string(),
+            None => format!(
                 "<event version=\"{}\"{}",
                 self.target_version.as_str(),
                 &tag["<event".len()..]
-            )
+            ),
         };
         let mut res = format!("{before}{new_tag}{after}");
         if self.strip_flow_tags {
