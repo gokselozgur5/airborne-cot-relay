@@ -43,7 +43,7 @@ fn find_unknown_arg(args: &[String]) -> Option<&String> {
 }
 
 fn print_banner() {
-    println!("Airborne CoT Relay v0.1.0");
+    println!("Airborne CoT Relay v{}", env!("CARGO_PKG_VERSION"));
     println!("Sensor-to-TAK Cursor-on-Target relay runner");
 }
 
