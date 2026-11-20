@@ -35,3 +35,24 @@ fn test_multicast_sink_deliver_payload() {
     let (n, _) = rx.recv_from(&mut buf).unwrap();
     assert_eq!(&buf[..n], payload);
 }
+
+#[test]
+fn test_multicast_group_delivery_to_receiver() {
+    use airborne_cot_relay::multicast_rx::{MulticastReceiver, MulticastRxConfig};
+    use std::time::Duration;
+    let group: Ipv4Addr = "239.255.42.51".parse().unwrap();
+    let temp = match UdpSocket::bind("0.0.0.0:0") { Ok(s) => s, Err(_) => return };
+    let port = temp.local_addr().unwrap().port();
+    drop(temp);
+    let cfg = MulticastRxConfig::new(group, port).with_read_timeout(Duration::from_millis(200));
+    let rx = match MulticastReceiver::bind(cfg) { Ok(r) => r, Err(_) => return };
+    let scfg = UdpMulticastConfig::new().with_loopback(true);
+    let mut sink = match UdpMulticastSink::bind(SocketAddr::from((group, port)), &scfg) {
+        Ok(s) => s,
+        Err(_) => return,
+    };
+    let payload = b"<event uid=\"test-mc-rx\"/>";
+    if sink.send(payload).is_err() { return; }
+    let (data, _) = rx.recv_datagram().unwrap();
+    assert_eq!(&data, payload);
+}
