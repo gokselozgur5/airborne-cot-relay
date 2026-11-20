@@ -274,6 +274,27 @@ fn extract_json_string(json: &str, key: &str) -> Option<String> {
     }
 }
 
+fn extract_json_f64_field(json: &str, key: &'static str) -> Result<Option<f64>, JsonCotError> {
+    let key_pat = format!("\"{key}\"");
+    let Some(i) = json.find(&key_pat) else {
+        return Ok(None);
+    };
+    let rest = &json[i + key_pat.len()..];
+    let Some(ci) = rest.find(':') else {
+        return Ok(None);
+    };
+    let val = rest[ci + 1..].trim_start();
+    let end = val.find(|c| c == ',' || c == '}').unwrap_or(val.len());
+    let v: f64 = val[..end]
+        .trim()
+        .parse()
+        .map_err(|_| JsonCotError::NumericParseError(key))?;
+    v.is_finite()
+        .then_some(v)
+        .ok_or(JsonCotError::NumericParseError(key))
+        .map(Some)
+}
+
 fn extract_json_f64(json: &str, key: &str) -> Option<f64> {
     let key_pat = format!("\"{key}\"");
     let key_idx = json.find(&key_pat)?;
