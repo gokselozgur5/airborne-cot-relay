@@ -1,6 +1,7 @@
 use crate::config::RelayError;
 use crate::relay::{Backoff, CotSink};
 use std::io::Write;
+use std::time::{Duration, Instant};
 
 /// Configuration for an outbound TLS client connection.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -68,6 +69,7 @@ pub struct TlsClientSink<C: TlsConnector> {
     stream: Option<Box<dyn Write + Send>>,
     backoff: Backoff,
     last_delay_ms: u64,
+    next_connect_deadline: Option<Instant>,
 }
 
 impl<C: TlsConnector> TlsClientSink<C> {
@@ -79,6 +81,7 @@ impl<C: TlsConnector> TlsClientSink<C> {
             stream: None,
             backoff,
             last_delay_ms: 0,
+            next_connect_deadline: None,
         })
     }
 
