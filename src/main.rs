@@ -101,6 +101,13 @@ fn main() -> ExitCode {
         if mode == MissionMode::Mock {
             return run_mock_mode(&config);
         }
+        if let Err(e) = std::net::UdpSocket::bind(&config.telemetry_listen_addr) {
+            eprintln!(
+                "error: cannot bind telemetry listen addr {}: {e}",
+                config.telemetry_listen_addr
+            );
+            return ExitCode::from(3);
+        }
     }
     run_mission(mode)
 }
