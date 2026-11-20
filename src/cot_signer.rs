@@ -207,6 +207,7 @@ pub enum CotSignerError {
     PayloadLengthMismatch { expected: usize, actual: usize },
     TimestampExpired { age_secs: u64, max_skew_secs: u64 },
     TimestampInFuture { diff_secs: u64, max_skew_secs: u64 },
+    ReplayedFrame,
 }
 
 impl fmt::Display for CotSignerError {
@@ -246,6 +247,7 @@ impl fmt::Display for CotSignerError {
                     "message timestamp in future by {diff_secs}s exceeds {max_skew_secs}s"
                 )
             }
+            Self::ReplayedFrame => write!(f, "frame replay detected within skew window"),
         }
     }
 }
