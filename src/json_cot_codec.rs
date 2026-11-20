@@ -74,12 +74,27 @@ impl CotEventDto {
     }
 }
 
-fn extract_xml_attr<'a>(tag_content: &'a str, attr_name: &str) -> Option<&'a str> {
-    let pattern = format!("{attr_name}=\"");
-    let start = tag_content.find(&pattern)? + pattern.len();
-    let rest = &tag_content[start..];
-    let end = rest.find('"')?;
-    Some(&rest[..end])
+pub(crate) fn find_xml_attr_span(s: &str, name: &str) -> Option<(usize, usize, usize)> {
+    let (b, nb) = (s.as_bytes(), name.as_bytes());
+    (0..b.len().saturating_sub(nb.len())).find_map(|i| {
+        let ok = (i == 0 || b[i - 1].is_ascii_whitespace() || b[i - 1] == b'<' || b[i - 1] == b'?')
+            && b[i..].starts_with(nb);
+        let mut j = i + nb.len();
+        while j < b.len() && b[j].is_ascii_whitespace() { j += 1; }
+        if ok && j < b.len() && b[j] == b'=' {
+            j += 1;
+            while j < b.len() && b[j].is_ascii_whitespace() { j += 1; }
+            if j < b.len() && (b[j] == b'"' || b[j] == b'\'') {
+                let end = s[j + 1..].find(b[j] as char)?;
+                return Some((i, j + 1, j + 1 + end));
+            }
+        }
+        None
+    })
+}
+
+pub(crate) fn extract_xml_attr<'a>(tag_content: &'a str, attr_name: &str) -> Option<&'a str> {
+    find_xml_attr_span(tag_content, attr_name).map(|(_, vs, ve)| &tag_content[vs..ve])
 }
 
 fn extract_xml_tag<'a>(xml: &'a str, tag_name: &str) -> Option<&'a str> {
