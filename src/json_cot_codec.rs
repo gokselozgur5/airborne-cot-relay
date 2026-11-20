@@ -406,15 +406,30 @@ pub fn cot_xml_to_json(xml: &str) -> Result<String, JsonCotError> {
 pub const DEFAULT_MAX_STREAM_BUFFER_SIZE: usize = 16 * 1024 * 1024;
 
 /// Streaming converter from newline-delimited JSON into Cursor-on-Target XML events.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct JsonToCotStream {
     buf: String,
+    max_buf: usize,
+}
+
+impl Default for JsonToCotStream {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl JsonToCotStream {
     /// Constructs a new empty `JsonToCotStream`.
     pub fn new() -> Self {
-        Self::default()
+        Self::with_max_buffer_size(DEFAULT_MAX_STREAM_BUFFER_SIZE)
+    }
+
+    /// Constructs a new empty `JsonToCotStream` with a custom buffer limit.
+    pub fn with_max_buffer_size(max_buf: usize) -> Self {
+        Self {
+            buf: String::new(),
+            max_buf,
+        }
     }
 
     /// Feeds incremental chunk of text/bytes into the stream buffer.
@@ -431,6 +446,11 @@ impl JsonToCotStream {
                 return Ok(None);
             }
             return json_to_cot_xml(&line).map(Some);
+        }
+        if self.buf.len() > self.max_buf {
+            let len = self.buf.len();
+            self.buf.clear();
+            return Err(JsonCotError::PayloadTooLarge(len));
         }
         Ok(None)
     }
