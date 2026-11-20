@@ -56,6 +56,9 @@ impl UdpMulticastSink {
 impl UdpMulticastSink {
     pub fn bind(target: SocketAddr, cfg: &UdpMulticastConfig) -> Result<Self, RelayError> {
         let socket = Self::bind_socket(target, cfg.outbound_interface)?;
+        if let Some(iface) = cfg.outbound_interface {
+            Self::set_multicast_if_v4(&socket, iface)?;
+        }
         if let Some(ttl) = cfg.ttl {
             socket.set_multicast_ttl_v4(ttl)?;
         }
