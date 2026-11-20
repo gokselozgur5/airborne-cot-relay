@@ -47,12 +47,23 @@ impl UdpTelemetrySource {
 
 impl TelemetrySource for UdpTelemetrySource {
     fn poll_chunk(&mut self) -> Result<Option<Vec<u8>>, RelayError> {
-        match self.socket.recv_from(&mut self.buffer) {
-            Ok((n, _src)) => Ok(Some(self.buffer[..n].to_vec())),
-            Err(ref e) if e.kind() == ErrorKind::WouldBlock || e.kind() == ErrorKind::TimedOut => {
-                Ok(None)
+        loop {
+            match self.socket.recv_from(&mut self.buffer) {
+                Ok((n, src)) => {
+                    if let Some(ref mut filter) = self.filter {
+                        if !filter.check(&src.ip()) {
+                            continue;
+                        }
+                    }
+                    return Ok(Some(self.buffer[..n].to_vec()));
+                }
+                Err(ref e)
+                    if e.kind() == ErrorKind::WouldBlock || e.kind() == ErrorKind::TimedOut =>
+                {
+                    return Ok(None);
+                }
+                Err(e) => return Err(RelayError::from(e)),
             }
-            Err(e) => Err(RelayError::from(e)),
         }
     }
 }
