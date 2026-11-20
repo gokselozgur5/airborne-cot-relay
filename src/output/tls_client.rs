@@ -124,7 +124,9 @@ impl<C: TlsConnector> CotSink for TlsClientSink<C> {
             Ok(()) => Ok(payload.len()),
             Err(e) => {
                 self.stream = None;
-                self.last_delay_ms = self.backoff.next_delay_ms();
+                let delay = self.backoff.next_delay_ms();
+                self.last_delay_ms = delay;
+                self.next_connect_deadline = Some(Instant::now() + Duration::from_millis(delay));
                 Err(RelayError::from(e))
             }
         }
