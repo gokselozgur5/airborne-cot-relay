@@ -1,3 +1,4 @@
+use crate::clock::Clock;
 use crate::config::RelayError;
 use stm32_navcore::protocol::NavTelemetry;
 
@@ -82,6 +83,7 @@ pub struct TelemetryIngest {
     max_age_ms: u64,
     reset_threshold_ms: u64,
     latest_pose: Option<PlatformPose>,
+    last_arrival_ms: Option<u64>,
     decode_errors: u64,
     dropped_bytes: u64,
     last_decode_error: Option<RelayError>,
@@ -102,6 +104,7 @@ impl TelemetryIngest {
             max_age_ms,
             reset_threshold_ms: Self::DEFAULT_RESET_THRESHOLD_MS,
             latest_pose: None,
+            last_arrival_ms: None,
             decode_errors: 0,
             dropped_bytes: 0,
             last_decode_error: None,
@@ -123,8 +126,8 @@ impl TelemetryIngest {
     }
 
     pub fn is_stale(&self, now_ms: u64) -> bool {
-        match self.latest_pose {
-            Some(pose) => pose.is_stale(now_ms, self.max_age_ms),
+        match self.last_arrival_ms {
+            Some(arrival) => now_ms.saturating_sub(arrival) > self.max_age_ms,
             None => true,
         }
     }
@@ -173,6 +176,7 @@ impl TelemetryIngest {
             telem.euler_rad[2] as f64,
         );
         self.latest_pose = Some(pose);
+        self.last_arrival_ms = Some(crate::clock::SystemClock::new().now_ms());
         Some(pose)
     }
 }

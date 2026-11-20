@@ -32,8 +32,12 @@ impl Pipeline {
         detections: &[TargetDetection],
         now_ms: u64,
     ) -> Result<Vec<TrackedObject>, RelayError> {
-        let pose = self.ingest.latest_pose();
-        self.fuse_detections(pose.as_ref(), detections, now_ms)
+        if !self.has_fresh_pose(now_ms) {
+            self.metrics.add_dropped(detections.len() as u64);
+            return Ok(Vec::new());
+        }
+        let pose = self.ingest.latest_pose().unwrap();
+        self.targeter.update(&pose, detections)
     }
 
     /// Fuses `detections` with a pose interpolated between `a` and `b` at `now_ms`.
@@ -50,9 +54,6 @@ impl Pipeline {
 
     /// Returns `true` when the pipeline holds a pose fresher than `target_stale_timeout_ms`.
     pub fn has_fresh_pose(&self, now_ms: u64) -> bool {
-        let max_age_ms = self.config.target_stale_timeout_ms;
-        self.ingest
-            .latest_pose()
-            .is_some_and(|p| !p.is_stale(now_ms, max_age_ms))
+        !self.ingest.is_stale(now_ms)
     }
 }
