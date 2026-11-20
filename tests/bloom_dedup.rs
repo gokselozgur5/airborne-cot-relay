@@ -37,3 +37,16 @@ fn test_cot_deduplicator_reset_window() {
     dedup.reset_window();
     assert!(dedup.check_and_record_uid_time("DRONE-1", "10:00:00"));
 }
+
+#[test]
+fn never_seen_events_still_pass_after_a_long_run() {
+    let mut dedup = CotBloomDeduplicator::new(65_536, 4);
+    for i in 0..100_000u32 {
+        dedup.check_and_record_uid_time(&format!("UAV-{}", i % 50), &format!("t{i}"));
+    }
+    let passed = (0..1000)
+        .filter(|i| dedup.check_and_record_uid_time(&format!("NEW-{i}"), "2027-01-01T00:00:00Z"))
+        .count();
+    assert!(passed >= 900, "only {passed} of 1000 never-seen events passed");
+}
+
