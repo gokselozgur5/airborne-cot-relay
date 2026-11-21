@@ -1,4 +1,6 @@
-use airborne_cot_relay::{CameraIntrinsics, Targeter, TelemetryIngest};
+use airborne_cot_relay::{
+    CameraIntrinsics, PlatformPose, TargetDetection, Targeter, TelemetryIngest,
+};
 use stm32_navcore::protocol::NavTelemetry;
 
 fn boresight_east_m(roll: f32, pitch: f32, yaw: f32) -> f64 {
@@ -41,4 +43,33 @@ fn heading_and_bank_sweep_finite_ground_intersection() {
             assert!(east.is_finite(), "east must be finite");
         }
     }
+}
+
+#[test]
+fn class_map_prunes_stale_track_entries() {
+    let cam = CameraIntrinsics::default();
+    let mut targeter = Targeter::with_params(&cam, 0.0, 1, 1, 1.0);
+    let mut pose = PlatformPose::new(1000, 37.0, -122.0, 100.0, 0.0, 0.0, 0.0);
+    let det = TargetDetection {
+        pixel_u: cam.principal_u,
+        pixel_v: cam.principal_v,
+        bbox: (
+            cam.principal_u - 10.0,
+            cam.principal_v - 10.0,
+            cam.principal_u + 10.0,
+            cam.principal_v + 10.0,
+        ),
+        classification: "vehicle".into(),
+        confidence: 0.9,
+        embedding: None,
+    };
+
+    targeter.update(&pose, &[det]).unwrap();
+    assert_eq!(targeter.class_map_len(), 1);
+
+    for _ in 0..3 {
+        pose.timestamp_ms += 100;
+        targeter.update(&pose, &[]).unwrap();
+    }
+    assert_eq!(targeter.class_map_len(), 0);
 }
