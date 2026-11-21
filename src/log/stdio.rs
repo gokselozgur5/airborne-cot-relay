@@ -19,6 +19,16 @@ fn level_color(level: Level) -> &'static str {
     }
 }
 
+fn escape_stdio_into(s: &str, out: &mut String) {
+    for c in s.chars() {
+        match c {
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            c => out.push(c),
+        }
+    }
+}
+
 /// Formats a record into a human-readable log line.
 pub fn format_record(record: &Record<'_>, colored: bool) -> String {
     let level_str = record.level.as_str().to_ascii_uppercase();
@@ -28,14 +38,15 @@ pub fn format_record(record: &Record<'_>, colored: bool) -> String {
         level_str
     };
     let mut out = format!(
-        "[{}] {} [{}] {}",
-        record.ts_ms, level_formatted, record.target, record.message
+        "[{}] {} [{}] ",
+        record.ts_ms, level_formatted, record.target
     );
+    escape_stdio_into(record.message, &mut out);
     for (k, v) in record.fields {
         out.push(' ');
-        out.push_str(k);
+        escape_stdio_into(k, &mut out);
         out.push('=');
-        out.push_str(v);
+        escape_stdio_into(v, &mut out);
     }
     out
 }

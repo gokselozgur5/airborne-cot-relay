@@ -4,6 +4,8 @@ use super::{Level, Logger, Record};
 use std::io::Write;
 use std::sync::Mutex;
 
+const RESERVED_KEYS: &[&str] = &["ts", "level", "target", "message"];
+
 fn escape_json_into(s: &str, out: &mut String) {
     for c in s.chars() {
         match c {
@@ -12,6 +14,10 @@ fn escape_json_into(s: &str, out: &mut String) {
             '\n' => out.push_str("\\n"),
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
+            c if (c as u32) < 0x20 => {
+                use std::fmt::Write;
+                let _ = write!(out, "\\u{:04x}", c as u32);
+            }
             c => out.push(c),
         }
     }
@@ -30,6 +36,9 @@ pub fn format_json(record: &Record<'_>) -> String {
     escape_json_into(record.message, &mut out);
     out.push('"');
     for (k, v) in record.fields {
+        if RESERVED_KEYS.contains(k) {
+            continue;
+        }
         out.push_str(",\"");
         escape_json_into(k, &mut out);
         out.push_str("\":\"");
