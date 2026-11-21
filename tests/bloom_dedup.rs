@@ -52,3 +52,10 @@ fn never_seen_events_still_pass_after_a_long_run() {
         "only {passed} of 1000 never-seen events passed"
     );
 }
+
+#[test]
+fn test_cot_deduplicator_uid_time_no_colon_collision() {
+    let mut dedup = CotBloomDeduplicator::new(4096, 4);
+    assert!(dedup.check_and_record_uid_time("A:B", "C"));
+    assert!(dedup.check_and_record_uid_time("A", "B:C"));
+}
