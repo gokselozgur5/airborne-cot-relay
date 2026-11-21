@@ -160,6 +160,8 @@ fn test_reconnect_metric_only_on_success() {
     let _ = loop_inst.poll();
     loop_inst.enqueue(b"m3".to_vec());
     let _ = loop_inst.poll();
+    loop_inst.enqueue(b"m4".to_vec());
+    let _ = loop_inst.poll();
     let snap = metrics.snapshot(100);
     assert_eq!(snap.reconnects, 0);
 }
