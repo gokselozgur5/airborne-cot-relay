@@ -79,7 +79,9 @@ fn queue_preserves_events_within_drop_policy() {
     queue.push(30);
     assert_eq!(queue.len(), 2);
     let event = airborne_cot_relay::pipeline::events::PipelineEvent::SinkDegraded { failures: 3 };
-    let _ = recovery.on_event(&event, &mut || Ok(1));
+    let res = recovery.on_event(&event, &mut || Ok(1));
+    assert_eq!(res.unwrap(), Some(1));
+    assert_eq!(recovery.reconnects(), 1);
     assert_eq!(queue.pop(), Some(20));
     assert_eq!(queue.pop(), Some(30));
 }
