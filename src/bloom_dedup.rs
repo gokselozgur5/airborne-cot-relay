@@ -128,9 +128,9 @@ impl CotBloomDeduplicator {
 
     /// Checks a CoT (UID, time) tuple. Returns true if unique (new), false if duplicate.
     pub fn check_and_record_uid_time(&mut self, uid: &str, time_str: &str) -> bool {
-        let mut key = Vec::with_capacity(uid.len() + time_str.len() + 1);
+        let mut key = Vec::with_capacity(std::mem::size_of::<usize>() + uid.len() + time_str.len());
+        key.extend_from_slice(&uid.len().to_le_bytes());
         key.extend_from_slice(uid.as_bytes());
-        key.push(b':');
         key.extend_from_slice(time_str.as_bytes());
         self.check_and_record_raw(&key)
     }
