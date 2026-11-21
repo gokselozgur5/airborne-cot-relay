@@ -203,6 +203,7 @@ pub enum CotSignerError {
     InvalidMagic([u8; 4]),
     UnsupportedVersion(u8),
     KeyNotFound(u32),
+    EmptyKey,
     InvalidSignature,
     PayloadLengthMismatch { expected: usize, actual: usize },
     TimestampExpired { age_secs: u64, max_skew_secs: u64 },
@@ -222,6 +223,7 @@ impl fmt::Display for CotSignerError {
             Self::InvalidMagic(m) => write!(f, "invalid magic {m:?}"),
             Self::UnsupportedVersion(v) => write!(f, "unsupported version {v}"),
             Self::KeyNotFound(k) => write!(f, "signing key {k} not found in store"),
+            Self::EmptyKey => write!(f, "HMAC signing key must not be empty"),
             Self::InvalidSignature => write!(f, "cryptographic signature mismatch"),
             Self::PayloadLengthMismatch { expected, actual } => {
                 write!(
