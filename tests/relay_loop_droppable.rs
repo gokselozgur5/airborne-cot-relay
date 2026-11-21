@@ -33,6 +33,16 @@ fn droppable_error_does_not_stop_the_loop() {
     );
     let pipe = Pipeline::from_config(&RelayConfig::default()).unwrap();
     let queue = BoundedQueue::new(4, DropPolicy::DropOldest);
-    let mut relay = RelayLoop::new(VecTelemetrySource::default(), OneBad(true), pipe, queue, outbound, ManualClock::new(1000), ShutdownSignal::new(), RunLimit::iterations(3), |_: &_, _: u64| String::new());
+    let mut relay = RelayLoop::new(
+        VecTelemetrySource::default(),
+        OneBad(true),
+        pipe,
+        queue,
+        outbound,
+        ManualClock::new(1000),
+        ShutdownSignal::new(),
+        RunLimit::iterations(3),
+        |_: &_, _: u64| String::new(),
+    );
     assert!(relay.run().is_ok());
 }
