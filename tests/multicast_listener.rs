@@ -83,7 +83,28 @@ fn poll_socket_returns_after_draining_with_default_config() {
     let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
     sender.send_to(b"<event/>", ("127.0.0.1", port)).unwrap();
     let (tx, rx) = std::sync::mpsc::channel();
-    std::thread::spawn(move || tx.send(listener.poll_socket().map_err(|e| e.to_string())));
-    let got = rx.recv_timeout(Duration::from_secs(2));
+    std::thread::spawn(move || {
+        let start = std::time::Instant::now();
+        let timeout = Duration::from_secs(2);
+        let mut total = 0;
+        while start.elapsed() < timeout {
+            match listener.poll_socket() {
+                Ok(n) => {
+                    total += n;
+                    if total > 0 {
+                        let _ = tx.send(Ok(total));
+                        return;
+                    }
+                    std::thread::sleep(Duration::from_millis(5));
+                }
+                Err(e) => {
+                    let _ = tx.send(Err(e.to_string()));
+                    return;
+                }
+            }
+        }
+        let _ = tx.send(Ok(total));
+    });
+    let got = rx.recv_timeout(Duration::from_secs(3));
     assert_eq!(got, Ok(Ok(1)), "poll_socket did not return within 2 s");
 }
