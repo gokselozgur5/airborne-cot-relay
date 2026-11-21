@@ -28,12 +28,25 @@ impl Router {
 
 impl Router {
     pub fn dispatch(&self, req: &RequestLine) -> HttpResponse {
-        if req.method != Method::Get {
-            return HttpResponse::method_not_allowed();
+        if req.method != Method::Get && req.method != Method::Head {
+            let mut resp = HttpResponse::method_not_allowed();
+            resp.headers.push(("Allow".into(), "GET, HEAD".into()));
+            return resp;
         }
-        match self.routes.get(&req.path) {
+        let route_path = req.path.split('?').next().unwrap_or(&req.path);
+        let resp = match self.routes.get(route_path) {
             Some(handler) => handler(req),
             None => HttpResponse::not_found(),
+        };
+        if req.method == Method::Head {
+            HttpResponse {
+                status: resp.status,
+                headers: resp.headers,
+                content_type: resp.content_type,
+                body: Vec::new(),
+            }
+        } else {
+            resp
         }
     }
 }
