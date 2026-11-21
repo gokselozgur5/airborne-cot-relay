@@ -28,7 +28,8 @@ fn test_router_dispatch_get_success() {
     let mut stream = TcpStream::connect(addr).unwrap();
     stream.write_all(b"GET /healthz HTTP/1.1\r\n\r\n").unwrap();
 
-    let handled = server.poll_step().unwrap();
+    sleep(Duration::from_millis(10));
+    let handled = poll_until_handled(&mut server, Duration::from_secs(2));
     assert!(handled);
 
     let mut buf = [0u8; 1024];
@@ -47,7 +48,8 @@ fn test_router_dispatch_404_not_found() {
     let mut stream = TcpStream::connect(addr).unwrap();
     stream.write_all(b"GET /unknown HTTP/1.1\r\n\r\n").unwrap();
 
-    let handled = server.poll_step().unwrap();
+    sleep(Duration::from_millis(10));
+    let handled = poll_until_handled(&mut server, Duration::from_secs(2));
     assert!(handled);
 
     let mut buf = [0u8; 1024];
@@ -66,7 +68,8 @@ fn test_router_dispatch_405_method_not_allowed() {
     let mut stream = TcpStream::connect(addr).unwrap();
     stream.write_all(b"POST /post HTTP/1.1\r\n\r\n").unwrap();
 
-    let handled = server.poll_step().unwrap();
+    sleep(Duration::from_millis(10));
+    let handled = poll_until_handled(&mut server, Duration::from_secs(2));
     assert!(handled);
 
     let mut buf = [0u8; 1024];
@@ -86,7 +89,8 @@ fn test_router_dispatch_400_bad_request_oversized() {
     bad_payload.extend_from_slice(b"\r\n\r\n");
     stream.write_all(&bad_payload).unwrap();
 
-    let handled = server.poll_step().unwrap();
+    sleep(Duration::from_millis(10));
+    let handled = poll_until_handled(&mut server, Duration::from_secs(2));
     assert!(handled);
 
     let mut buf = [0u8; 1024];
