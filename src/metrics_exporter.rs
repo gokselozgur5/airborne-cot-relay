@@ -187,9 +187,30 @@ impl PrometheusExporter {
         }
     }
 
-    /// Appends a pre-built metric family.
+    fn valid_name(s: &str, colon: bool) -> bool {
+        let mut c = s.chars();
+        matches!(c.next(), Some(x) if x.is_ascii_alphabetic() || x == '_' || (colon && x == ':'))
+            && c.all(|x| x.is_ascii_alphanumeric() || x == '_' || (colon && x == ':'))
+    }
+
+    /// Appends a pre-built metric family, merging samples if the family already exists.
     pub fn add_metric_family(&mut self, family: MetricFamily) {
-        self.custom_families.push(family);
+        let labels_valid = family
+            .samples
+            .iter()
+            .all(|s| s.labels.iter().all(|(k, _)| Self::valid_name(k, false)));
+        if !Self::valid_name(&family.name, true) || !labels_valid {
+            return;
+        }
+        if let Some(existing) = self
+            .custom_families
+            .iter_mut()
+            .find(|f| f.name == family.name)
+        {
+            existing.samples.extend(family.samples);
+        } else {
+            self.custom_families.push(family);
+        }
     }
 
     /// Registers a custom counter metric with given name, description, and value.
