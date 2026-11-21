@@ -59,6 +59,7 @@ pub struct FrameDecoder {
     length_field: LengthField,
     endianness: Endianness,
     buffer: Vec<u8>,
+    read_pos: usize,
 }
 
 impl FrameDecoder {
@@ -69,6 +70,7 @@ impl FrameDecoder {
             length_field: LengthField::default(),
             endianness: Endianness::default(),
             buffer: Vec::new(),
+            read_pos: 0,
         }
     }
 }
@@ -105,18 +107,23 @@ impl FrameDecoder {
 
     /// Number of buffered unparsed bytes.
     pub fn buffer_len(&self) -> usize {
-        self.buffer.len()
+        self.buffer.len() - self.read_pos
     }
 
     /// Clears any unparsed buffered bytes.
     pub fn clear(&mut self) {
         self.buffer.clear();
+        self.read_pos = 0;
     }
 }
 
 impl FrameDecoder {
     /// Appends incoming streaming bytes to the internal decode buffer.
     pub fn feed(&mut self, data: &[u8]) {
+        if self.read_pos > 0 {
+            self.buffer.drain(..self.read_pos);
+            self.read_pos = 0;
+        }
         self.buffer.extend_from_slice(data);
     }
 
@@ -142,26 +149,28 @@ impl FrameDecoder {
     /// Attempts to decode the next frame from the internal buffer.
     pub fn decode_next(&mut self) -> Result<Option<Vec<u8>>, FrameCodecError> {
         let prefix_len = self.length_field.byte_len();
-        if self.buffer.len() < prefix_len {
+        let unread_len = self.buffer.len() - self.read_pos;
+        if unread_len < prefix_len {
             return Ok(None);
         }
         let frame_len = Self::parse_length(
-            &self.buffer[..prefix_len],
+            &self.buffer[self.read_pos..self.read_pos + prefix_len],
             self.length_field,
             self.endianness,
         );
         if frame_len > self.max_frame_len {
+            self.clear();
             return Err(FrameCodecError::FrameTooLarge {
                 frame_len,
                 max_len: self.max_frame_len,
             });
         }
         let total_len = prefix_len + frame_len;
-        if self.buffer.len() < total_len {
+        if unread_len < total_len {
             return Ok(None);
         }
-        let payload = self.buffer[prefix_len..total_len].to_vec();
-        self.buffer.drain(..total_len);
+        let payload = self.buffer[self.read_pos + prefix_len..self.read_pos + total_len].to_vec();
+        self.read_pos += total_len;
         Ok(Some(payload))
     }
 }
@@ -174,15 +183,24 @@ impl FrameDecoder {
         loop {
             match self.decode_next() {
                 Ok(Some(frame)) => frames.push(frame),
-                Ok(None) => return Ok(frames),
-                Err(err) => {
-                    let mut restored = Vec::new();
-                    for f in frames {
-                        let enc = Self::encode(&f, self.length_field, self.endianness)?;
-                        restored.extend_from_slice(&enc);
+                Ok(None) => {
+                    if self.read_pos > 0 {
+                        self.buffer.drain(..self.read_pos);
+                        self.read_pos = 0;
                     }
-                    restored.extend_from_slice(&self.buffer);
-                    self.buffer = restored;
+                    return Ok(frames);
+                }
+                Err(err) => {
+                    if !matches!(err, FrameCodecError::FrameTooLarge { .. }) {
+                        let mut restored = Vec::new();
+                        for f in frames {
+                            let enc = Self::encode(&f, self.length_field, self.endianness)?;
+                            restored.extend_from_slice(&enc);
+                        }
+                        restored.extend_from_slice(&self.buffer[self.read_pos..]);
+                        self.buffer = restored;
+                        self.read_pos = 0;
+                    }
                     return Err(err);
                 }
             }

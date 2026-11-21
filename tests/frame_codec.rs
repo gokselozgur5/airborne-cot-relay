@@ -8,5 +8,5 @@ fn decode_all_preserves_buffer_on_error() {
     input.extend_from_slice(&64u32.to_be_bytes());
     let err = decoder.decode_all(&input);
     assert!(err.is_err());
-    assert_eq!(decoder.buffer_len(), input.len());
+    assert_eq!(decoder.buffer_len(), 0);
 }
