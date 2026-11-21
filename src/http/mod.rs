@@ -130,6 +130,8 @@ impl StatusCode {
 pub struct HttpResponse {
     /// Response status code.
     pub status: StatusCode,
+    /// Response headers as (name, value) pairs.
+    pub headers: Vec<(String, String)>,
     /// Optional Content-Type header.
     pub content_type: Option<String>,
     /// Response payload bytes.
@@ -141,6 +143,7 @@ impl HttpResponse {
     pub fn new(status: StatusCode, body: impl Into<Vec<u8>>, content_type: Option<&str>) -> Self {
         Self {
             status,
+            headers: Vec::new(),
             content_type: content_type.map(String::from),
             body: body.into(),
         }
@@ -178,6 +181,9 @@ impl HttpResponse {
         let code = self.status.0;
         let reason = self.status.reason_phrase();
         out.extend_from_slice(format!("HTTP/1.1 {code} {reason}\r\n").as_bytes());
+        for (name, val) in &self.headers {
+            out.extend_from_slice(format!("{name}: {val}\r\n").as_bytes());
+        }
         if let Some(ct) = &self.content_type {
             out.extend_from_slice(format!("Content-Type: {ct}\r\n").as_bytes());
         }
