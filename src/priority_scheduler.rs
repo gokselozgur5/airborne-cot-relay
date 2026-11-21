@@ -159,6 +159,14 @@ impl PriorityPacketScheduler {
                 return true;
             }
         }
+        if incoming == CotPriority::Emergency
+            && self.queues[incoming.as_tier()].pop_front().is_some()
+        {
+            self.stats.dropped[incoming.as_tier()] =
+                self.stats.dropped[incoming.as_tier()].saturating_add(1);
+            self.current_count = self.current_count.saturating_sub(1);
+            return true;
+        }
         false
     }
 
