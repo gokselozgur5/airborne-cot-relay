@@ -109,3 +109,26 @@ fn test_poll_step_idle_client_timeout() {
     let handled = poll_until_handled(&mut server, Duration::from_secs(2));
     assert!(handled);
 }
+
+#[test]
+fn test_router_dispatch_400_bad_request_oversized_header() {
+    let mut router = Router::new();
+    router.add_route("/healthz", |_req| HttpResponse::ok("ok\n", "text/plain"));
+    let mut server = HttpServer::bind("127.0.0.1:0", router).unwrap();
+    let addr = server.local_addr().unwrap();
+
+    let mut stream = TcpStream::connect(addr).unwrap();
+    let mut payload = b"GET /healthz HTTP/1.1\r\nX-Header: ".to_vec();
+    payload.extend(vec![b'A'; 9000]);
+    payload.extend_from_slice(b"\r\n\r\n");
+    stream.write_all(&payload).unwrap();
+
+    sleep(Duration::from_millis(10));
+    let handled = poll_until_handled(&mut server, Duration::from_secs(2));
+    assert!(handled);
+
+    let mut buf = [0u8; 1024];
+    let n = stream.read(&mut buf).unwrap();
+    let res = String::from_utf8_lossy(&buf[..n]);
+    assert!(res.contains("400 Bad Request"));
+}
