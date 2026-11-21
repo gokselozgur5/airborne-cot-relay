@@ -404,7 +404,11 @@ impl CotSignatureValidator {
         expected_sig: &[u8; 32],
     ) -> Result<(), CotSignerError> {
         let key = match self.keys.get(&key_id) {
-            Some(k) => k,
+            Some(k) if !k.is_empty() => k,
+            Some(_) => {
+                self.stats.invalid_signatures += 1;
+                return Err(CotSignerError::EmptyKey);
+            }
             None => {
                 self.stats.key_not_found += 1;
                 return Err(CotSignerError::KeyNotFound(key_id));
@@ -483,7 +487,11 @@ impl CotSignatureValidator {
             }
         }
         let key = match self.keys.get(&key_id) {
-            Some(k) => k,
+            Some(k) if !k.is_empty() => k,
+            Some(_) => {
+                self.stats.invalid_signatures += 1;
+                return Err(CotSignerError::EmptyKey);
+            }
             None => {
                 self.stats.key_not_found += 1;
                 return Err(CotSignerError::KeyNotFound(key_id));
