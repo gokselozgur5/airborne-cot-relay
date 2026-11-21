@@ -482,6 +482,12 @@ mod tests_horizon {
         pose.pitch_rad = std::f64::consts::FRAC_PI_2;
         let res = targeter.project_pixel(500.0, 500.0, &pose);
         assert!(res.is_err());
+        assert_eq!(
+            res,
+            Err(RelayError::TargetingError(
+                "ground intersection error: ray is above or parallel to horizon".into()
+            ))
+        );
     }
 }
 
