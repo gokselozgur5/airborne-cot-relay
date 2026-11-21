@@ -59,18 +59,7 @@ pub fn has_xml_entities(input: &str) -> bool {
 
 /// Sanitizes invalid XML characters and escapes attribute entities in a single pass.
 pub fn sanitize_and_escape_attr(input: &str) -> String {
-    let mut out = String::with_capacity(input.len());
-    for c in input.chars() {
-        if !is_xml_valid_char(c) {
-            continue;
-        }
-        if let Some(entity) = escape_xml_entity(c) {
-            out.push_str(entity);
-        } else {
-            out.push(c);
-        }
-    }
-    out
+    sightline_cot::cot::escape_xml_attr(input)
 }
 
 /// Sanitizes invalid XML characters and escapes text entities in a single pass.
