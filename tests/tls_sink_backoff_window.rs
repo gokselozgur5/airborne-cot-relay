@@ -23,5 +23,9 @@ fn sends_inside_backoff_window_do_not_dial_again() {
         assert!(sink.send(b"<event/>").is_err());
     }
     assert_eq!(sink.retry_delay_ms(), 60_000);
-    assert_eq!(dials.load(Ordering::SeqCst), 1, "connect attempts inside one 60 s backoff window");
+    assert_eq!(
+        dials.load(Ordering::SeqCst),
+        1,
+        "connect attempts inside one 60 s backoff window"
+    );
 }
