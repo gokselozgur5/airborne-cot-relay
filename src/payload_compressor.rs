@@ -722,7 +722,9 @@ fn decode_deflate_stored(
     let len = reader.read_bits(16)? as u16;
     let nlen = reader.read_bits(16)? as u16;
     if (len ^ 0xffff) != nlen {
-        return Err(CompressorError::CorruptPayload("invalid stored block length"));
+        return Err(CompressorError::CorruptPayload(
+            "invalid stored block length",
+        ));
     }
     for _ in 0..len {
         if out.len() >= max_bytes {
