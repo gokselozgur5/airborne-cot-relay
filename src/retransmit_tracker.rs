@@ -1,7 +1,7 @@
 //! Reliable Broadcast Transport (RBT) ACK/NACK retransmission tracker.
 //!
 //! Tracks transmitted broadcast packets, receiver feedback (ACK/NACK/SACK),
-//! and schedules retransmissions with configurable backoff and retry caps.
+//! and schedules retransmissions with timeout and retry caps.
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -223,6 +223,7 @@ impl RetransmitTracker {
             self.stats.packets_dropped_max_retries += 1;
         }
 
+        to_retransmit.sort_by_key(|&(seq, _)| seq);
         self.stats.retransmissions_scheduled += to_retransmit.len() as u64;
         to_retransmit
     }
