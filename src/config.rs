@@ -80,6 +80,8 @@ fn invalid(msg: &str) -> Result<(), RelayError> {
 }
 
 impl RelayConfig {
+    pub const MAX_TARGET_STALE_TIMEOUT_MS: u64 = 86_400_000;
+
     fn validate_numeric(&self) -> Result<(), RelayError> {
         let c = &self.camera;
         if !c.focal_length_px.is_finite() {
@@ -90,6 +92,9 @@ impl RelayConfig {
         }
         if self.target_stale_timeout_ms == 0 {
             return invalid("stale timeout must be positive");
+        }
+        if self.target_stale_timeout_ms > Self::MAX_TARGET_STALE_TIMEOUT_MS {
+            return invalid("stale timeout exceeds maximum allowed value");
         }
         if c.image_width == 0 || c.image_height == 0 {
             return invalid("image size must be non-zero");

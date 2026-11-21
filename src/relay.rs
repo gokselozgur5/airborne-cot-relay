@@ -255,7 +255,8 @@ impl CotStreamer {
 
     pub fn build_cot_xml(&self, track: &TrackSummary, now_ms: i64) -> String {
         let cot_type = classification_to_cot_type(&track.classification);
-        let stale_ms = now_ms + self.stale_timeout_ms as i64;
+        let timeout_ms = i64::try_from(self.stale_timeout_ms).unwrap_or(i64::MAX);
+        let stale_ms = now_ms.saturating_add(timeout_ms);
         let time_str = format_iso8601_utc(now_ms);
         let stale_str = format_iso8601_utc(stale_ms);
         let uid = format!("TRACK-{}-{:04}", self.uid_prefix, track.id);
