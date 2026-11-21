@@ -19,6 +19,11 @@ fn payload_queued_by_failed_send_is_delivered_before_newer_ones() {
     let left_in_queue = client.queued_messages();
     client.disconnect();
     let mut got = String::new();
-    listener.accept().unwrap().0.read_to_string(&mut got).unwrap();
+    listener
+        .accept()
+        .unwrap()
+        .0
+        .read_to_string(&mut got)
+        .unwrap();
     assert_eq!((got.as_str(), left_in_queue), ("first;second;", 0));
 }

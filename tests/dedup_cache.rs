@@ -23,7 +23,12 @@ fn refreshed_key_is_not_evicted_before_older_unrefreshed_key() {
     cache.check_and_insert(b"B", 200);
     cache.check_and_insert(b"A", 500);
     cache.check_and_insert(b"C", 600);
-    assert!(cache.is_duplicate(b"A", 600), "A was refreshed and should not be evicted");
-    assert!(!cache.is_duplicate(b"B", 600), "B had older expiry and should be evicted");
+    assert!(
+        cache.is_duplicate(b"A", 600),
+        "A was refreshed and should not be evicted"
+    );
+    assert!(
+        !cache.is_duplicate(b"B", 600),
+        "B had older expiry and should be evicted"
+    );
 }
-
