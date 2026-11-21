@@ -106,9 +106,6 @@ impl<C: TlsConnector> CotSink for TlsClientSink<C> {
             }
             match self.connector.connect(&self.cfg) {
                 Ok(s) => {
-                    self.backoff.reset();
-                    self.last_delay_ms = 0;
-                    self.next_connect_deadline = None;
                     self.stream = Some(s);
                 }
                 Err(e) => {
@@ -121,7 +118,12 @@ impl<C: TlsConnector> CotSink for TlsClientSink<C> {
         }
         let stream = self.stream.as_mut().expect("connected");
         match stream.write_all(payload).and_then(|_| stream.flush()) {
-            Ok(()) => Ok(payload.len()),
+            Ok(()) => {
+                self.backoff.reset();
+                self.last_delay_ms = 0;
+                self.next_connect_deadline = None;
+                Ok(payload.len())
+            }
             Err(e) => {
                 self.stream = None;
                 let delay = self.backoff.next_delay_ms();
