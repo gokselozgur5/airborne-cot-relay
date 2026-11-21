@@ -89,7 +89,6 @@ impl PrioritizedPacket {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SchedulerError {
     QueueFull,
-    InvalidPacket,
 }
 
 /// Operational statistics for the priority scheduler.
@@ -171,6 +170,8 @@ impl PriorityPacketScheduler {
         timestamp_ms: u64,
     ) -> Result<u64, SchedulerError> {
         if self.current_count >= self.max_capacity && !self.evict_lowest_priority(priority) {
+            self.stats.dropped[priority.as_tier()] =
+                self.stats.dropped[priority.as_tier()].saturating_add(1);
             return Err(SchedulerError::QueueFull);
         }
         let seq = self.next_sequence;
@@ -186,6 +187,8 @@ impl PriorityPacketScheduler {
     pub fn push_packet(&mut self, mut pkt: PrioritizedPacket) -> Result<u64, SchedulerError> {
         let prio = pkt.priority;
         if self.current_count >= self.max_capacity && !self.evict_lowest_priority(prio) {
+            self.stats.dropped[prio.as_tier()] =
+                self.stats.dropped[prio.as_tier()].saturating_add(1);
             return Err(SchedulerError::QueueFull);
         }
         let seq = self.next_sequence;
