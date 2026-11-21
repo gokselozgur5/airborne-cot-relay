@@ -47,6 +47,8 @@ fn never_seen_events_still_pass_after_a_long_run() {
     let passed = (0..1000)
         .filter(|i| dedup.check_and_record_uid_time(&format!("NEW-{i}"), "2027-01-01T00:00:00Z"))
         .count();
-    assert!(passed >= 900, "only {passed} of 1000 never-seen events passed");
+    assert!(
+        passed >= 900,
+        "only {passed} of 1000 never-seen events passed"
+    );
 }
-
