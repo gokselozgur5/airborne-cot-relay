@@ -445,13 +445,12 @@ impl JsonToCotStream {
 
     /// Decodes the next available CoT XML event if a complete JSON line is buffered.
     pub fn decode_next(&mut self) -> Result<Option<String>, JsonCotError> {
-        if let Some(pos) = self.buf.find('\n') {
+        while let Some(pos) = self.buf.find('\n') {
             let line = self.buf[..pos].trim().to_string();
             self.buf.drain(..=pos);
-            if line.is_empty() {
-                return Ok(None);
+            if !line.is_empty() {
+                return json_to_cot_xml(&line).map(Some);
             }
-            return json_to_cot_xml(&line).map(Some);
         }
         if self.buf.len() > self.max_buf {
             let len = self.buf.len();
