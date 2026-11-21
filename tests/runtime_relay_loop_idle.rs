@@ -43,5 +43,9 @@ fn idle_loop_does_not_spin() {
         |_: &TrackSummary, _: u64| String::new(),
     );
     relay.run().unwrap();
-    assert!(relay.telemetry().0 <= 2_000, "{} idle polls in 200 ms", relay.telemetry().0);
+    assert!(
+        relay.telemetry().0 <= 2_000,
+        "{} idle polls in 200 ms",
+        relay.telemetry().0
+    );
 }
