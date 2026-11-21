@@ -227,6 +227,7 @@ impl FailoverRouter {
                 let min_pri = self
                     .interfaces
                     .iter()
+                    .filter(|i| i.enabled)
                     .map(|i| i.priority)
                     .min()
                     .unwrap_or(0);
