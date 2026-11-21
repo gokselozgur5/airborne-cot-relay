@@ -60,3 +60,29 @@ fn rejected_packet_is_counted_as_dropped() {
     );
     assert_eq!(scheduler.stats().dropped[CotPriority::Normal.as_tier()], 1);
 }
+
+#[test]
+fn test_emergency_push_into_full_emergency_queue_evicts_oldest_emergency() {
+    let mut sched = PriorityPacketScheduler::new(2);
+    sched
+        .push(b"emerg1".to_vec(), CotPriority::Emergency, 1)
+        .unwrap();
+    sched
+        .push(b"emerg2".to_vec(), CotPriority::Emergency, 2)
+        .unwrap();
+
+    let seq3 = sched
+        .push(b"emerg3".to_vec(), CotPriority::Emergency, 3)
+        .expect("Emergency packet push must succeed even when queue is full of emergency packets");
+
+    assert_eq!(sched.len(), 2);
+    assert_eq!(sched.stats().dropped[CotPriority::Emergency.as_tier()], 1);
+    assert_eq!(sched.stats().enqueued[CotPriority::Emergency.as_tier()], 3);
+
+    let first = sched.pop().unwrap();
+    assert_eq!(first.payload, b"emerg2");
+    let second = sched.pop().unwrap();
+    assert_eq!(second.payload, b"emerg3");
+    assert_eq!(second.sequence, seq3);
+    assert!(sched.pop().is_none());
+}
