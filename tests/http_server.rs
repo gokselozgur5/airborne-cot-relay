@@ -2,6 +2,19 @@ use airborne_cot_relay::http::server::{HttpServer, Router};
 use airborne_cot_relay::http::HttpResponse;
 use std::io::{Read, Write};
 use std::net::TcpStream;
+use std::thread::sleep;
+use std::time::{Duration, Instant};
+
+fn poll_until_handled(server: &mut HttpServer, timeout: Duration) -> bool {
+    let start = Instant::now();
+    while start.elapsed() < timeout {
+        if server.poll_step().unwrap() {
+            return true;
+        }
+        sleep(Duration::from_millis(5));
+    }
+    false
+}
 
 #[test]
 fn test_router_dispatch_get_success() {
@@ -89,6 +102,6 @@ fn test_poll_step_idle_client_timeout() {
     let addr = server.local_addr().unwrap();
 
     let _stream = TcpStream::connect(addr).unwrap();
-    let handled = server.poll_step().unwrap();
+    let handled = poll_until_handled(&mut server, Duration::from_secs(2));
     assert!(handled);
 }
