@@ -12,7 +12,10 @@ fn to_json_escapes_quotes_and_backslashes() {
     let mut dto = CotEventDto::new("U1", "a-f-G", "2026-11-16T08:00:00Z", 1.0, 2.0);
     dto.callsign = Some(r#"Alpha "Two" C:\x"#.to_string());
     let json = dto.to_json();
-    assert!(json.contains(r#""callsign":"Alpha \"Two\" C:\\x""#), "{json}");
+    assert!(
+        json.contains(r#""callsign":"Alpha \"Two\" C:\\x""#),
+        "{json}"
+    );
 }
 
 #[test]
