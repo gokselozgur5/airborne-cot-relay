@@ -22,7 +22,9 @@ impl std::fmt::Display for JsonCotError {
             Self::MalformedJson(msg) => write!(f, "malformed json: {msg}"),
             Self::MalformedXml(msg) => write!(f, "malformed xml: {msg}"),
             Self::NumericParseError(field) => write!(f, "invalid numeric value for: {field}"),
-            Self::PayloadTooLarge(size) => write!(f, "payload exceeded maximum buffer size: {size}"),
+            Self::PayloadTooLarge(size) => {
+                write!(f, "payload exceeded maximum buffer size: {size}")
+            }
         }
     }
 }
@@ -83,10 +85,14 @@ pub(crate) fn find_xml_attr_span(s: &str, name: &str) -> Option<(usize, usize, u
         let ok = (i == 0 || b[i - 1].is_ascii_whitespace() || b[i - 1] == b'<' || b[i - 1] == b'?')
             && b[i..].starts_with(nb);
         let mut j = i + nb.len();
-        while j < b.len() && b[j].is_ascii_whitespace() { j += 1; }
+        while j < b.len() && b[j].is_ascii_whitespace() {
+            j += 1;
+        }
         if ok && j < b.len() && b[j] == b'=' {
             j += 1;
-            while j < b.len() && b[j].is_ascii_whitespace() { j += 1; }
+            while j < b.len() && b[j].is_ascii_whitespace() {
+                j += 1;
+            }
             if j < b.len() && (b[j] == b'"' || b[j] == b'\'') {
                 let end = s[j + 1..].find(b[j] as char)?;
                 return Some((i, j + 1, j + 1 + end));
