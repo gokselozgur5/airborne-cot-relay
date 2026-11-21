@@ -408,7 +408,10 @@ impl Targeter {
 
 impl Targeter {
     fn update_classification_map(&mut self, detections: &[TargetDetection]) {
-        for trk in &self.tracker.tracks {
+        let tracks = &self.tracker.tracks;
+        self.class_map
+            .retain(|id, _| tracks.iter().any(|t| t.id == *id));
+        for trk in tracks {
             if self.class_map.contains_key(&trk.id) {
                 continue;
             }
