@@ -43,7 +43,10 @@ fn crossing_targets_keep_two_stable_ids() {
     let steps = ids_per_step(&frames);
     let first_valid = steps.iter().find(|ids| !ids.is_empty()).unwrap();
     assert!(
-        steps.iter().filter(|ids| !ids.is_empty()).all(|ids| ids.len() == 2 && ids == first_valid),
+        steps
+            .iter()
+            .filter(|ids| !ids.is_empty())
+            .all(|ids| ids.len() == 2 && ids == first_valid),
         "ids per step: {steps:?}"
     );
 }
@@ -56,7 +59,10 @@ fn target_moving_30_px_per_frame_stays_associated() {
     let steps = ids_per_step(&frames);
     let first_valid = steps.iter().find(|ids| !ids.is_empty()).unwrap();
     assert!(
-        steps.iter().filter(|ids| !ids.is_empty()).all(|ids| ids.len() == 1 && ids[0].0 == first_valid[0].0),
+        steps
+            .iter()
+            .filter(|ids| !ids.is_empty())
+            .all(|ids| ids.len() == 1 && ids[0].0 == first_valid[0].0),
         "ids per step: {steps:?}"
     );
 }
@@ -74,7 +80,10 @@ fn appearance_change_keeps_id_with_predicted_box() {
     let steps = ids_per_step(&frames);
     let first_valid = steps.iter().find(|ids| !ids.is_empty()).unwrap();
     assert!(
-        steps.iter().filter(|ids| !ids.is_empty()).all(|ids| ids.len() == 1 && ids[0].0 == first_valid[0].0),
+        steps
+            .iter()
+            .filter(|ids| !ids.is_empty())
+            .all(|ids| ids.len() == 1 && ids[0].0 == first_valid[0].0),
         "ids per step: {steps:?}"
     );
 }
