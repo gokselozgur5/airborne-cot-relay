@@ -110,7 +110,13 @@ impl UdpMulticastSink {
             }
             let octets = iface.octets();
             let ret = unsafe {
-                setsockopt(socket.as_raw_fd(), 0, IP_MULTICAST_IF, octets.as_ptr() as *const _, 4)
+                setsockopt(
+                    socket.as_raw_fd(),
+                    0,
+                    IP_MULTICAST_IF,
+                    octets.as_ptr() as *const _,
+                    4,
+                )
             };
             if ret != 0 {
                 return Err(RelayError::from(std::io::Error::last_os_error()));
@@ -128,12 +134,19 @@ impl UdpMulticastSink {
             #[cfg(not(target_os = "linux"))]
             const IP_MULTICAST_IF: i32 = 9;
             extern "C" {
-                fn getsockopt(s: i32, l: i32, o: i32, v: *mut std::ffi::c_void, n: *mut u32) -> i32;
+                fn getsockopt(s: i32, l: i32, o: i32, v: *mut std::ffi::c_void, n: *mut u32)
+                    -> i32;
             }
             let mut octets = [0u8; 4];
             let mut len = 4u32;
             let ret = unsafe {
-                getsockopt(self.socket.as_raw_fd(), 0, IP_MULTICAST_IF, octets.as_mut_ptr() as *mut _, &mut len)
+                getsockopt(
+                    self.socket.as_raw_fd(),
+                    0,
+                    IP_MULTICAST_IF,
+                    octets.as_mut_ptr() as *mut _,
+                    &mut len,
+                )
             };
             if ret != 0 {
                 return Err(RelayError::from(std::io::Error::last_os_error()));
