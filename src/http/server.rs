@@ -71,7 +71,7 @@ impl HttpServer {
 impl HttpServer {
     fn handle_connection(&self, mut stream: TcpStream) -> io::Result<()> {
         stream.set_write_timeout(Some(Duration::from_millis(500)))?;
-        let mut buf = [0u8; 8192];
+        let mut buf = [0u8; 8193];
         let n = match stream.read(&mut buf) {
             Ok(0) => return Ok(()),
             Ok(n) => n,
@@ -82,12 +82,16 @@ impl HttpServer {
             }
             Err(e) => return Err(e),
         };
-        let response = match std::str::from_utf8(&buf[..n]) {
-            Ok(text) => match parse_request_line(text.lines().next().unwrap_or("")) {
-                Ok(req) => self.router.dispatch(&req),
+        let response = if n > 8192 {
+            HttpResponse::bad_request("Bad Request\n")
+        } else {
+            match std::str::from_utf8(&buf[..n]) {
+                Ok(text) => match parse_request_line(text.lines().next().unwrap_or("")) {
+                    Ok(req) => self.router.dispatch(&req),
+                    Err(_) => HttpResponse::bad_request("Bad Request\n"),
+                },
                 Err(_) => HttpResponse::bad_request("Bad Request\n"),
-            },
-            Err(_) => HttpResponse::bad_request("Bad Request\n"),
+            }
         };
         let _ = stream.write_all(&response.to_bytes());
         let _ = stream.flush();
