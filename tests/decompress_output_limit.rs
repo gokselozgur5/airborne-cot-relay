@@ -16,5 +16,8 @@ fn decompress_enforces_max_payload_bytes_on_the_decoded_output() {
     assert!(wire.len() < 40_000);
     let parsed = CompressedPayload::from_framed_bytes(&wire).unwrap();
     let out = comp.decompress(&parsed).map(|bytes| bytes.len());
-    assert!(out.is_err(), "limit 1024, header claims 16, decoded {out:?} bytes");
+    assert!(
+        out.is_err(),
+        "limit 1024, header claims 16, decoded {out:?} bytes"
+    );
 }
