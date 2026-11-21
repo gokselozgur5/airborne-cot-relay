@@ -25,7 +25,9 @@ fn concurrent_updates_never_expose_a_torn_snapshot() {
         })
         .collect();
     let is_torn = |p: PlatformPose| p.lat_deg != p.yaw_rad || p.lat_deg != p.timestamp_ms as f64;
-    let torn = (0..2_000_000u64).filter(|_| is_torn(sampler.sample().pose)).count();
+    let torn = (0..2_000_000u64)
+        .filter(|_| is_torn(sampler.sample().pose))
+        .count();
     stop.store(true, Ordering::Relaxed);
     writers.into_iter().for_each(|w| w.join().unwrap());
     assert_eq!(torn, 0, "snapshots mixing fields of two different updates");
