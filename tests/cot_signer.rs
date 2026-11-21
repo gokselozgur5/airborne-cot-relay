@@ -15,3 +15,16 @@ fn replayed_frame_is_rejected() {
     let again = validator.verify_frame(&frame, 1200);
     assert!(again.is_err(), "captured frame accepted again 200 s later");
 }
+
+#[test]
+fn empty_key_does_not_authenticate_frames() {
+    let mut signer = CotSigner::new(CotSignerConfig::default());
+    let frame = signer.create_signed_frame(b"<event uid=\"A\"/>", 1000);
+    let mut validator = CotSignatureValidator::new(300);
+    validator.add_key(1, Vec::new());
+    let result = validator.verify_frame(&frame, 1000);
+    assert!(
+        result.is_err(),
+        "frame authenticated with a zero-length key"
+    );
+}
