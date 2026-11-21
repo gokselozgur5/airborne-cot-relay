@@ -1001,7 +1001,10 @@ mod tests {
     #[test]
     fn test_corrupt_snappy_decompression() {
         let corrupt = vec![0x10, 0x01, 0xff, 0xff];
-        assert!(snappy_decompress(&corrupt).is_err());
+        assert_eq!(
+            snappy_decompress(&corrupt),
+            Err(CompressorError::CorruptPayload("invalid copy offset"))
+        );
     }
 
     #[test]
