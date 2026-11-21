@@ -49,3 +49,14 @@ fn test_scheduler_exhaustion_and_clear() {
     assert!(sched.is_empty());
     assert!(sched.pop().is_none());
 }
+
+#[test]
+fn rejected_packet_is_counted_as_dropped() {
+    let mut scheduler = PriorityPacketScheduler::new(1);
+    scheduler.push(vec![1], CotPriority::Normal, 0).unwrap();
+    assert_eq!(
+        scheduler.push(vec![2], CotPriority::Normal, 1),
+        Err(SchedulerError::QueueFull)
+    );
+    assert_eq!(scheduler.stats().dropped[CotPriority::Normal.as_tier()], 1);
+}
