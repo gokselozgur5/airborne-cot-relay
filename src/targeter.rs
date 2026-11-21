@@ -101,6 +101,12 @@ impl Targeter {
         targeter.tracker = MultiTargetTracker::new(min_hits, max_age, q_acc);
         targeter
     }
+
+    /// Return the number of entries currently stored in the classification map.
+    // #[test] helper for tests/targeter.rs
+    pub fn class_map_len(&self) -> usize {
+        self.class_map.len()
+    }
 }
 
 impl Targeter {
