@@ -7,8 +7,15 @@ fn first_track_uid(lat_deg: f64) -> String {
     let (classification, lon_deg, hae_m) = ("vehicle".to_string(), 10.0, 0.0);
     let (ce90_m, le90_m, course_deg, speed_mps) = (5.0, 10.0, 0.0, 0.0);
     let track = TrackSummary {
-        id: 1, classification, lat_deg, lon_deg, hae_m, ce90_m, le90_m,
-        course_deg, speed_mps,
+        id: 1,
+        classification,
+        lat_deg,
+        lon_deg,
+        hae_m,
+        ce90_m,
+        le90_m,
+        course_deg,
+        speed_mps,
     };
     let xml = streamer.build_cot_xml(&track, 1_731_369_600_000);
     CotEvent::from_xml(&xml).expect("valid CoT").uid
