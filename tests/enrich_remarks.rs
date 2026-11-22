@@ -1,5 +1,5 @@
 use airborne_cot_relay::output::build_remarks;
-use sightline_cot::format_mgrs;
+use sightline_cot::{format_mgrs, GridError};
 
 #[test]
 fn remarks_carry_mgrs_sensor_and_confidence() {
@@ -20,5 +20,8 @@ fn remarks_omit_optional_fields() {
 
 #[test]
 fn remarks_reject_polar_latitude() {
-    assert!(build_remarks(89.0, 0.0, None, None).is_err());
+    assert_eq!(
+        build_remarks(89.0, 0.0, None, None),
+        Err(GridError::InvalidLatitude)
+    );
 }
