@@ -1,42 +1,9 @@
 //! Deduplication and rate limiting for outbound track events.
 
-use std::cell::Cell;
 use std::collections::HashMap;
 
-/// Source of time in milliseconds, shared with the rest of the crate.
-pub use crate::clock::{Clock, SystemClock};
-
-/// Manually advanced clock for deterministic tests.
-#[derive(Debug, Default)]
-pub struct ManualClock(Cell<u64>);
-
-impl ManualClock {
-    pub fn new(start_ms: u64) -> Self {
-        Self(Cell::new(start_ms))
-    }
-
-    pub fn set(&self, now_ms: u64) {
-        self.0.set(now_ms);
-    }
-
-    pub fn advance(&self, delta_ms: u64) {
-        self.0.set(self.0.get() + delta_ms);
-    }
-
-    pub fn advance_ms(&self, delta_ms: u64) {
-        self.advance(delta_ms);
-    }
-
-    pub fn set_ms(&self, now_ms: u64) {
-        self.set(now_ms);
-    }
-}
-
-impl Clock for ManualClock {
-    fn now_ms(&self) -> u64 {
-        self.0.get()
-    }
-}
+/// Unified clock trait and implementations shared across the crate.
+pub use crate::clock::{Clock, ManualClock, SystemClock};
 
 /// Limits applied to outbound track events.
 #[derive(Debug, Clone, Copy, PartialEq)]
