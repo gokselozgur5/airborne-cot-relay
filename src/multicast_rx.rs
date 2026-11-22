@@ -23,39 +23,18 @@ impl MulticastReceiver {
     }
 
     pub fn recv_datagram(&self) -> Result<(Vec<u8>, SocketAddr), MulticastRxError> {
-        let mut buf = vec![0u8; self.config.buffer_size.saturating_add(1)];
+        let max_size = self.inner.config().max_packet_size;
+        let mut buf = vec![0u8; max_size.saturating_add(1)];
         let (bytes_read, src) = self.recv(&mut buf)?;
-        if bytes_read > self.config.buffer_size {
+        if bytes_read > max_size {
             return Err(MulticastRxError::OversizedDatagram(bytes_read));
         }
         buf.truncate(bytes_read);
         Ok((buf, src))
     }
-}
 
-impl MulticastReceiver {
-    pub fn leave_group(&mut self) -> Result<(), MulticastRxError> {
-        if self.joined {
-            self.socket
-                .leave_multicast_v4(&self.config.multicast_addr, &self.config.interface_addr)?;
-            self.joined = false;
-        }
-        Ok(())
-    }
-
-    pub fn rejoin_group(&mut self) -> Result<(), MulticastRxError> {
-        if !self.joined {
-            self.socket
-                .join_multicast_v4(&self.config.multicast_addr, &self.config.interface_addr)?;
-            self.joined = true;
-        }
-        Ok(())
-    }
-}
-
-impl MulticastReceiver {
     pub fn local_addr(&self) -> Result<SocketAddr, MulticastRxError> {
-        self.socket.local_addr().map_err(MulticastRxError::Io)
+        self.inner.socket().local_addr().map_err(MulticastRxError::Io)
     }
 
     pub fn socket(&self) -> &UdpSocket {
