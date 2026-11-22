@@ -23,8 +23,16 @@ impl TlsConnector for Ok_ {
 fn config_rejects_half_identity() {
     let mut c = TlsClientConfig::new("tak");
     c.client_cert_path = Some("c.pem".into());
-    assert!(c.validate().is_err());
-    assert!(TlsClientConfig::new("").validate().is_err());
+    assert_eq!(
+        c.validate(),
+        Err(RelayError::InvalidConfig(
+            "client cert and key must be set together".into()
+        ))
+    );
+    assert_eq!(
+        TlsClientConfig::new("").validate(),
+        Err(RelayError::InvalidConfig("empty TLS server name".into()))
+    );
 }
 
 #[test]
