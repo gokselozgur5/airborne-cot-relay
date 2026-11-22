@@ -47,7 +47,8 @@ fn track_is_dropped_after_long_gap() {
     for i in 0..11 {
         frame(&mut t, i, i < 4);
     }
-    assert!(frame(&mut t, 11, false).is_empty());
+    let objs = frame(&mut t, 11, false);
+    assert_eq!(objs, Vec::<TrackedObject>::new());
 }
 
 #[test]
