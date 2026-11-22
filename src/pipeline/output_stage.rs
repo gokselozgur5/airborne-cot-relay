@@ -79,6 +79,8 @@ impl<C: Clock> OutputStage<C> {
         let sent = send_tracked(sink, &mut self.health, payload.as_bytes()).is_ok();
         if sent {
             metrics.record_sent(now_ms);
+        } else {
+            metrics.add_dropped(1);
         }
         sent
     }
