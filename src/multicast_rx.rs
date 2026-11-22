@@ -13,7 +13,8 @@ pub struct MulticastReceiver {
 }
 
 impl MulticastReceiver {
-    pub fn bind(config: MulticastRxConfig) -> Result<Self, MulticastRxError> {
+    pub fn bind(mut config: MulticastRxConfig) -> Result<Self, MulticastRxError> {
+        config.nonblocking = false;
         let inner = MulticastListener::bind(config)?;
         Ok(Self { inner })
     }
