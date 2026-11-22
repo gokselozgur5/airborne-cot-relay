@@ -2,47 +2,10 @@
 
 use std::net::{SocketAddr, UdpSocket};
 
-impl MulticastRxConfig {
-    pub fn new(multicast_addr: Ipv4Addr, port: u16) -> Self {
-        Self {
-            multicast_addr,
-            interface_addr: Ipv4Addr::UNSPECIFIED,
-            port,
-            read_timeout: None,
-            buffer_size: 4096,
-        }
-    }
-
-    pub fn with_interface(mut self, interface_addr: Ipv4Addr) -> Self {
-        self.interface_addr = interface_addr;
-        self
-    }
-
-    pub fn with_read_timeout(mut self, timeout: Duration) -> Self {
-        self.read_timeout = Some(timeout);
-        self
-    }
-
-    pub fn with_buffer_size(mut self, size: usize) -> Self {
-        self.buffer_size = size;
-        self
-    }
-}
-
-impl MulticastRxConfig {
-    pub fn validate(&self) -> Result<(), MulticastRxError> {
-        if !self.multicast_addr.is_multicast() {
-            return Err(MulticastRxError::InvalidGroup(self.multicast_addr));
-        }
-        if self.port == 0 {
-            return Err(MulticastRxError::InvalidPort);
-        }
-        if self.buffer_size == 0 {
-            return Err(MulticastRxError::InvalidBufferSize);
-        }
-        Ok(())
-    }
-}
+pub use crate::multicast_listener::{
+    MulticastListener, MulticastListenerConfig as MulticastRxConfig,
+    MulticastListenerError as MulticastRxError,
+};
 
 #[derive(Debug)]
 pub struct MulticastReceiver {
