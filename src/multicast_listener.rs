@@ -54,6 +54,7 @@ pub enum MulticastListenerError {
     InvalidPacketSize,
     Io(io::Error),
     RingBufferFull,
+    OversizedDatagram(usize),
 }
 
 impl fmt::Display for MulticastListenerError {
@@ -65,6 +66,7 @@ impl fmt::Display for MulticastListenerError {
             Self::InvalidPacketSize => write!(f, "maximum packet size must be non-zero"),
             Self::Io(err) => write!(f, "multicast listener io error: {}", err),
             Self::RingBufferFull => write!(f, "multicast ring buffer full"),
+            Self::OversizedDatagram(sz) => write!(f, "received oversized datagram: {} bytes", sz),
         }
     }
 }
@@ -467,5 +469,15 @@ mod tests {
         assert!(polled >= 1);
         let pkt = listener.pop_packet().unwrap();
         assert_eq!(pkt.data, b"MULTICAST_HELLO");
+    }
+}
+
+impl fmt::Debug for MulticastListener {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("MulticastListener")
+            .field("socket", &self.socket)
+            .field("config", &self.config)
+            .field("stats", &self.stats)
+            .finish()
     }
 }
