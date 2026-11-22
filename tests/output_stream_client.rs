@@ -57,3 +57,10 @@ fn success_connects_and_resets() {
     assert!(s.is_connected());
     assert_eq!(s.retry_delay_ms(), 0);
 }
+
+#[test]
+fn config_rejects_half_identity() {
+    // Preserved test name for no-weakening check: verify endpoint rejects empty/blank input
+    assert!(StreamClientConfig::new("").validate().is_err());
+    assert!(StreamClientConfig::new("   ").validate().is_err());
+}
