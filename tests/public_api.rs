@@ -51,8 +51,8 @@ fn pose_staleness_respects_max_age() {
 #[test]
 fn telemetry_ingest_starts_without_pose() {
     let mut ingest = TelemetryIngest::new(37.0, -122.0, 0.0, 1_000);
-    assert!(ingest.latest_pose().is_none());
-    assert!(ingest.process_bytes(&[]).is_empty());
+    assert_eq!(ingest.latest_pose(), None);
+    assert_eq!(ingest.process_bytes(&[]), Vec::<PlatformPose>::new());
 }
 
 use airborne_cot_relay::{
