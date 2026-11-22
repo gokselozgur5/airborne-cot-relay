@@ -53,6 +53,16 @@ impl TlsClientConfig {
                 "client cert and key must be set together".into(),
             ));
         }
+        if self.connect_timeout_ms == 0 {
+            return Err(RelayError::InvalidConfig(
+                "connect_timeout_ms must be non-zero".into(),
+            ));
+        }
+        if self.write_timeout_ms == 0 {
+            return Err(RelayError::InvalidConfig(
+                "write_timeout_ms must be non-zero".into(),
+            ));
+        }
         Ok(())
     }
 }
