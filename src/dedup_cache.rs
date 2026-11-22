@@ -66,69 +66,7 @@ impl SlidingEntry {
 }
 
 /// Compact bloom filter for fast duplicate screening.
-#[derive(Debug, Clone)]
-pub struct DedupBloomFilter {
-    bits: Vec<u64>,
-    num_bits: usize,
-    num_hashes: usize,
-}
-
-impl DedupBloomFilter {
-    /// Creates a new bloom filter with given bit capacity and hash count.
-    pub fn new(num_bits: usize, num_hashes: usize) -> Self {
-        let num_bits = num_bits.max(64);
-        let num_words = num_bits.div_ceil(64);
-        let num_hashes = num_hashes.clamp(1, 16);
-        Self {
-            bits: vec![0u64; num_words],
-            num_bits,
-            num_hashes,
-        }
-    }
-    fn hash_pair(data: &[u8]) -> (u64, u64) {
-        let mut h1 = 0xcbf29ce484222325u64;
-        for &b in data {
-            h1 = (h1 ^ (b as u64)).wrapping_mul(0x100000001b3u64);
-        }
-        let mut h2 = 0x517cc1b727220a95u64;
-        for &b in data {
-            h2 = (h2 ^ (b as u64)).wrapping_mul(0x100000001b3u64);
-        }
-        (h1, if h2 == 0 { 1 } else { h2 })
-    }
-
-    /// Inserts raw byte key into bloom filter.
-    pub fn insert(&mut self, data: &[u8]) {
-        let (h1, h2) = Self::hash_pair(data);
-        for i in 0..self.num_hashes {
-            let comb = h1.wrapping_add((i as u64).wrapping_mul(h2));
-            let bit_idx = (comb % self.num_bits as u64) as usize;
-            self.bits[bit_idx / 64] |= 1u64 << (bit_idx % 64);
-        }
-    }
-    /// Checks whether key may be present in the bloom filter.
-    pub fn contains(&self, data: &[u8]) -> bool {
-        let (h1, h2) = Self::hash_pair(data);
-        for i in 0..self.num_hashes {
-            let comb = h1.wrapping_add((i as u64).wrapping_mul(h2));
-            let bit_idx = (comb % self.num_bits as u64) as usize;
-            if (self.bits[bit_idx / 64] & (1u64 << (bit_idx % 64))) == 0 {
-                return false;
-            }
-        }
-        true
-    }
-
-    /// Clears all bits in bloom filter.
-    pub fn clear(&mut self) {
-        self.bits.fill(0);
-    }
-
-    /// Returns count of set bits in bloom filter.
-    pub fn count_ones(&self) -> usize {
-        self.bits.iter().map(|w| w.count_ones() as usize).sum()
-    }
-}
+pub use crate::bloom_dedup::BloomFilter as DedupBloomFilter;
 
 /// Primary deduplication cache combining sliding window expiration and Bloom filtering.
 #[derive(Debug, Clone)]
