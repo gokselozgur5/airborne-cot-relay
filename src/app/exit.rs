@@ -4,12 +4,7 @@ use crate::metrics::Snapshot;
 
 /// Exit status for `err`: 2 config, 3 I/O, 4 decode, 5 targeting.
 pub fn status_for(err: &RelayError) -> u8 {
-    match err {
-        RelayError::InvalidConfig(_) => 2,
-        RelayError::IoError(_) => 3,
-        RelayError::DecodeError(_) => 4,
-        RelayError::TargetingError(_) => 5,
-    }
+    u8::try_from(crate::error::exit::exit_code(err)).unwrap_or(1)
 }
 
 /// What the binary prints and returns when a run ends.
