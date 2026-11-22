@@ -61,3 +61,16 @@ fn clock_send_and_exit_helpers_are_unified() {
         assert_eq!(i32::from(status_for(&e)), exit_code(&e));
     }
 }
+
+#[test]
+fn unit_system_clock_and_manual_clock_aliases_work() {
+    let manual = clock::ManualClock::new(100);
+    manual.advance(50);
+    assert_eq!(manual.now_ms(), 150);
+    assert_eq!(relay::Clock::now_ms(&manual), 150);
+    manual.set(42);
+    assert_eq!(manual.now_ms(), 42);
+    let unit_now = clock::SystemClock.now_ms();
+    assert!(unit_now >= 1_700_000_000_000);
+    assert!(relay::Clock::now_ms(&clock::SystemClock) >= 1_700_000_000_000);
+}
