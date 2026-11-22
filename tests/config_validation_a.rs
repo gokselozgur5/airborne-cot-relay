@@ -34,4 +34,5 @@ fn accepts_ipv6_socket_addr() {
     let mut cfg = RelayConfig::default();
     cfg.cot_broadcast_addr = "[ff02::1]:6969".into();
     assert!(cfg.validate().is_ok());
+    assert_eq!(cfg.validate(), Ok(()));
 }
