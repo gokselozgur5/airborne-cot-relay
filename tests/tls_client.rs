@@ -1,5 +1,5 @@
 use airborne_cot_relay::config::RelayError;
-use airborne_cot_relay::output::{TlsClientConfig, TlsClientSink, TlsConnector};
+use airborne_cot_relay::output::{StreamClientConfig, StreamClientSink, StreamConnector};
 use airborne_cot_relay::relay::{Backoff, CotSink};
 use std::io::Write;
 use std::thread::sleep;
@@ -20,16 +20,16 @@ impl Write for DroppingWrite {
 }
 
 struct ConnectOkWriteFails;
-impl TlsConnector for ConnectOkWriteFails {
-    fn connect(&mut self, _: &TlsClientConfig) -> Result<Box<dyn Write + Send>, RelayError> {
+impl StreamConnector for ConnectOkWriteFails {
+    fn connect(&mut self, _: &StreamClientConfig) -> Result<Box<dyn Write + Send>, RelayError> {
         Ok(Box::new(DroppingWrite))
     }
 }
 
 #[test]
 fn backoff_grows_when_connect_succeeds_but_write_fails() {
-    let mut s = TlsClientSink::new(
-        TlsClientConfig::new("tak"),
+    let mut s = StreamClientSink::new(
+        StreamClientConfig::new("tak"),
         ConnectOkWriteFails,
         Backoff::new(100, 1000),
     )
