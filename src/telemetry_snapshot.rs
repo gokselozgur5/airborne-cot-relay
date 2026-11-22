@@ -143,9 +143,15 @@ mod tests {
         });
         let sr = Arc::clone(&sampler);
         let r = thread::spawn(move || {
+            let mut last_seq = 0;
             for _ in 0..500 {
                 let snap = sr.sample();
                 assert!(snap.is_valid);
+                assert!(snap.sequence >= last_seq);
+                last_seq = snap.sequence;
+                assert_eq!(snap.timestamp_ns, snap.sequence * 1000);
+                assert_eq!(snap.pose.timestamp_ms, 1000 + snap.sequence);
+                assert_eq!(snap.pose.lat_deg, snap.sequence as f64);
             }
         });
         w.join().unwrap();
