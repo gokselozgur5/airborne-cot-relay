@@ -105,30 +105,54 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
 
 use crate::metrics::Metrics;
 use crate::relay::{send_tracked, TrackSummary};
+
+/// Filters, encodes and sends one track, updating `health` and `metrics`.
+pub(crate) fn send_filtered_track<C: Clock, S: CotSink, F>(
+    filter: &mut TrackFilter<C>,
+    sink: &mut S,
+    health: &mut SendHealth,
+    metrics: &Metrics,
+    track: &TrackSummary,
+    now_ms: u64,
+    render: F,
+) -> Option<bool>
+where
+    F: FnOnce(&TrackSummary, u64) -> String,
+{
+    let uid = format!("TRACK-{:04}", track.id);
+    if !filter.accept(&uid, track.lat_deg, track.lon_deg) {
+        return None;
+    }
+    let ok = send_tracked(sink, health, render(track, now_ms).as_bytes()).is_ok();
+    if ok {
+        metrics.record_sent(now_ms);
+    } else {
+        metrics.add_dropped(1);
+    }
+    Some(ok)
+}
+
 impl<C: Clock, S: CotSink> OutboundStep<C, S> {
     /// Filters, renders and sends one track; `None` means the filter held it back.
     fn send_one<F>(
         &mut self,
         track: &TrackSummary,
         now_ms: u64,
-        metrics: &Metrics,
-        render: &mut F,
+        m: &Metrics,
+        r: &mut F,
     ) -> Option<bool>
     where
         F: FnMut(&TrackSummary, u64) -> String,
     {
-        let uid = format!("TRACK-{:04}", track.id);
-        if !self.filter.accept(&uid, track.lat_deg, track.lon_deg) {
-            return None;
-        }
-        let xml = render(track, now_ms);
-        let ok = send_tracked(&mut self.sink, &mut self.health, xml.as_bytes()).is_ok();
-        if ok {
-            metrics.record_sent(now_ms);
-        } else {
-            metrics.add_dropped(1);
-        }
-        Some(ok)
+        send_filtered_track(
+            &mut self.filter,
+            &mut self.sink,
+            &mut self.health,
+            m,
+            track,
+            now_ms,
+            r,
+        )
     }
 }
 
