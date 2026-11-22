@@ -5,7 +5,8 @@
 pub mod adapters;
 
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 /// Source of time in milliseconds.
 pub trait Clock {
@@ -31,27 +32,34 @@ impl<C: Clock + ?Sized> Clock for Box<C> {
     }
 }
 
-/// Wall clock that never returns less than a value it already returned.
-#[derive(Debug, Default)]
-pub struct SystemClock {
-    last_ms: AtomicU64,
-}
+/// Monotonic clock anchored once at process start to Unix epoch milliseconds.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct SystemClock;
 
 impl SystemClock {
-    /// Creates a new non-decreasing system clock.
+    /// Creates a new monotonic system clock handle.
     pub fn new() -> Self {
-        Self::default()
+        Self
     }
+}
+
+fn monotonic_epoch_ms() -> u64 {
+    static ANCHOR: OnceLock<(u64, Instant)> = OnceLock::new();
+    let &(base_ms, start) = ANCHOR.get_or_init(|| {
+        let now = Instant::now();
+        let wall = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| u64::try_from(d.as_millis()).unwrap_or(u64::MAX))
+            .unwrap_or(0);
+        (wall, now)
+    });
+    let elapsed = u64::try_from(start.elapsed().as_millis()).unwrap_or(u64::MAX);
+    base_ms.saturating_add(elapsed)
 }
 
 impl Clock for SystemClock {
     fn now_ms(&self) -> u64 {
-        let wall = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| u64::try_from(d.as_millis()).unwrap_or(u64::MAX))
-            .unwrap_or(0);
-        let prev = self.last_ms.fetch_max(wall, Ordering::Relaxed);
-        prev.max(wall)
+        monotonic_epoch_ms()
     }
 }
 
