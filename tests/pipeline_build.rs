@@ -28,17 +28,22 @@ fn with_origin_keeps_config_and_clears_pose() {
 
 #[test]
 fn crate_root_exports_pipeline() {
-    let res = airborne_cot_relay::Pipeline::from_config(&RelayConfig::default());
-    assert!(res.is_ok());
+    let pipeline = airborne_cot_relay::Pipeline::from_config(&RelayConfig::default())
+        .expect("default config must build a pipeline");
+    assert_eq!(pipeline.config(), &RelayConfig::default());
+    assert_eq!(pipeline.metrics().snapshot(0).packets_in, 0);
 }
 
 #[test]
 fn pipeline_implements_try_from_config() {
     let cfg = RelayConfig::default();
-    let p1 = Pipeline::try_from(&cfg);
-    assert!(p1.is_ok());
-    let p2 = Pipeline::try_from(cfg);
-    assert!(p2.is_ok());
+    let p1 = Pipeline::try_from(&cfg).expect("ref TryFrom must succeed");
+    assert_eq!(p1.config(), &cfg);
+    assert_eq!(p1.metrics().snapshot(0).packets_in, 0);
+
+    let p2 = Pipeline::try_from(cfg.clone()).expect("value TryFrom must succeed");
+    assert_eq!(p2.config(), &cfg);
+    assert_eq!(p2.metrics().snapshot(0).packets_in, 0);
 }
 
 #[test]
