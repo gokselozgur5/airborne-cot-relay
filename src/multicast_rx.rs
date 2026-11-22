@@ -1,7 +1,4 @@
-use std::fmt;
-use std::io;
-use std::net::{Ipv4Addr, SocketAddr, UdpSocket};
-use std::time::Duration;
+//! Canonical multicast receiver adapter delegating to MulticastListener.
 
 #[derive(Debug)]
 pub enum MulticastRxError {
