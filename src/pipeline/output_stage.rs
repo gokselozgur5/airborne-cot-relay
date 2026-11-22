@@ -1,7 +1,7 @@
 //! Output stage: track filter, CoT encoding and sink send accounting.
 
 use crate::metrics::Metrics;
-use crate::relay::{send_tracked, CotSink, SendHealth};
+use crate::relay::{CotSink, SendHealth};
 use crate::track_filter::{Clock, TrackFilter};
 use crate::TrackSummary;
 
@@ -71,16 +71,16 @@ impl<C: Clock> OutputStage<C> {
         track: &TrackSummary,
     ) -> bool {
         let now_ms = self.filter.clock().now_ms();
-        let uid = format!("TRACK-{:04}", track.id);
-        if !self.filter.accept(&uid, track.lat_deg, track.lon_deg) {
-            return false;
-        }
-        let payload = (self.encode)(track, now_ms);
-        let sent = send_tracked(sink, &mut self.health, payload.as_bytes()).is_ok();
-        if sent {
-            metrics.record_sent(now_ms);
-        }
-        sent
+        super::step::send_filtered_track(
+            &mut self.filter,
+            sink,
+            &mut self.health,
+            metrics,
+            track,
+            now_ms,
+            &*self.encode,
+        )
+        .unwrap_or(false)
     }
 }
 
