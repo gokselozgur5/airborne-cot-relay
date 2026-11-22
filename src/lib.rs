@@ -30,10 +30,6 @@ pub mod resilience;
 pub mod ring_buf;
 pub use ring_buf::{AtomicRingBuffer, CotRingBuffer};
 pub mod fragment_reassembly;
-pub use fragment_reassembly::{
-    fragment_payload, Fragment, FragmentHeader, FragmentReassembler, ReassemblyError,
-    ReassemblyStats, HEADER_SIZE,
-};
 pub mod runtime;
 pub mod track_filter;
 pub mod ttl_cache;
@@ -115,8 +111,7 @@ pub use failover_router::{
 
 pub mod fragmentation;
 pub use fragmentation::{
-    crc16_ccitt, FragmentHeader as CotFragmentHeader, FragmentPacket, FragmentationError,
-    FragmentationStats, FragmenterConfig, InFlightSession, PayloadFragmenter, ReassemblyConfig,
-    ReassemblyEngine, DEFAULT_MTU, HEADER_SIZE as FRAG_HEADER_SIZE, MAGIC_BYTES, MIN_MTU,
-    PROTOCOL_VERSION,
+    crc16_ccitt, FragmentHeader, FragmentPacket, FragmentationError, FragmentationStats,
+    FragmenterConfig, InFlightSession, PayloadFragmenter, ReassemblyConfig, ReassemblyEngine,
+    DEFAULT_MTU, HEADER_SIZE, MAGIC_BYTES, MIN_MTU, PROTOCOL_VERSION,
 };
