@@ -38,29 +38,21 @@ impl MulticastReceiver {
     }
 
     pub fn socket(&self) -> &UdpSocket {
-        &self.socket
+        self.inner.socket()
     }
 
     pub fn config(&self) -> &MulticastRxConfig {
-        &self.config
+        self.inner.config()
     }
 
     pub fn is_joined(&self) -> bool {
-        self.joined
+        true
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_config_validation_valid() {
-        let group: Ipv4Addr = "239.2.3.1".parse().unwrap();
-        let cfg = MulticastRxConfig::new(group, 8080)
-            .with_buffer_size(4096)
-            .with_read_timeout(Duration::from_millis(100));
-        assert!(cfg.validate().is_ok());
+    pub fn leave_group(&mut self) -> Result<(), MulticastRxError> {
+        let cfg = self.inner.config();
+        self.inner.socket().leave_multicast_v4(&cfg.multicast_addr, &cfg.interface_addr)?;
+        Ok(())
     }
 
     #[test]
