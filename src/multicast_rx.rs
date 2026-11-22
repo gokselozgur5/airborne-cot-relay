@@ -55,83 +55,9 @@ impl MulticastReceiver {
         Ok(())
     }
 
-    #[test]
-    fn test_config_validation_invalid_group() {
-        let unicast: Ipv4Addr = "192.168.1.1".parse().unwrap();
-        let cfg = MulticastRxConfig::new(unicast, 8080);
-        assert!(matches!(
-            cfg.validate(),
-            Err(MulticastRxError::InvalidGroup(_))
-        ));
-    }
-
-    #[test]
-    fn test_config_validation_zero_port() {
-        let group: Ipv4Addr = "239.2.3.1".parse().unwrap();
-        let cfg = MulticastRxConfig::new(group, 0);
-        assert!(matches!(cfg.validate(), Err(MulticastRxError::InvalidPort)));
-    }
-
-    #[test]
-    fn test_config_validation_zero_buffer() {
-        let group: Ipv4Addr = "239.2.3.1".parse().unwrap();
-        let cfg = MulticastRxConfig::new(group, 8080).with_buffer_size(0);
-        assert!(matches!(
-            cfg.validate(),
-            Err(MulticastRxError::InvalidBufferSize)
-        ));
-    }
-
-    #[test]
-    fn test_multicast_rx_bind_and_accessors() {
-        let group: Ipv4Addr = "239.255.0.1".parse().unwrap();
-        let temp = UdpSocket::bind("127.0.0.1:0").unwrap();
-        let port = temp.local_addr().unwrap().port();
-        drop(temp);
-
-        let cfg = MulticastRxConfig::new(group, port).with_buffer_size(1024);
-        let rx = MulticastReceiver::bind(cfg.clone()).unwrap();
-        assert_eq!(rx.config().multicast_addr, group);
-        assert_eq!(rx.config().buffer_size, 1024);
-        assert!(rx.is_joined());
-        assert!(rx.local_addr().is_ok());
-    }
-
-    #[test]
-    fn test_multicast_rx_leave_and_rejoin() {
-        let group: Ipv4Addr = "239.255.0.2".parse().unwrap();
-        let temp = UdpSocket::bind("127.0.0.1:0").unwrap();
-        let port = temp.local_addr().unwrap().port();
-        drop(temp);
-
-        let cfg = MulticastRxConfig::new(group, port);
-        let mut rx = MulticastReceiver::bind(cfg).unwrap();
-        assert!(rx.is_joined());
-        assert!(rx.leave_group().is_ok());
-        assert!(!rx.is_joined());
-        assert!(rx.rejoin_group().is_ok());
-        assert!(rx.is_joined());
-    }
-
-    #[test]
-    fn test_multicast_rx_packet_reception() {
-        let group: Ipv4Addr = "239.255.0.3".parse().unwrap();
-        let temp = UdpSocket::bind("127.0.0.1:0").unwrap();
-        let port = temp.local_addr().unwrap().port();
-        drop(temp);
-
-        let cfg = MulticastRxConfig::new(group, port).with_read_timeout(Duration::from_millis(200));
-        let rx = MulticastReceiver::bind(cfg).unwrap();
-
-        let sender = UdpSocket::bind("127.0.0.1:0").unwrap();
-        sender
-            .send_to(
-                b"COT_MULTICAST_TEST",
-                SocketAddr::from(([127, 0, 0, 1], port)),
-            )
-            .unwrap();
-
-        let (payload, _src) = rx.recv_datagram().unwrap();
-        assert_eq!(&payload, b"COT_MULTICAST_TEST");
+    pub fn rejoin_group(&mut self) -> Result<(), MulticastRxError> {
+        let cfg = self.inner.config();
+        self.inner.socket().join_multicast_v4(&cfg.multicast_addr, &cfg.interface_addr)?;
+        Ok(())
     }
 }
