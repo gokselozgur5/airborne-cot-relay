@@ -15,14 +15,19 @@ impl CotSink for MockSink {
 fn test_reconnecting_relay_loop_type_exists() {
     let clock = ManualClock::new(0);
     let metrics = Arc::new(Metrics::new());
-    let _ = ReconnectingRelayLoop::new(
+    let mut loop_inst = ReconnectingRelayLoop::new(
         MockSink,
         || Ok(MockSink),
         10,
         DropPolicy::DropOldest,
         clock,
-        metrics,
+        Arc::clone(&metrics),
     );
+    assert_eq!(metrics.snapshot(0).queue_depth, 0);
+    assert_eq!(metrics.snapshot(0).sent, 0);
+    assert_eq!(metrics.snapshot(0).dropped, 0);
+    assert_eq!(metrics.snapshot(0).reconnects, 0);
+    assert_eq!(loop_inst.poll().unwrap(), ());
 }
 
 #[test]
