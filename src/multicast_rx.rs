@@ -1,42 +1,6 @@
 //! Canonical multicast receiver adapter delegating to MulticastListener.
 
-#[derive(Debug)]
-pub enum MulticastRxError {
-    InvalidGroup(Ipv4Addr),
-    InvalidPort,
-    InvalidBufferSize,
-    OversizedDatagram(usize),
-    Io(io::Error),
-}
-
-impl fmt::Display for MulticastRxError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::InvalidGroup(ip) => write!(f, "invalid multicast address: {}", ip),
-            Self::InvalidPort => write!(f, "multicast port must be non-zero"),
-            Self::InvalidBufferSize => write!(f, "buffer size must be non-zero"),
-            Self::OversizedDatagram(sz) => write!(f, "received oversized datagram: {} bytes", sz),
-            Self::Io(err) => write!(f, "multicast io error: {}", err),
-        }
-    }
-}
-
-impl std::error::Error for MulticastRxError {}
-
-impl From<io::Error> for MulticastRxError {
-    fn from(err: io::Error) -> Self {
-        Self::Io(err)
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MulticastRxConfig {
-    pub multicast_addr: Ipv4Addr,
-    pub interface_addr: Ipv4Addr,
-    pub port: u16,
-    pub read_timeout: Option<Duration>,
-    pub buffer_size: usize,
-}
+use std::net::{SocketAddr, UdpSocket};
 
 impl MulticastRxConfig {
     pub fn new(multicast_addr: Ipv4Addr, port: u16) -> Self {
