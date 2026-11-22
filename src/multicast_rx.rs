@@ -9,38 +9,17 @@ pub use crate::multicast_listener::{
 
 #[derive(Debug)]
 pub struct MulticastReceiver {
-    socket: UdpSocket,
-    config: MulticastRxConfig,
-    joined: bool,
-}
-
-impl MulticastReceiver {
-    fn bind_socket(config: &MulticastRxConfig) -> io::Result<UdpSocket> {
-        let bind_addr = SocketAddr::from(([0, 0, 0, 0], config.port));
-        let socket = UdpSocket::bind(bind_addr)?;
-        if let Some(timeout) = config.read_timeout {
-            socket.set_read_timeout(Some(timeout))?;
-        }
-        Ok(socket)
-    }
+    inner: MulticastListener,
 }
 
 impl MulticastReceiver {
     pub fn bind(config: MulticastRxConfig) -> Result<Self, MulticastRxError> {
-        config.validate()?;
-        let socket = Self::bind_socket(&config)?;
-        socket.join_multicast_v4(&config.multicast_addr, &config.interface_addr)?;
-        Ok(Self {
-            socket,
-            config,
-            joined: true,
-        })
+        let inner = MulticastListener::bind(config)?;
+        Ok(Self { inner })
     }
-}
 
-impl MulticastReceiver {
     pub fn recv(&self, buf: &mut [u8]) -> Result<(usize, SocketAddr), MulticastRxError> {
-        self.socket.recv_from(buf).map_err(MulticastRxError::Io)
+        self.inner.socket().recv_from(buf).map_err(MulticastRxError::Io)
     }
 
     pub fn recv_datagram(&self) -> Result<(Vec<u8>, SocketAddr), MulticastRxError> {
