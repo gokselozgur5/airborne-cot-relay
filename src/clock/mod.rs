@@ -76,11 +76,16 @@ impl ManualClock {
             now_ms: AtomicU64::new(start_ms),
         }
     }
+
+    /// Returns the current manual clock reading in milliseconds.
+    pub fn now_ms(&self) -> u64 {
+        self.now_ms.load(Ordering::SeqCst)
+    }
 }
 
 impl Clock for ManualClock {
     fn now_ms(&self) -> u64 {
-        self.now_ms.load(Ordering::SeqCst)
+        ManualClock::now_ms(self)
     }
 }
 
@@ -97,9 +102,19 @@ impl ManualClock {
         }
     }
 
+    /// Alias for [`ManualClock::advance_ms`].
+    pub fn advance(&self, delta_ms: u64) {
+        self.advance_ms(delta_ms);
+    }
+
     /// Sets the clock to `now_ms`; backward steps are allowed.
     pub fn set_ms(&self, now_ms: u64) {
         self.now_ms.store(now_ms, Ordering::SeqCst);
+    }
+
+    /// Alias for [`ManualClock::set_ms`].
+    pub fn set(&self, now_ms: u64) {
+        self.set_ms(now_ms);
     }
 }
 
