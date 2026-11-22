@@ -3,48 +3,22 @@ use sightline_cot::cot::{escape_xml_attr, format_iso8601_utc};
 use sightline_cot::tracker::Track;
 use std::net::{SocketAddr, ToSocketAddrs, UdpSocket};
 
-/// Source of wall-clock time in milliseconds since the Unix epoch.
+pub use crate::clock::{ManualClock, SystemClock};
+
+/// Legacy signed-millisecond clock view backed by [`crate::clock::Clock`].
 pub trait Clock {
     fn now_ms(&self) -> i64;
 }
 
-/// Clock backed by the operating system time.
-#[derive(Debug, Clone, Copy, Default)]
-pub struct SystemClock;
-
 impl Clock for SystemClock {
     fn now_ms(&self) -> i64 {
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| d.as_millis() as i64)
-            .unwrap_or(0)
-    }
-}
-
-/// Deterministic clock for tests; time only moves when advanced.
-#[derive(Debug, Default)]
-pub struct ManualClock {
-    now_ms: std::cell::Cell<i64>,
-}
-
-impl ManualClock {
-    /// Creates a clock frozen at `start_ms`.
-    pub fn new(start_ms: i64) -> Self {
-        Self {
-            now_ms: std::cell::Cell::new(start_ms),
-        }
-    }
-
-    /// Moves the clock forward by `delta_ms`.
-    pub fn advance_ms(&self, delta_ms: u64) {
-        let delta = i64::try_from(delta_ms).unwrap_or(i64::MAX);
-        self.now_ms.set(self.now_ms.get().saturating_add(delta));
+        i64::try_from(crate::clock::Clock::now_ms(self)).unwrap_or(i64::MAX)
     }
 }
 
 impl Clock for ManualClock {
     fn now_ms(&self) -> i64 {
-        self.now_ms.get()
+        i64::try_from(crate::clock::Clock::now_ms(self)).unwrap_or(i64::MAX)
     }
 }
 
@@ -383,7 +357,8 @@ mod tests {
         clock.advance_ms(250);
         assert_eq!(clock.now_ms(), 1_250);
         clock.advance_ms(u64::MAX);
-        assert_eq!(clock.now_ms(), i64::MAX);
+        assert_eq!(clock.now_ms(), u64::MAX);
+        assert_eq!(Clock::now_ms(&clock), i64::MAX);
         assert!(SystemClock.now_ms() > 1_700_000_000_000);
     }
 
