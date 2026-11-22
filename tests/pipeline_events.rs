@@ -30,7 +30,7 @@ fn success_before_threshold_emits_nothing() {
     [false, false, true, false, false]
         .into_iter()
         .for_each(|ok| tracker.record_send(ok));
-    assert!(tracker.drain().is_empty());
+    assert_eq!(tracker.drain(), Vec::<PipelineEvent>::new());
 }
 
 #[test]
