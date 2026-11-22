@@ -57,13 +57,12 @@ impl DualBufferSampler {
 
     /// Update the telemetry pose under mutex synchronization.
     pub fn update(&self, pose: PlatformPose, timestamp_ns: u64) -> u64 {
-        let seq = self.writes_total.fetch_add(1, Ordering::Relaxed) + 1;
-        let snap = TelemetrySnapshot::new(pose, seq, timestamp_ns);
         let mut guard = self
             .snapshot
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
-        *guard = snap;
+        let seq = self.writes_total.fetch_add(1, Ordering::Relaxed) + 1;
+        *guard = TelemetrySnapshot::new(pose, seq, timestamp_ns);
         let next_idx = 1 - self.active_idx.load(Ordering::Relaxed);
         self.active_idx.store(next_idx, Ordering::Relaxed);
         seq
