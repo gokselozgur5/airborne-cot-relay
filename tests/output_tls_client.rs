@@ -58,3 +58,23 @@ fn success_connects_and_resets() {
     assert!(s.is_connected());
     assert_eq!(s.retry_delay_ms(), 0);
 }
+
+#[test]
+fn unused_timeouts_and_peer_verify_are_validated() {
+    let mut c = TlsClientConfig::new("tak");
+    c.connect_timeout_ms = 0;
+    assert_eq!(
+        c.validate(),
+        Err(RelayError::InvalidConfig(
+            "connect_timeout_ms must be non-zero".into()
+        ))
+    );
+    let mut c2 = TlsClientConfig::new("tak");
+    c2.write_timeout_ms = 0;
+    assert_eq!(
+        c2.validate(),
+        Err(RelayError::InvalidConfig(
+            "write_timeout_ms must be non-zero".into()
+        ))
+    );
+}
