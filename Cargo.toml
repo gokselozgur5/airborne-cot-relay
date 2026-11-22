@@ -8,4 +8,5 @@ description = "Airborne sensor-to-TAK Cursor-on-Target relay"
 
 [dependencies]
 stm32-navcore = { git = "https://github.com/gokselozgur5/stm32-navcore.git", rev = "f5e585c6b24e52a5e2fb9f7b3032087ff1d4d50a" }
+uas-cot = { version = "0.6.0", default-features = false, features = ["remoteid"] }
 sightline-cot = { git = "https://github.com/gokselozgur5/sightline-cot.git", rev = "d4410e5b28fd3919abdc0874dd281f59c09723e4" }

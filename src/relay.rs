@@ -109,7 +109,10 @@ pub fn classification_to_cot_type(classification: &str) -> &'static str {
     match classification.to_ascii_lowercase().as_str() {
         "vehicle" | "car" | "truck" => "a-f-G-E-V-C",
         "person" | "pedestrian" | "human" => "a-u-G-U-C-I",
-        "aircraft" | "drone" | "uav" => "a-f-A-M-F",
+        "aircraft" | "drone" | "uav" => {
+            static UAS: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+            UAS.get_or_init(|| uas_cot::rid::aircraft_type(uas_cot::remoteid::UaType::None, 'u'))
+        }
         _ => "a-u-G",
     }
 }
@@ -390,7 +393,8 @@ mod tests {
         assert_eq!(classification_to_cot_type("truck"), "a-f-G-E-V-C");
         assert_eq!(classification_to_cot_type("person"), "a-u-G-U-C-I");
         assert_eq!(classification_to_cot_type("pedestrian"), "a-u-G-U-C-I");
-        assert_eq!(classification_to_cot_type("drone"), "a-f-A-M-F");
+        assert_eq!(classification_to_cot_type("drone"), "a-u-A-M-F-Q");
+        assert_eq!(classification_to_cot_type("UAV"), "a-u-A-M-F-Q");
         assert_eq!(classification_to_cot_type("unknown_object"), "a-u-G");
     }
 

@@ -22,7 +22,7 @@ use airborne_cot_relay::{classification_to_cot_type, RelayError};
 #[test]
 fn classification_maps_to_cot_type() {
     assert_eq!(classification_to_cot_type("Truck"), "a-f-G-E-V-C");
-    assert_eq!(classification_to_cot_type("drone"), "a-f-A-M-F");
+    assert_eq!(classification_to_cot_type("drone"), "a-u-A-M-F-Q");
     assert_eq!(classification_to_cot_type("unknown"), "a-u-G");
 }
 
