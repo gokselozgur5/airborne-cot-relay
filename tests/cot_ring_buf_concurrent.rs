@@ -1,5 +1,6 @@
 //! Concurrent multi-threaded test for lock-free CotRingBuffer.
 
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 
@@ -27,7 +28,26 @@ fn make_cot(i: usize) -> CotEvent {
 fn test_cot_ring_buffer_concurrent_spsc() {
     let buf = Arc::new(CotRingBuffer::new(64));
     let buf_producer = Arc::clone(&buf);
+    let buf_consumer = Arc::clone(&buf);
     let n = 200;
+
+    let running = Arc::new(AtomicBool::new(true));
+    let consumer_running = Arc::clone(&running);
+
+    let consumer = thread::spawn(move || {
+        let mut received = Vec::new();
+        while consumer_running.load(Ordering::Relaxed) {
+            if let Some(event) = buf_consumer.pop() {
+                received.push(event);
+            } else {
+                thread::yield_now();
+            }
+        }
+        while let Some(event) = buf_consumer.pop() {
+            received.push(event);
+        }
+        received
+    });
 
     let producer = thread::spawn(move || {
         for i in 0..n {
@@ -36,8 +56,23 @@ fn test_cot_ring_buffer_concurrent_spsc() {
     });
 
     producer.join().expect("producer finished");
-    assert!(buf.len() > 0);
-    let drained = buf.drain_all();
-    assert!(drained.len() <= 64);
-    assert_eq!(drained.len() + buf.dropped_count(), n);
+    running.store(false, Ordering::Relaxed);
+    let mut consumed = consumer.join().expect("consumer finished");
+
+    let mut remaining = buf.drain_all();
+    assert!(remaining.len() <= 64);
+    consumed.append(&mut remaining);
+
+    let drops = buf.dropped_count();
+    assert_eq!(consumed.len() + drops, n);
+    assert!(!consumed.is_empty());
+
+    let mut uids = std::collections::HashSet::new();
+    for event in &consumed {
+        assert!(
+            uids.insert(event.uid.clone()),
+            "duplicate event received: {}",
+            event.uid
+        );
+    }
 }
