@@ -20,7 +20,10 @@ impl MulticastReceiver {
     }
 
     pub fn recv(&self, buf: &mut [u8]) -> Result<(usize, SocketAddr), MulticastRxError> {
-        self.inner.socket().recv_from(buf).map_err(MulticastRxError::Io)
+        self.inner
+            .socket()
+            .recv_from(buf)
+            .map_err(MulticastRxError::Io)
     }
 
     pub fn recv_datagram(&self) -> Result<(Vec<u8>, SocketAddr), MulticastRxError> {
@@ -35,7 +38,10 @@ impl MulticastReceiver {
     }
 
     pub fn local_addr(&self) -> Result<SocketAddr, MulticastRxError> {
-        self.inner.socket().local_addr().map_err(MulticastRxError::Io)
+        self.inner
+            .socket()
+            .local_addr()
+            .map_err(MulticastRxError::Io)
     }
 
     pub fn socket(&self) -> &UdpSocket {
@@ -52,13 +58,17 @@ impl MulticastReceiver {
 
     pub fn leave_group(&mut self) -> Result<(), MulticastRxError> {
         let cfg = self.inner.config();
-        self.inner.socket().leave_multicast_v4(&cfg.multicast_addr, &cfg.interface_addr)?;
+        self.inner
+            .socket()
+            .leave_multicast_v4(&cfg.multicast_addr, &cfg.interface_addr)?;
         Ok(())
     }
 
     pub fn rejoin_group(&mut self) -> Result<(), MulticastRxError> {
         let cfg = self.inner.config();
-        self.inner.socket().join_multicast_v4(&cfg.multicast_addr, &cfg.interface_addr)?;
+        self.inner
+            .socket()
+            .join_multicast_v4(&cfg.multicast_addr, &cfg.interface_addr)?;
         Ok(())
     }
 }
