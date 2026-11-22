@@ -196,8 +196,9 @@ impl CotRingBuffer {
     /// Enqueues an event, dropping the oldest event if full.
     pub fn push_overwrite(&self, mut event: CotEvent) {
         while let Err(ev) = self.inner.push(event) {
-            let _ = self.inner.pop();
-            self.dropped_count.fetch_add(1, Ordering::Relaxed);
+            if self.inner.pop().is_some() {
+                self.dropped_count.fetch_add(1, Ordering::Relaxed);
+            }
             event = ev;
         }
     }
