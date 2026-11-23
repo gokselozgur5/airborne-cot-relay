@@ -15,73 +15,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: airborne-cot-relay
-      - uses: dtolnay/rust-toolchain@1.85.0
+      - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
       - name: Verify formatting
         run: cargo fmt --all -- --check
-        working-directory: airborne-cot-relay
 
   clippy:
     name: Run clippy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: airborne-cot-relay
-      - uses: actions/checkout@v4
-        with:
-          repository: gokselozgur5/stm32-navcore
-          path: stm32-navcore
-      - uses: actions/checkout@v4
-        with:
-          repository: gokselozgur5/sightline-cot
-          path: sightline-cot
-      - uses: dtolnay/rust-toolchain@1.85.0
+      - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
       - name: Run clippy
         run: cargo clippy --all-targets -- -D warnings
-        working-directory: airborne-cot-relay
 
   test:
     name: Run test suite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: airborne-cot-relay
-      - uses: actions/checkout@v4
-        with:
-          repository: gokselozgur5/stm32-navcore
-          path: stm32-navcore
-      - uses: actions/checkout@v4
-        with:
-          repository: gokselozgur5/sightline-cot
-          path: sightline-cot
-      - uses: dtolnay/rust-toolchain@1.85.0
+      - uses: dtolnay/rust-toolchain@stable
       - name: Run test suite
         run: cargo test --all-targets
-        working-directory: airborne-cot-relay
 
   doc:
     name: Build documentation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: airborne-cot-relay
-      - uses: actions/checkout@v4
-        with:
-          repository: gokselozgur5/stm32-navcore
-          path: stm32-navcore
-      - uses: actions/checkout@v4
-        with:
-          repository: gokselozgur5/sightline-cot
-          path: sightline-cot
-      - uses: dtolnay/rust-toolchain@1.85.0
+      - uses: dtolnay/rust-toolchain@stable
       - name: Build documentation
         run: cargo doc --no-deps
-        working-directory: airborne-cot-relay
