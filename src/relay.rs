@@ -107,9 +107,9 @@ impl Backoff {
 
 pub fn classification_to_cot_type(classification: &str) -> &'static str {
     match classification.to_ascii_lowercase().as_str() {
-        "vehicle" | "car" | "truck" => "a-f-G-E-V-C",
+        "vehicle" | "car" | "truck" => "a-u-G-E-V-C",
         "person" | "pedestrian" | "human" => "a-u-G-U-C-I",
-        "aircraft" | "drone" | "uav" => "a-f-A-M-F",
+        "aircraft" | "drone" | "uav" => "a-u-A-M-F-Q",
         _ => "a-u-G",
     }
 }
@@ -385,12 +385,14 @@ mod tests {
 
     #[test]
     fn test_classification_mapping() {
-        assert_eq!(classification_to_cot_type("vehicle"), "a-f-G-E-V-C");
-        assert_eq!(classification_to_cot_type("Car"), "a-f-G-E-V-C");
-        assert_eq!(classification_to_cot_type("truck"), "a-f-G-E-V-C");
+        assert_eq!(classification_to_cot_type("vehicle"), "a-u-G-E-V-C");
+        assert_eq!(classification_to_cot_type("Car"), "a-u-G-E-V-C");
+        assert_eq!(classification_to_cot_type("truck"), "a-u-G-E-V-C");
         assert_eq!(classification_to_cot_type("person"), "a-u-G-U-C-I");
         assert_eq!(classification_to_cot_type("pedestrian"), "a-u-G-U-C-I");
-        assert_eq!(classification_to_cot_type("drone"), "a-f-A-M-F");
+        assert_eq!(classification_to_cot_type("drone"), "a-u-A-M-F-Q");
+        assert_eq!(classification_to_cot_type("aircraft"), "a-u-A-M-F-Q");
+        assert_eq!(classification_to_cot_type("uav"), "a-u-A-M-F-Q");
         assert_eq!(classification_to_cot_type("unknown_object"), "a-u-G");
     }
 
@@ -434,11 +436,11 @@ mod tests {
         let xml = streamer.build_cot_xml(&track, now_ms);
         let expected_uid = format!("TRACK-{}-0042", streamer.uid_prefix);
         assert!(xml.contains(&format!(r#"uid="{expected_uid}""#)));
-        assert!(xml.contains(r#"type="a-f-G-E-V-C""#));
+        assert!(xml.contains(r#"type="a-u-G-E-V-C""#));
         assert!(xml.contains(r#"lat="37.7749000""#));
         let parsed = CotEvent::from_xml(&xml).expect("valid CoT 2.0 XML");
         assert_eq!(parsed.uid, expected_uid);
-        assert_eq!(parsed.cot_type, "a-f-G-E-V-C");
+        assert_eq!(parsed.cot_type, "a-u-G-E-V-C");
     }
 
     #[test]

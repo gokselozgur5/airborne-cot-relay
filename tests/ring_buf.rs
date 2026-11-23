@@ -13,6 +13,7 @@ fn make_cot(uid: &str) -> CotEvent {
         cot_type: "a-f-G-U-C".to_string(),
         how: "m-g".to_string(),
         time_ms: 1000,
+        start_ms: 1000,
         stale_ms: 2000,
         lat_deg: 35.0,
         lon_deg: 42.0,

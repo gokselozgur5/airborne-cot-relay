@@ -21,8 +21,11 @@ use airborne_cot_relay::{classification_to_cot_type, RelayError};
 
 #[test]
 fn classification_maps_to_cot_type() {
-    assert_eq!(classification_to_cot_type("Truck"), "a-f-G-E-V-C");
-    assert_eq!(classification_to_cot_type("drone"), "a-f-A-M-F");
+    assert_eq!(classification_to_cot_type("Truck"), "a-u-G-E-V-C");
+    assert_eq!(classification_to_cot_type("drone"), "a-u-A-M-F-Q");
+    assert_eq!(classification_to_cot_type("aircraft"), "a-u-A-M-F-Q");
+    assert_eq!(classification_to_cot_type("uav"), "a-u-A-M-F-Q");
+    assert_eq!(classification_to_cot_type("vehicle"), "a-u-G-E-V-C");
     assert_eq!(classification_to_cot_type("unknown"), "a-u-G");
 }
 
@@ -87,7 +90,7 @@ fn cot_streamer_builds_event_with_track_uid() {
     let xml = streamer.build_cot_xml(&track, 0);
     let expected_uid = format!("TRACK-{}-0007", streamer.uid_prefix);
     assert!(xml.contains(&format!(r#"uid="{expected_uid}""#)));
-    assert!(xml.contains(r#"type="a-f-G-E-V-C""#));
+    assert!(xml.contains(r#"type="a-u-G-E-V-C""#));
 }
 
 #[test]
