@@ -7,5 +7,5 @@ license = "MIT"
 description = "Airborne sensor-to-TAK Cursor-on-Target relay"
 
 [dependencies]
-stm32-navcore = { git = "https://github.com/gokselozgur5/stm32-navcore.git", rev = "f5e585c6b24e52a5e2fb9f7b3032087ff1d4d50a" }
-sightline-cot = { git = "https://github.com/gokselozgur5/sightline-cot.git", rev = "d4410e5b28fd3919abdc0874dd281f59c09723e4" }
+stm32-navcore = { git = "https://github.com/gokselozgur5/stm32-navcore.git", rev = "c6d7cd09ed47e9d01bc45464fa2a25a9957057e0" }
+sightline-cot = { git = "https://github.com/gokselozgur5/sightline-cot.git", rev = "c45808c84e92eecd054b5b05ec918b94e04ac0d1" }
