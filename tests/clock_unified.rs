@@ -30,7 +30,7 @@ fn manual_clock_advance_is_seen_across_threads() {
 
 #[test]
 fn system_clock_never_decreases() {
-    let clock = SystemClock::default();
+    let clock = SystemClock;
     let mut prev = clock.now_ms();
     for _ in 0..1000 {
         let now = clock.now_ms();

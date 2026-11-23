@@ -6,7 +6,15 @@ use airborne_cot_relay::PlatformPose;
 #[test]
 fn test_integration_heartbeat_cadence_stream() {
     let cfg = HeartbeatConfig::new("RELAY-99", "STORM-01").with_intervals(500, 1500);
-    let pose = PlatformPose::new(5000, 34.0522, -118.2437, 1200.0, 0.05, -0.02, 3.14);
+    let pose = PlatformPose::new(
+        5000,
+        34.0522,
+        -118.2437,
+        1200.0,
+        0.05,
+        -0.02,
+        std::f64::consts::PI,
+    );
     let plat = PlatformMetrics::new(
         "STORM-01",
         PlatformOperationalState::Nominal,

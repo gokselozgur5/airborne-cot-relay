@@ -1,6 +1,6 @@
 //! Tests for the injectable sleepers.
 
-use airborne_cot_relay::relay::{Clock, ManualClock};
+use airborne_cot_relay::relay::ManualClock;
 use airborne_cot_relay::runtime::sleep::{ManualSleeper, Sleeper, ThreadSleeper};
 use std::time::{Duration, Instant};
 
