@@ -77,7 +77,7 @@ fn emitted_cot_carries_uid_and_type() {
     let xml = recv(&rx);
     let expected_uid = format!("TRACK-{}-0001", s.uid_prefix);
     assert!(xml.contains(&format!(r#"uid="{expected_uid}""#)));
-    assert!(xml.contains("type=\"a-f-G-E-V-C\""));
+    assert!(xml.contains("type=\"a-u-G-E-V-C\""));
 }
 
 fn attr(xml: &str, name: &str) -> String {

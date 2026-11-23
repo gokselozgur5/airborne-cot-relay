@@ -13,6 +13,7 @@ fn make_cot(i: usize) -> CotEvent {
         cot_type: "a-f-G-U-C".to_string(),
         how: "m-g".to_string(),
         time_ms: i as i64,
+        start_ms: i as i64,
         stale_ms: i as i64 + 1000,
         lat_deg: 35.0,
         lon_deg: 42.0,
