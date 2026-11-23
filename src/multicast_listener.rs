@@ -356,6 +356,16 @@ impl MulticastListener {
     }
 }
 
+impl fmt::Debug for MulticastListener {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("MulticastListener")
+            .field("socket", &self.socket)
+            .field("config", &self.config)
+            .field("stats", &self.stats)
+            .finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -469,15 +479,5 @@ mod tests {
         assert!(polled >= 1);
         let pkt = listener.pop_packet().unwrap();
         assert_eq!(pkt.data, b"MULTICAST_HELLO");
-    }
-}
-
-impl fmt::Debug for MulticastListener {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("MulticastListener")
-            .field("socket", &self.socket)
-            .field("config", &self.config)
-            .field("stats", &self.stats)
-            .finish()
     }
 }

@@ -255,7 +255,7 @@ impl Targeter {
             let finite_box = x1.is_finite() && y1.is_finite() && x2.is_finite() && y2.is_finite();
             let finite_emb = d
                 .embedding
-                .map_or(true, |emb| emb.iter().all(|v| v.is_finite()));
+                .is_none_or(|emb| emb.iter().all(|v| v.is_finite()));
             if !finite_box || !finite_emb {
                 continue;
             }

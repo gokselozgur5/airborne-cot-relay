@@ -308,7 +308,7 @@ fn extract_json_f64_field(json: &str, key: &'static str) -> Result<Option<f64>, 
         return Ok(None);
     };
     let val = rest[ci + 1..].trim_start();
-    let end = val.find(|c| c == ',' || c == '}').unwrap_or(val.len());
+    let end = val.find([',', '}']).unwrap_or(val.len());
     let v: f64 = val[..end]
         .trim()
         .parse()
