@@ -1,7 +1,7 @@
 use airborne_cot_relay::metrics::Metrics;
 use airborne_cot_relay::pipeline::step::{OutboundStep, StepReport};
 use airborne_cot_relay::relay::{BoundedQueue, CotSink, DropPolicy, SendHealth};
-use airborne_cot_relay::track_filter::{Clock, FilterConfig, ManualClock, TrackFilter};
+use airborne_cot_relay::track_filter::{FilterConfig, ManualClock, TrackFilter};
 use airborne_cot_relay::{RelayError, TrackSummary};
 
 #[derive(Default)]

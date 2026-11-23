@@ -9,8 +9,7 @@ fn deflate_decompress_reads_every_block_or_reports_an_error() {
     let bytes: Vec<u8> = (0..STREAM.len() / 2)
         .map(|i| u8::from_str_radix(&STREAM[2 * i..2 * i + 2], 16).unwrap())
         .collect();
-    match deflate_decompress(&bytes) {
-        Ok(out) => assert_eq!(String::from_utf8_lossy(&out), PLAIN),
-        Err(_) => {}
+    if let Ok(out) = deflate_decompress(&bytes) {
+        assert_eq!(String::from_utf8_lossy(&out), PLAIN);
     }
 }

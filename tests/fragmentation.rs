@@ -1,5 +1,4 @@
 use airborne_cot_relay::fragmentation::*;
-use airborne_cot_relay::*;
 
 #[test]
 fn test_repro_370_glob_imports_no_ambiguity_and_single_protocol() {

@@ -51,7 +51,7 @@ fn clock_send_and_exit_helpers_are_unified() {
     assert_eq!(size_of::<clock::SystemClock>(), 0);
     let t0 = clock::SystemClock::new().now_ms();
     sleep(Duration::from_millis(5));
-    assert!(clock::SystemClock::default().now_ms() >= t0 + 2);
+    assert!(clock::SystemClock.now_ms() >= t0 + 2);
     for e in [
         RelayError::InvalidConfig("c".into()),
         RelayError::IoError("i".into()),
