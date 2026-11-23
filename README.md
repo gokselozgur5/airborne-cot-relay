@@ -6,11 +6,9 @@ Airborne sensor-to-TAK Cursor-on-Target relay pipeline.
 
 The library modules are implemented and covered by unit tests.
 
-The `airborne-cot-relay` binary is still a placeholder. It prints fixed messages for each mode and does not open sockets or read telemetry yet.
+The `airborne-cot-relay` binary runs a simulated flight path in mock mode by default, transmitting Cursor-on-Target (CoT) events over UDP to the configured broadcast address (`127.0.0.1:6969` by default). Live mode binds the telemetry listener socket and awaits sensor input.
 
 ## System Architecture
-
-The diagram shows the intended data flow. The binary does not connect these stages yet.
 
 ```mermaid
 graph TD
@@ -37,17 +35,26 @@ graph TD
 
 ```bash
 cargo run --bin airborne-cot-relay -- --help
+cargo run --bin airborne-cot-relay -- --dry-run
+cargo run --bin airborne-cot-relay -- --mock
 cargo run --example mock_flight_mission
 cargo test --all-targets
 ```
 
-The binary reads only its first argument:
+### CLI Arguments
 
 | Argument | Behavior |
 | --- | --- |
-| `--mock`, `-m`, or any unknown value | Print the simulated 60-second flight message (default) |
-| `--live`, `-l` | Print the live listening notice |
-| `--help`, `-h` | Print usage and exit with status 0 |
+| `--mock`, `-m` | Run a simulated flight path and send CoT events to destination (default) |
+| `--live`, `-l` | Listen on telemetry address for live telemetry and camera streams |
+| `--dry-run` | Resolve mission mode and configuration, then exit immediately |
+| `--help`, `-h` | Print usage text and exit with status 0 |
+| `--version`, `-V` | Print version and exit with status 0 |
 
-See [docs/architecture.md](docs/architecture.md) for module responsibilities and [docs/operations.md](docs/operations.md) for configuration, failure modes and exit codes.
+### Exit Codes
 
+- `0`: Success (mission completed, help or version displayed, dry-run resolved)
+- `2`: Invalid CLI argument or configuration error
+- `3`: Socket bind failure (e.g., telemetry address already in use)
+
+See [docs/architecture.md](docs/architecture.md) for module responsibilities and [docs/operations.md](docs/operations.md) for configuration, environment variables, failure modes and exit codes.
