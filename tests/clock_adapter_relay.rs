@@ -1,5 +1,5 @@
 use airborne_cot_relay::clock::adapters::RelayClockAdapter;
-use airborne_cot_relay::clock::{Clock as _, ManualClock};
+use airborne_cot_relay::clock::ManualClock;
 use airborne_cot_relay::relay::{self, Clock as _, CotStreamer, TrackSummary};
 
 fn track() -> TrackSummary {
