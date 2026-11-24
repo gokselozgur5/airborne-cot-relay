@@ -28,6 +28,7 @@ pub fn encode_mavlink_v2_attitude(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn encode_mavlink_v2_global_position(
     seq: u8,
     sysid: u8,

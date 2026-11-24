@@ -9,10 +9,9 @@ pub fn extract_field_str<'a>(json: &'a str, key: &str) -> Option<&'a str> {
 
     let start = if let Some(idx) = json.find(&pattern1) {
         idx + pattern1.len()
-    } else if let Some(idx) = json.find(&pattern2) {
-        idx + pattern2.len()
     } else {
-        return None;
+        let idx = json.find(&pattern2)?;
+        idx + pattern2.len()
     };
 
     let rest = &json[start..];
@@ -26,10 +25,9 @@ pub fn extract_field_f64(json: &str, key: &str) -> Option<f64> {
 
     let start = if let Some(idx) = json.find(&p1) {
         idx + p1.len()
-    } else if let Some(idx) = json.find(&p2) {
-        idx + p2.len()
     } else {
-        return None;
+        let idx = json.find(&p2)?;
+        idx + p2.len()
     };
 
     let rest = json[start..].trim_start();
