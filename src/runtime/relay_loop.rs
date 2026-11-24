@@ -85,6 +85,21 @@ impl<T, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
         &self.outbound
     }
 
+    /// Mutable outbound step reference.
+    pub fn outbound_mut(&mut self) -> &mut OutboundStep<C, S> {
+        &mut self.outbound
+    }
+
+    /// Clock reference.
+    pub fn clock(&self) -> &C {
+        &self.clock
+    }
+
+    /// Mutable clock reference.
+    pub fn clock_mut(&mut self) -> &mut C {
+        &mut self.clock
+    }
+
     /// Queue reference.
     pub fn queue(&self) -> &BoundedQueue<TrackSummary> {
         &self.queue
@@ -98,6 +113,11 @@ impl<T, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
     /// Current run limit.
     pub fn limit(&self) -> RunLimit {
         self.limit
+    }
+
+    /// Mutable run limit reference.
+    pub fn limit_mut(&mut self) -> &mut RunLimit {
+        &mut self.limit
     }
 
     /// Updates the run limit.
@@ -152,10 +172,11 @@ where
         if t.is_none() && d.is_none() {
             std::thread::sleep(std::time::Duration::from_millis(1));
         }
-        let report = self.outbound.step(
+        let report = self.outbound.step_gated(
             now_ms,
             &mut self.queue,
             self.pipeline.metrics(),
+            Some(self.pipeline.stale_gate()),
             &mut self.render,
         );
         Ok(report)
