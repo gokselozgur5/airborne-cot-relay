@@ -58,13 +58,17 @@ pub fn decode_mavlink_v2_frame(frame: &[u8]) -> Result<MavlinkPacket, RelayError
     let payload = &frame[10..10 + payload_len];
     let message = match msgid {
         MSG_ID_ATTITUDE => {
-            if payload.len() < 28 {
-                return Err(RelayError::DecodeError("attitude payload too short".into()));
+            if payload.len() > 28 {
+                return Err(RelayError::DecodeError(
+                    "attitude payload exceeds 28 bytes".into(),
+                ));
             }
-            let time_boot_ms = u32::from_le_bytes(payload[0..4].try_into().unwrap());
-            let roll = f32::from_le_bytes(payload[4..8].try_into().unwrap());
-            let pitch = f32::from_le_bytes(payload[8..12].try_into().unwrap());
-            let yaw = f32::from_le_bytes(payload[12..16].try_into().unwrap());
+            let mut padded = [0u8; 28];
+            padded[..payload.len()].copy_from_slice(payload);
+            let time_boot_ms = u32::from_le_bytes(padded[0..4].try_into().unwrap());
+            let roll = f32::from_le_bytes(padded[4..8].try_into().unwrap());
+            let pitch = f32::from_le_bytes(padded[8..12].try_into().unwrap());
+            let yaw = f32::from_le_bytes(padded[12..16].try_into().unwrap());
             MavlinkMessage::Attitude {
                 time_boot_ms,
                 roll,
@@ -73,20 +77,22 @@ pub fn decode_mavlink_v2_frame(frame: &[u8]) -> Result<MavlinkPacket, RelayError
             }
         }
         MSG_ID_GLOBAL_POSITION_INT => {
-            if payload.len() < 28 {
+            if payload.len() > 28 {
                 return Err(RelayError::DecodeError(
-                    "global_position_int payload too short".into(),
+                    "global_position_int payload exceeds 28 bytes".into(),
                 ));
             }
-            let time_boot_ms = u32::from_le_bytes(payload[0..4].try_into().unwrap());
-            let lat = i32::from_le_bytes(payload[4..8].try_into().unwrap());
-            let lon = i32::from_le_bytes(payload[8..12].try_into().unwrap());
-            let alt = i32::from_le_bytes(payload[12..16].try_into().unwrap());
-            let relative_alt = i32::from_le_bytes(payload[16..20].try_into().unwrap());
-            let vx = i16::from_le_bytes(payload[20..22].try_into().unwrap());
-            let vy = i16::from_le_bytes(payload[22..24].try_into().unwrap());
-            let vz = i16::from_le_bytes(payload[24..26].try_into().unwrap());
-            let hdg = u16::from_le_bytes(payload[26..28].try_into().unwrap());
+            let mut padded = [0u8; 28];
+            padded[..payload.len()].copy_from_slice(payload);
+            let time_boot_ms = u32::from_le_bytes(padded[0..4].try_into().unwrap());
+            let lat = i32::from_le_bytes(padded[4..8].try_into().unwrap());
+            let lon = i32::from_le_bytes(padded[8..12].try_into().unwrap());
+            let alt = i32::from_le_bytes(padded[12..16].try_into().unwrap());
+            let relative_alt = i32::from_le_bytes(padded[16..20].try_into().unwrap());
+            let vx = i16::from_le_bytes(padded[20..22].try_into().unwrap());
+            let vy = i16::from_le_bytes(padded[22..24].try_into().unwrap());
+            let vz = i16::from_le_bytes(padded[24..26].try_into().unwrap());
+            let hdg = u16::from_le_bytes(padded[26..28].try_into().unwrap());
             MavlinkMessage::GlobalPositionInt {
                 time_boot_ms,
                 lat,
