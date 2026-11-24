@@ -92,5 +92,10 @@ fn test_live_mode_loopback_e2e() {
     shutdown.trigger();
     let res = handle.join().expect("thread join ok");
     assert!(res.is_ok());
-    assert!(res.unwrap() >= 1);
+    let sent_count = res.unwrap();
+    assert!(sent_count >= 1);
+
+    let snapshot = metrics.snapshot(10_000);
+    assert_eq!(snapshot.sent, sent_count);
+    assert!(snapshot.packets_in >= 1);
 }
