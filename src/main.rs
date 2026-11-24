@@ -1,8 +1,12 @@
 use airborne_cot_relay::app::config_boot::{boot_config_from_env, CONFIG_ERROR_EXIT};
 use airborne_cot_relay::app::exit::finish;
+use airborne_cot_relay::app::run_live::run_live;
 use airborne_cot_relay::app::run_mock::run_mock;
+use airborne_cot_relay::runtime::limit::RunLimit;
+use airborne_cot_relay::runtime::ShutdownSignal;
 use std::env;
 use std::process::ExitCode;
+use std::sync::Arc;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MissionMode {
@@ -101,13 +105,7 @@ fn main() -> ExitCode {
         if mode == MissionMode::Mock {
             return run_mock_mode(&config);
         }
-        if let Err(e) = std::net::UdpSocket::bind(&config.telemetry_listen_addr) {
-            eprintln!(
-                "error: cannot bind telemetry listen addr {}: {e}",
-                config.telemetry_listen_addr
-            );
-            return ExitCode::from(3);
-        }
+        return run_live_mode(&config);
     }
     run_mission(mode)
 }
@@ -124,6 +122,35 @@ fn run_mock_mode(config: &airborne_cot_relay::RelayConfig) -> ExitCode {
     println!("Starting simulated 60-second flight path...");
     let metrics = airborne_cot_relay::metrics::Metrics::new();
     let result = run_mock(config, &metrics);
+    if let Ok(sent) = &result {
+        println!("Sent {sent} CoT events to {}", config.cot_broadcast_addr);
+    }
+    let now_ms = SystemClock.now_ms().max(0) as u64;
+    let outcome = finish(&result, &metrics.snapshot(now_ms));
+    print!("{}", outcome.stdout);
+    if let Some(err) = outcome.stderr {
+        eprintln!("{err}");
+    }
+    ExitCode::from(outcome.status)
+}
+
+fn run_live_mode(config: &airborne_cot_relay::RelayConfig) -> ExitCode {
+    use airborne_cot_relay::relay::{Clock, SystemClock};
+    println!("Listening for live telemetry and camera streams...");
+    let metrics = Arc::new(airborne_cot_relay::metrics::Metrics::new());
+    let shutdown = ShutdownSignal::new();
+
+    let limit = if let Ok(s) = env::var("RELAY_MAX_TICKS") {
+        if let Ok(n) = s.parse::<u64>() {
+            RunLimit::iterations(n)
+        } else {
+            RunLimit::unbounded()
+        }
+    } else {
+        RunLimit::unbounded()
+    };
+
+    let result = run_live(config, &metrics, shutdown, limit);
     if let Ok(sent) = &result {
         println!("Sent {sent} CoT events to {}", config.cot_broadcast_addr);
     }
