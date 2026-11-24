@@ -16,7 +16,6 @@ impl CotSink for ScriptedSink {
     }
 }
 
-
 fn make_track(id: u64, lat_deg: f64) -> TrackSummary {
     TrackSummary {
         id,
@@ -102,4 +101,3 @@ fn test_outbound_step_gated_withholds_when_gate_is_paused() {
     assert_eq!(report_fresh.sent, 1);
     assert_eq!(step.sink().0.len(), 1);
 }
-

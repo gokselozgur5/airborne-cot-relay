@@ -45,7 +45,6 @@ fn detection(u: f64, v: f64) -> TargetDetection {
     }
 }
 
-
 #[test]
 fn test_relay_loop_withholds_cot_when_telemetry_goes_stale() {
     let cfg = RelayConfig {
