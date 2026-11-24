@@ -49,18 +49,16 @@ impl StaleGate {
 
     /// Check the gate state against the current timestamp.
     pub fn state(&self, now_ms: u64) -> StaleGateState {
-        let reference_ts = self.last_arrival_ms.or(self.last_pose_ts_ms);
-        match reference_ts {
-            None => StaleGateState::Uninitialized,
-            Some(ts) if now_ms.saturating_sub(ts) <= self.max_age_ms => StaleGateState::Active,
-            Some(_) => {
-                if let Some(pose_ts) = self.last_pose_ts_ms {
-                    if now_ms.saturating_sub(pose_ts) <= self.max_age_ms {
-                        return StaleGateState::Active;
-                    }
-                }
-                StaleGateState::Paused
-            }
+        let reference_ts = match (self.last_arrival_ms, self.last_pose_ts_ms) {
+            (Some(arrival), _) => arrival,
+            (None, Some(pose_ts)) => pose_ts,
+            (None, None) => return StaleGateState::Uninitialized,
+        };
+
+        if now_ms >= reference_ts && (now_ms - reference_ts) <= self.max_age_ms {
+            StaleGateState::Active
+        } else {
+            StaleGateState::Paused
         }
     }
 

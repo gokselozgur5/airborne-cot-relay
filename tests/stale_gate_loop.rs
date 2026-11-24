@@ -87,9 +87,10 @@ fn test_relay_loop_withholds_cot_when_telemetry_goes_stale() {
     assert!(rep.sent >= 1);
     assert!(!rloop.outbound().sink().0.is_empty());
 
-    // Now advance time past stale gate limit (1_400 + 500 = 1_900) without new telemetry
+    // Now advance time past stale gate limit (1_400 + 500 = 1_900) without new telemetry.
+    // Move the target position to (700.0, 400.0) so TrackFilter would emit if ungated.
     rloop.clock_mut().set(3_000);
-    rloop.detections_mut().push(vec![detection(640.0, 360.0)]);
+    rloop.detections_mut().push(vec![detection(700.0, 400.0)]);
 
     let count_before = rloop.outbound().sink().0.len();
     let step_rep = rloop.step().unwrap();

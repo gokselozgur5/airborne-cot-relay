@@ -10,10 +10,15 @@ impl Pipeline {
     /// Each decoded pose adds one to `Metrics::packets_in` and each frame
     /// that fails to decode adds one to `Metrics::dropped`.
     pub fn ingest_telemetry(&mut self, bytes: &[u8]) -> Vec<PlatformPose> {
-        let errors_before = self.ingest.decode_errors();
-        let poses = self.ingest.process_bytes(bytes);
-        let failed = self.ingest.decode_errors().saturating_sub(errors_before);
         let now_ms = crate::clock::SystemClock::new().now_ms();
+        self.ingest_telemetry_at(bytes, now_ms)
+    }
+
+    /// Feeds raw telemetry bytes through the ingest with an explicit arrival timestamp.
+    pub fn ingest_telemetry_at(&mut self, bytes: &[u8], now_ms: u64) -> Vec<PlatformPose> {
+        let errors_before = self.ingest.decode_errors();
+        let poses = self.ingest.process_bytes_at(bytes, Some(now_ms));
+        let failed = self.ingest.decode_errors().saturating_sub(errors_before);
         for pose in &poses {
             self.stale_gate.update_with_arrival(pose, now_ms);
         }

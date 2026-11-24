@@ -186,10 +186,9 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
         F: FnMut(&TrackSummary, u64) -> String,
     {
         let mut report = StepReport::default();
-        let is_paused = gate
-            .is_some_and(|g| g.state(now_ms) == crate::runtime::stale_gate::StaleGateState::Paused);
+        let is_blocked = gate.is_some_and(|g| !g.is_active(now_ms));
         while let Some(track) = queue.pop() {
-            if is_paused {
+            if is_blocked {
                 report.filtered += 1;
                 metrics.add_dropped(1);
                 continue;
@@ -232,10 +231,9 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
         F: FnMut(&TrackSummary, u64) -> String,
     {
         let mut report = StepReport::default();
-        let is_paused = gate
-            .is_some_and(|g| g.state(now_ms) == crate::runtime::stale_gate::StaleGateState::Paused);
+        let is_blocked = gate.is_some_and(|g| !g.is_active(now_ms));
         while let Some(track) = stage.pop(metrics) {
-            if is_paused {
+            if is_blocked {
                 report.filtered += 1;
                 metrics.add_dropped(1);
                 continue;

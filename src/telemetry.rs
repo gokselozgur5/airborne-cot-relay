@@ -147,13 +147,24 @@ impl TelemetryIngest {
 
 impl TelemetryIngest {
     pub fn update_from_nav(&mut self, telem: &NavTelemetry) -> PlatformPose {
-        self.accept_nav(telem)
+        self.accept_nav(telem, None)
+            .or(self.latest_pose)
+            .expect("a pose exists after a nav update")
+    }
+
+    /// Update pose from nav telemetry with an explicit arrival timestamp.
+    pub fn update_from_nav_at(&mut self, telem: &NavTelemetry, arrival_ms: u64) -> PlatformPose {
+        self.accept_nav(telem, Some(arrival_ms))
             .or(self.latest_pose)
             .expect("a pose exists after a nav update")
     }
 
     /// Returns the new pose, or `None` when the frame was ignored.
-    fn accept_nav(&mut self, telem: &NavTelemetry) -> Option<PlatformPose> {
+    fn accept_nav(
+        &mut self,
+        telem: &NavTelemetry,
+        arrival_ms: Option<u64>,
+    ) -> Option<PlatformPose> {
         if let Some(current) = self.latest_pose {
             let ts = telem.timestamp_ms as u64;
             let is_reset = current.timestamp_ms.saturating_sub(ts) > self.reset_threshold_ms;
@@ -172,20 +183,30 @@ impl TelemetryIngest {
             telem.euler_rad[2] as f64,
         );
         self.latest_pose = Some(pose);
-        self.last_arrival_ms = Some(crate::clock::SystemClock::new().now_ms());
+        self.last_arrival_ms =
+            Some(arrival_ms.unwrap_or_else(|| crate::clock::SystemClock::new().now_ms()));
         Some(pose)
     }
 }
 
 impl TelemetryIngest {
     pub fn process_bytes(&mut self, incoming: &[u8]) -> Vec<PlatformPose> {
+        self.process_bytes_at(incoming, None)
+    }
+
+    /// Feeds incoming bytes with an explicit arrival timestamp.
+    pub fn process_bytes_at(
+        &mut self,
+        incoming: &[u8],
+        arrival_ms: Option<u64>,
+    ) -> Vec<PlatformPose> {
         self.rx_buf.extend_from_slice(incoming);
         let mut poses = Vec::new();
         while let Some(pos) = self.rx_buf.iter().position(|&b| b == 0x00) {
             let frame: Vec<u8> = self.rx_buf.drain(..=pos).collect();
             if frame.len() > 1 {
                 match NavTelemetry::unpack_uart(&frame) {
-                    Ok(telem) => poses.extend(self.accept_nav(&telem)),
+                    Ok(telem) => poses.extend(self.accept_nav(&telem, arrival_ms)),
                     Err(e) => self.record_decode_error(format!("{e:?}")),
                 }
             }
