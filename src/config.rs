@@ -49,6 +49,8 @@ pub struct RelayConfig {
     pub camera: CameraIntrinsics,
     pub ground_elevation_m: f64,
     pub target_stale_timeout_ms: u64,
+    pub detections_listen_addr: Option<String>,
+    pub http_listen_addr: Option<String>,
 }
 
 impl Default for RelayConfig {
@@ -59,6 +61,8 @@ impl Default for RelayConfig {
             camera: CameraIntrinsics::default(),
             ground_elevation_m: 0.0,
             target_stale_timeout_ms: 5000,
+            detections_listen_addr: None,
+            http_listen_addr: None,
         }
     }
 }
@@ -123,6 +127,12 @@ impl RelayConfig {
                 RelayError::InvalidConfig(format!("RELAY_STALE_TIMEOUT_MS not a number: {v}"))
             })?;
         }
+        if let Some(v) = lookup("RELAY_DETECTIONS_ADDR") {
+            self.detections_listen_addr = Some(v);
+        }
+        if let Some(v) = lookup("RELAY_HTTP_ADDR") {
+            self.http_listen_addr = Some(v);
+        }
         Ok(self)
     }
 
@@ -137,6 +147,12 @@ impl RelayConfig {
         }
         check_socket_addr("telemetry listen addr", &self.telemetry_listen_addr)?;
         check_socket_addr("cot broadcast addr", &self.cot_broadcast_addr)?;
+        if let Some(ref d) = self.detections_listen_addr {
+            check_socket_addr("detections listen addr", d)?;
+        }
+        if let Some(ref h) = self.http_listen_addr {
+            check_socket_addr("http listen addr", h)?;
+        }
         if self.camera.focal_length_px <= 0.0 {
             return Err(RelayError::InvalidConfig(
                 "focal length must be positive".into(),
