@@ -122,3 +122,111 @@ required-features = ["experimental"]
 name = "heartbeat"
 required-features = ["experimental"]
 
+[[test]]
+name = "json_cot_bidirectional"
+required-features = ["experimental"]
+
+[[test]]
+name = "json_cot_coordinate_validation"
+required-features = ["experimental"]
+
+[[test]]
+name = "json_cot_errors"
+required-features = ["experimental"]
+
+[[test]]
+name = "json_cot_stream_buffer_limit"
+required-features = ["experimental"]
+
+[[test]]
+name = "json_cot_streaming"
+required-features = ["experimental"]
+
+[[test]]
+name = "json_cot_string_escapes"
+required-features = ["experimental"]
+
+[[test]]
+name = "json_stream_blank_line"
+required-features = ["experimental"]
+
+[[test]]
+name = "metrics_exporter_single_type"
+required-features = ["experimental"]
+
+[[test]]
+name = "multicast_listener"
+required-features = ["experimental"]
+
+[[test]]
+name = "multicast_rx"
+required-features = ["experimental"]
+
+[[test]]
+name = "output_udp_multicast"
+required-features = ["experimental"]
+
+[[test]]
+name = "payload_compressor"
+required-features = ["experimental"]
+
+[[test]]
+name = "priority_from_xml_false_emergency"
+required-features = ["experimental"]
+
+[[test]]
+name = "priority_scheduler"
+required-features = ["experimental"]
+
+[[test]]
+name = "reassembly_engine_byte_limit"
+required-features = ["experimental"]
+
+[[test]]
+name = "reassembly_two_senders"
+required-features = ["experimental"]
+
+[[test]]
+name = "reconnect_client"
+required-features = ["experimental"]
+
+[[test]]
+name = "reconnect_client_queue_order"
+required-features = ["experimental"]
+
+[[test]]
+name = "reconnect_client_zero_queue"
+required-features = ["experimental"]
+
+[[test]]
+name = "reconnecting_relay_loop"
+required-features = ["experimental"]
+
+[[test]]
+name = "relay_loop"
+required-features = ["experimental"]
+
+[[test]]
+name = "retransmit_tracker"
+required-features = ["experimental"]
+
+[[test]]
+name = "ring_buf"
+required-features = ["experimental"]
+
+[[test]]
+name = "schema_version_test"
+required-features = ["experimental"]
+
+[[test]]
+name = "telemetry_snapshot"
+required-features = ["experimental"]
+
+[[test]]
+name = "udp_batch"
+required-features = ["experimental"]
+
+[[test]]
+name = "xml_sanitize"
+required-features = ["experimental"]
+
