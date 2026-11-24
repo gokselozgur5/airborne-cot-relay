@@ -46,7 +46,7 @@ cargo test --all-targets
 | Argument | Behavior |
 | --- | --- |
 | `--mock`, `-m` | Run a simulated flight path and send CoT events to destination (default) |
-| `--live`, `-l` | Listen on telemetry address for live telemetry and camera streams |
+| `--live`, `-l` | Listen for live UDP telemetry and detection streams, relaying CoT events subject to StaleGate |
 | `--dry-run` | Resolve mission mode and configuration, then exit immediately |
 | `--help`, `-h` | Print usage text and exit with status 0 |
 | `--version`, `-V` | Print version and exit with status 0 |
