@@ -39,7 +39,17 @@ cargo run --bin airborne-cot-relay -- --dry-run
 cargo run --bin airborne-cot-relay -- --mock
 cargo run --example mock_flight_mission
 cargo test --all-targets
+cargo test --all-targets --all-features
 ```
+
+### Features and Ingest Adapters
+
+- **Lean Core (default):** Core relay binary and runtime pipeline with zero external dependencies beyond `stm32-navcore` and `sightline-cot`.
+- **Experimental Feature (`--features experimental`):** Gated protocol extensions including telemetry recorders, compression, failover router, and schedulers.
+- **Zero-Dependency Ingest Adapters:**
+  - `ingest::mavlink_udp`: MAVLink v2 UDP telemetry source (`GLOBAL_POSITION_INT` & `ATTITUDE`) with X.25 CRC-16.
+  - `ingest::serial_cobs`: Streaming COBS reader decoding `stm32_navcore::protocol::NavTelemetry` over byte streams.
+  - `ingest::json_udp`: UDP JSON-lines detection parser extracting normalized bounding boxes and classifications.
 
 ### CLI Arguments
 
