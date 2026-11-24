@@ -12,6 +12,8 @@ This guide covers configuration, environment overrides, validation, errors and e
 | `cot_broadcast_addr` | `127.0.0.1:6969` | `RELAY_COT_ADDR` |
 | `ground_elevation_m` | `0.0` | — |
 | `target_stale_timeout_ms` | `5000` | `RELAY_STALE_TIMEOUT_MS` |
+| `detections_listen_addr` | `None` | `RELAY_DETECTIONS_ADDR` |
+| `http_listen_addr` | `None` | `RELAY_HTTP_ADDR` |
 | `camera.focal_length_px` | `1200.0` | — |
 | `camera.principal_u` | `640.0` | — |
 | `camera.principal_v` | `360.0` | — |
@@ -20,6 +22,7 @@ This guide covers configuration, environment overrides, validation, errors and e
 
 > [!NOTE]
 > The default CoT destination is `127.0.0.1:6969` to prevent unintentional live network multicast injection. Live multicast groups (such as `239.2.3.1:6969`) can be opted into via `RELAY_COT_ADDR`.
+> In live mode, telemetry is ingested from `telemetry_listen_addr` and detections from `detections_listen_addr` (if configured). An optional lightweight HTTP server on `http_listen_addr` provides health status and `/shutdown` controls. Outbound CoT emissions are gated by `StaleGate` when platform pose telemetry goes stale.
 
 ## Validation
 
