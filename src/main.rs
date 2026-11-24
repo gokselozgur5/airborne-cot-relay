@@ -139,6 +139,9 @@ fn run_live_mode(config: &airborne_cot_relay::RelayConfig) -> ExitCode {
     println!("Listening for live telemetry and camera streams...");
     let metrics = Arc::new(airborne_cot_relay::metrics::Metrics::new());
     let shutdown = ShutdownSignal::new();
+    if let Err(e) = airborne_cot_relay::runtime::signal::install_handlers(&shutdown) {
+        eprintln!("[warn] failed to install signal handlers: {e}");
+    }
 
     let limit = if let Ok(s) = env::var("RELAY_MAX_TICKS") {
         if let Ok(n) = s.parse::<u64>() {

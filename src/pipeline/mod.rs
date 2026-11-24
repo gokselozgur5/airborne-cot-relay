@@ -23,6 +23,14 @@ impl Pipeline {
     /// Validates `config` and builds every stage from it, with the NED
     /// origin at latitude and longitude zero (see [`Pipeline::with_origin`]).
     pub fn from_config(config: &RelayConfig) -> Result<Self, RelayError> {
+        Self::from_config_with_metrics(config, Arc::new(Metrics::new()))
+    }
+
+    /// Validates `config` and builds every stage from it with an existing shared `Metrics` instance.
+    pub fn from_config_with_metrics(
+        config: &RelayConfig,
+        metrics: Arc<Metrics>,
+    ) -> Result<Self, RelayError> {
         config.validate()?;
         let alt = config.ground_elevation_m;
         let stale_ms = config.target_stale_timeout_ms;
@@ -30,7 +38,7 @@ impl Pipeline {
             config: config.clone(),
             ingest: TelemetryIngest::new(0.0, 0.0, alt, stale_ms),
             targeter: Targeter::new(&config.camera, alt),
-            metrics: Arc::new(Metrics::new()),
+            metrics,
             stale_gate: crate::runtime::stale_gate::StaleGate::new(stale_ms),
         })
     }

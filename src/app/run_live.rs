@@ -1,6 +1,5 @@
 //! Live mission execution wiring real UDP sockets, pipeline, and optional HTTP service.
 
-use crate::clock::Clock;
 use crate::config::{RelayConfig, RelayError};
 use crate::http::server::{HttpServer, Router};
 use crate::http::HttpResponse;
@@ -71,7 +70,7 @@ pub fn run_live(
         SendHealth::new(3),
     );
 
-    let pipeline = Pipeline::from_config(config)?;
+    let pipeline = Pipeline::from_config_with_metrics(config, Arc::clone(metrics))?;
     let queue = BoundedQueue::new(64, DropPolicy::DropOldest);
 
     let stale_timeout_ms = config.target_stale_timeout_ms;
@@ -128,9 +127,6 @@ pub fn run_live(
         match relay_loop.step() {
             Ok(rep) => {
                 total_sent += rep.sent as u64;
-                if rep.sent > 0 {
-                    metrics.record_sent(SystemClock.now_ms());
-                }
             }
             Err(e) if crate::error::class::classify(&e).is_fatal() => return Err(e),
             Err(e) => {
