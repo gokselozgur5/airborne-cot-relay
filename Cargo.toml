@@ -9,3 +9,116 @@ description = "Airborne sensor-to-TAK Cursor-on-Target relay"
 [dependencies]
 stm32-navcore = { git = "https://github.com/gokselozgur5/stm32-navcore.git", rev = "bf3264cb3872193a4712f16b1097d6858ca47116" }
 sightline-cot = { git = "https://github.com/gokselozgur5/sightline-cot.git", rev = "ba69befe4e01bccb9d4f1bc23e85c89b72a0fd6e" }
+
+[features]
+default = []
+experimental = []
+
+[[test]]
+name = "bandwidth_throttle"
+required-features = ["experimental"]
+
+[[test]]
+name = "bloom_dedup"
+required-features = ["experimental"]
+
+[[test]]
+name = "cot_ring_buf_concurrent"
+required-features = ["experimental"]
+
+[[test]]
+name = "cot_signer"
+required-features = ["experimental"]
+
+[[test]]
+name = "cot_xml_single_quoted_attributes"
+required-features = ["experimental"]
+
+[[test]]
+name = "crash_dump_json_validity"
+required-features = ["experimental"]
+
+[[test]]
+name = "decompress_output_limit"
+required-features = ["experimental"]
+
+[[test]]
+name = "dedup_cache"
+required-features = ["experimental"]
+
+[[test]]
+name = "dedup_cache_pipeline"
+required-features = ["experimental"]
+
+[[test]]
+name = "deflate_multi_block_stream"
+required-features = ["experimental"]
+
+[[test]]
+name = "downgrade_never_raises_version"
+required-features = ["experimental"]
+
+[[test]]
+name = "failover_router"
+required-features = ["experimental"]
+
+[[test]]
+name = "failover_router_recovery"
+required-features = ["experimental"]
+
+[[test]]
+name = "flow_tags_strip_keeps_siblings"
+required-features = ["experimental"]
+
+[[test]]
+name = "fragment_reassembler_memory_bound"
+required-features = ["experimental"]
+
+[[test]]
+name = "fragment_reassembly"
+required-features = ["experimental"]
+
+[[test]]
+name = "fragment_reassembly_integration"
+required-features = ["experimental"]
+
+[[test]]
+name = "fragmentation"
+required-features = ["experimental"]
+
+[[test]]
+name = "frame_codec"
+required-features = ["experimental"]
+
+[[test]]
+name = "frame_codec_clear"
+required-features = ["experimental"]
+
+[[test]]
+name = "frame_codec_config"
+required-features = ["experimental"]
+
+[[test]]
+name = "frame_codec_limits"
+required-features = ["experimental"]
+
+[[test]]
+name = "frame_codec_multi"
+required-features = ["experimental"]
+
+[[test]]
+name = "frame_codec_roundtrip"
+required-features = ["experimental"]
+
+[[test]]
+name = "frame_codec_stream"
+required-features = ["experimental"]
+
+[[test]]
+name = "frame_decoder_oversized_prefix"
+required-features = ["experimental"]
+
+[[test]]
+name = "heartbeat"
+required-features = ["experimental"]
+
