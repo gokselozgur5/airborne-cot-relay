@@ -24,6 +24,22 @@ pub(crate) fn apply_relay_section(c: &mut RelayConfig, sec: &IniSection) -> Resu
                     ))
                 })?;
             }
+            "detections_listen_addr" => {
+                let v = e.value.trim();
+                c.detections_listen_addr = if v.is_empty() || v.eq_ignore_ascii_case("none") {
+                    None
+                } else {
+                    Some(v.to_string())
+                };
+            }
+            "http_listen_addr" => {
+                let v = e.value.trim();
+                c.http_listen_addr = if v.is_empty() || v.eq_ignore_ascii_case("none") {
+                    None
+                } else {
+                    Some(v.to_string())
+                };
+            }
             k => {
                 return Err(RelayError::InvalidConfig(format!(
                     "unknown key '{k}' in section 'relay'"
