@@ -165,13 +165,35 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
         now_ms: u64,
         queue: &mut BoundedQueue<TrackSummary>,
         metrics: &Metrics,
+        render: F,
+    ) -> StepReport
+    where
+        F: FnMut(&TrackSummary, u64) -> String,
+    {
+        self.step_gated(now_ms, queue, metrics, None, render)
+    }
+
+    /// Drains `queue` through `render` to the sink with an optional `StaleGate`.
+    pub fn step_gated<F>(
+        &mut self,
+        now_ms: u64,
+        queue: &mut BoundedQueue<TrackSummary>,
+        metrics: &Metrics,
+        gate: Option<&crate::runtime::stale_gate::StaleGate>,
         mut render: F,
     ) -> StepReport
     where
         F: FnMut(&TrackSummary, u64) -> String,
     {
         let mut report = StepReport::default();
+        let is_paused = gate
+            .is_some_and(|g| g.state(now_ms) == crate::runtime::stale_gate::StaleGateState::Paused);
         while let Some(track) = queue.pop() {
+            if is_paused {
+                report.filtered += 1;
+                metrics.add_dropped(1);
+                continue;
+            }
             match self.send_one(&track, now_ms, metrics, &mut render) {
                 None => report.filtered += 1,
                 Some(true) => report.sent += 1,
@@ -189,13 +211,35 @@ impl<C: Clock, S: CotSink> OutboundStep<C, S> {
         now_ms: u64,
         stage: &mut crate::pipeline::queue_stage::QueueStage<TrackSummary>,
         metrics: &Metrics,
+        render: F,
+    ) -> StepReport
+    where
+        F: FnMut(&TrackSummary, u64) -> String,
+    {
+        self.step_stage_gated(now_ms, stage, metrics, None, render)
+    }
+
+    /// Drains `stage` through `render` to the sink with an optional `StaleGate`.
+    pub fn step_stage_gated<F>(
+        &mut self,
+        now_ms: u64,
+        stage: &mut crate::pipeline::queue_stage::QueueStage<TrackSummary>,
+        metrics: &Metrics,
+        gate: Option<&crate::runtime::stale_gate::StaleGate>,
         mut render: F,
     ) -> StepReport
     where
         F: FnMut(&TrackSummary, u64) -> String,
     {
         let mut report = StepReport::default();
+        let is_paused = gate
+            .is_some_and(|g| g.state(now_ms) == crate::runtime::stale_gate::StaleGateState::Paused);
         while let Some(track) = stage.pop(metrics) {
+            if is_paused {
+                report.filtered += 1;
+                metrics.add_dropped(1);
+                continue;
+            }
             match self.send_one(&track, now_ms, metrics, &mut render) {
                 None => report.filtered += 1,
                 Some(true) => report.sent += 1,
@@ -212,6 +256,26 @@ use super::Pipeline;
 impl Pipeline {
     /// Steps `outbound`, draining `queue` with pipeline metrics and `render`.
     pub fn step<C: Clock, S: CotSink, F>(
+        &self,
+        outbound: &mut OutboundStep<C, S>,
+        now_ms: u64,
+        queue: &mut BoundedQueue<TrackSummary>,
+        render: F,
+    ) -> StepReport
+    where
+        F: FnMut(&TrackSummary, u64) -> String,
+    {
+        outbound.step_gated(
+            now_ms,
+            queue,
+            &self.metrics,
+            Some(self.stale_gate()),
+            render,
+        )
+    }
+
+    /// Steps `outbound` without telemetry staleness gating.
+    pub fn step_ungated<C: Clock, S: CotSink, F>(
         &self,
         outbound: &mut OutboundStep<C, S>,
         now_ms: u64,
