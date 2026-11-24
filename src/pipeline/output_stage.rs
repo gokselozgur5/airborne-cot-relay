@@ -70,7 +70,24 @@ impl<C: Clock> OutputStage<C> {
         metrics: &Metrics,
         track: &TrackSummary,
     ) -> bool {
+        self.send_one_gated(sink, metrics, track, None)
+    }
+
+    /// Filters, encodes and sends one track with an optional `StaleGate`.
+    pub fn send_one_gated<S: CotSink>(
+        &mut self,
+        sink: &mut S,
+        metrics: &Metrics,
+        track: &TrackSummary,
+        gate: Option<&crate::runtime::stale_gate::StaleGate>,
+    ) -> bool {
         let now_ms = self.filter.clock().now_ms();
+        if let Some(g) = gate {
+            if g.state(now_ms) == crate::runtime::stale_gate::StaleGateState::Paused {
+                metrics.add_dropped(1);
+                return false;
+            }
+        }
         super::step::send_filtered_track(
             &mut self.filter,
             sink,
@@ -95,9 +112,20 @@ impl<C: Clock> OutputStage<C> {
         metrics: &Metrics,
         tracks: &[TrackSummary],
     ) -> usize {
+        self.emit_gated(sink, metrics, tracks, None)
+    }
+
+    /// Sends every track accepted by filter and freshness gate.
+    pub fn emit_gated<S: CotSink>(
+        &mut self,
+        sink: &mut S,
+        metrics: &Metrics,
+        tracks: &[TrackSummary],
+        gate: Option<&crate::runtime::stale_gate::StaleGate>,
+    ) -> usize {
         tracks
             .iter()
-            .filter(|t| self.send_one(sink, metrics, t))
+            .filter(|t| self.send_one_gated(sink, metrics, t, gate))
             .count()
     }
 }

@@ -16,6 +16,7 @@ pub struct Pipeline {
     ingest: TelemetryIngest,
     targeter: Targeter,
     metrics: Arc<Metrics>,
+    stale_gate: crate::runtime::stale_gate::StaleGate,
 }
 
 impl Pipeline {
@@ -24,11 +25,13 @@ impl Pipeline {
     pub fn from_config(config: &RelayConfig) -> Result<Self, RelayError> {
         config.validate()?;
         let alt = config.ground_elevation_m;
+        let stale_ms = config.target_stale_timeout_ms;
         Ok(Self {
             config: config.clone(),
-            ingest: TelemetryIngest::new(0.0, 0.0, alt, config.target_stale_timeout_ms),
+            ingest: TelemetryIngest::new(0.0, 0.0, alt, stale_ms),
             targeter: Targeter::new(&config.camera, alt),
             metrics: Arc::new(Metrics::new()),
+            stale_gate: crate::runtime::stale_gate::StaleGate::new(stale_ms),
         })
     }
 }
@@ -78,6 +81,16 @@ impl Pipeline {
     pub fn targeter(&self) -> &Targeter {
         &self.targeter
     }
+
+    /// Telemetry freshness gate controlling outbound CoT sending.
+    pub fn stale_gate(&self) -> &crate::runtime::stale_gate::StaleGate {
+        &self.stale_gate
+    }
+
+    /// Mutable telemetry freshness gate.
+    pub fn stale_gate_mut(&mut self) -> &mut crate::runtime::stale_gate::StaleGate {
+        &mut self.stale_gate
+    }
 }
 
 impl Pipeline {
@@ -87,6 +100,7 @@ impl Pipeline {
     pub fn with_origin(mut self, lat_deg: f64, lon_deg: f64, alt_m: f64) -> Self {
         let max_age_ms = self.config.target_stale_timeout_ms;
         self.ingest = TelemetryIngest::new(lat_deg, lon_deg, alt_m, max_age_ms);
+        self.stale_gate = crate::runtime::stale_gate::StaleGate::new(max_age_ms);
         self
     }
 }

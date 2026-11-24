@@ -18,6 +18,7 @@ pub enum StaleGateState {
 pub struct StaleGate {
     max_age_ms: u64,
     last_pose_ts_ms: Option<u64>,
+    last_arrival_ms: Option<u64>,
 }
 
 impl StaleGate {
@@ -26,6 +27,7 @@ impl StaleGate {
         Self {
             max_age_ms,
             last_pose_ts_ms: None,
+            last_arrival_ms: None,
         }
     }
 
@@ -39,12 +41,36 @@ impl StaleGate {
         self.last_pose_ts_ms = Some(pose.timestamp_ms);
     }
 
+    /// Update gate with pose and arrival timestamp.
+    pub fn update_with_arrival(&mut self, pose: &PlatformPose, arrival_ms: u64) {
+        self.last_pose_ts_ms = Some(pose.timestamp_ms);
+        self.last_arrival_ms = Some(arrival_ms);
+    }
+
     /// Check the gate state against the current timestamp.
     pub fn state(&self, now_ms: u64) -> StaleGateState {
-        match self.last_pose_ts_ms {
+        let reference_ts = self.last_arrival_ms.or(self.last_pose_ts_ms);
+        match reference_ts {
             None => StaleGateState::Uninitialized,
             Some(ts) if now_ms.saturating_sub(ts) <= self.max_age_ms => StaleGateState::Active,
-            Some(_) => StaleGateState::Paused,
+            Some(_) => {
+                if let Some(pose_ts) = self.last_pose_ts_ms {
+                    if now_ms.saturating_sub(pose_ts) <= self.max_age_ms {
+                        return StaleGateState::Active;
+                    }
+                }
+                StaleGateState::Paused
+            }
         }
+    }
+
+    /// Returns true if the gate is active and telemetry is fresh at `now_ms`.
+    pub fn is_active(&self, now_ms: u64) -> bool {
+        self.state(now_ms) == StaleGateState::Active
+    }
+
+    /// Returns the last known pose timestamp in milliseconds, if any.
+    pub fn last_pose_ts_ms(&self) -> Option<u64> {
+        self.last_pose_ts_ms
     }
 }
