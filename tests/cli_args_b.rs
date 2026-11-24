@@ -4,6 +4,7 @@ fn run(args: &[&str]) -> std::process::Output {
     Command::new(env!("CARGO_BIN_EXE_airborne-cot-relay"))
         .args(args)
         .env("RELAY_COT_ADDR", "127.0.0.1:1")
+        .env("RELAY_MAX_TICKS", "1")
         .output()
         .unwrap()
 }
