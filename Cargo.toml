@@ -1,6 +1,6 @@
 [package]
 name = "airborne-cot-relay"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 authors = ["Goksel Ozgur <gokselozgur5@gmail.com>"]
 license = "MIT"
@@ -8,7 +8,7 @@ description = "Airborne sensor-to-TAK Cursor-on-Target relay"
 
 [dependencies]
 stm32-navcore = { git = "https://github.com/gokselozgur5/stm32-navcore.git", rev = "a70426d275db6be4514124639211b6c25da80e43" }
-sightline-cot = { git = "https://github.com/gokselozgur5/sightline-cot.git", rev = "ba69befe4e01bccb9d4f1bc23e85c89b72a0fd6e" }
+sightline-cot = { git = "https://github.com/gokselozgur5/sightline-cot.git", rev = "8902bfe79edd7a2097a79ef308f62260c1d34947", features = ["grid"] }
 
 [features]
 default = []
