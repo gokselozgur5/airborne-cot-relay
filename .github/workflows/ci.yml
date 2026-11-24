@@ -22,25 +22,46 @@ jobs:
         run: cargo fmt --all -- --check
 
   clippy:
-    name: Run clippy
+    name: Run clippy (lean core)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-      - name: Run clippy
+      - name: Run clippy (lean core)
         run: cargo clippy --all-targets -- -D warnings
 
+  clippy-all:
+    name: Run clippy (all features)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Run clippy (all features)
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
   test:
-    name: Run test suite
+    name: Run test suite (lean core)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Run test suite
+      - name: Run test suite (lean core)
         run: cargo test --all-targets
+
+  test-all:
+    name: Run test suite (all features)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Run test suite (all features)
+        run: cargo test --all-targets --all-features
 
   doc:
     name: Build documentation
@@ -49,4 +70,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Build documentation
-        run: cargo doc --no-deps
+        run: cargo doc --no-deps --all-features
