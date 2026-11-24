@@ -83,7 +83,7 @@ impl<C: Clock> OutputStage<C> {
     ) -> bool {
         let now_ms = self.filter.clock().now_ms();
         if let Some(g) = gate {
-            if g.state(now_ms) == crate::runtime::stale_gate::StaleGateState::Paused {
+            if !g.is_active(now_ms) {
                 metrics.add_dropped(1);
                 return false;
             }

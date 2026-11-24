@@ -144,7 +144,11 @@ fn outbound_step_mut_accessors_and_into_parts() {
 #[test]
 fn pipeline_step_drains_queue_and_updates_gauge() {
     let cfg = airborne_cot_relay::RelayConfig::default();
-    let pipeline = airborne_cot_relay::pipeline::Pipeline::from_config(&cfg).unwrap();
+    let mut pipeline = airborne_cot_relay::pipeline::Pipeline::from_config(&cfg).unwrap();
+    pipeline.stale_gate_mut().update_with_arrival(
+        &airborne_cot_relay::PlatformPose::new(5_000, 35.0, 139.0, 100.0, 0.0, 0.0, 0.0),
+        5_000,
+    );
     pipeline.metrics().set_queue_depth(1);
     let mut queue = queue_of(vec![track(1, 35.0)]);
     let mut step = stepper(false);

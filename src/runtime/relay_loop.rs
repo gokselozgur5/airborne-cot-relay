@@ -129,8 +129,11 @@ impl<T, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
 impl<T: TelemetrySource, D, C: Clock, S: CotSink, R> RelayLoop<T, D, C, S, R> {
     /// Ingests one chunk of telemetry if available.
     pub fn poll_telemetry(&mut self) -> Result<Option<usize>, RelayError> {
+        let now_ms = self.clock.now_ms();
         match self.telemetry.poll_chunk()? {
-            Some(chunk) => Ok(Some(self.pipeline.ingest_telemetry(&chunk).len())),
+            Some(chunk) => Ok(Some(
+                self.pipeline.ingest_telemetry_at(&chunk, now_ms).len(),
+            )),
             None => Ok(None),
         }
     }
